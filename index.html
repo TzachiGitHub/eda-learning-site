@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Event-Driven Architecture | Interactive Course</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <!-- Header with Progress -->
+    <header class="header">
+        <div class="container">
+            <h1>🎯 Event-Driven Architecture</h1>
+            <p class="tagline">Master EDA with ADHD-Friendly Bite-Sized Lessons</p>
+
+            <div class="progress-overview">
+                <div class="stat">
+                    <span class="stat-number" id="lessons-completed">0</span>
+                    <span class="stat-label">Lessons</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="total-xp">0</span>
+                    <span class="stat-label">XP</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="streak-count">0</span>
+                    <span class="stat-label">Day Streak</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+
+        <!-- Module 1: Foundations -->
+        <section class="module">
+            <div class="module-header">
+                <h2>📚 Module 1: Foundations</h2>
+                <span class="module-progress" id="module-1-progress">0/5 Complete</span>
+            </div>
+
+            <div class="lessons">
+                <!-- Lesson 1.1 -->
+                <div class="lesson-card" data-lesson="1-1">
+                    <div class="lesson-header">
+                        <h3>1.1 What is Event-Driven Architecture?</h3>
+                        <span class="xp-badge">+50 XP</span>
+                    </div>
+                    <p class="lesson-description">Learn the core concept of EDA and why it's revolutionary</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 5 min</span>
+                        <span class="difficulty easy">Easy</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('1-1')">Start Lesson</button>
+                </div>
+
+                <!-- Lesson 1.2 -->
+                <div class="lesson-card" data-lesson="1-2">
+                    <div class="lesson-header">
+                        <h3>1.2 Traditional vs Event-Driven</h3>
+                        <span class="xp-badge">+50 XP</span>
+                    </div>
+                    <p class="lesson-description">See the difference with real-world examples</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 7 min</span>
+                        <span class="difficulty easy">Easy</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('1-2')">Start Lesson</button>
+                </div>
+
+                <!-- Lesson 1.3 -->
+                <div class="lesson-card" data-lesson="1-3">
+                    <div class="lesson-header">
+                        <h3>1.3 Core Components: Events, Publishers, Subscribers</h3>
+                        <span class="xp-badge">+75 XP</span>
+                    </div>
+                    <p class="lesson-description">The three building blocks of every EDA system</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 8 min</span>
+                        <span class="difficulty easy">Easy</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('1-3')">Start Lesson</button>
+                </div>
+
+                <!-- Lesson 1.4 -->
+                <div class="lesson-card" data-lesson="1-4">
+                    <div class="lesson-header">
+                        <h3>1.4 Your First Event Flow</h3>
+                        <span class="xp-badge">+100 XP</span>
+                    </div>
+                    <p class="lesson-description">Interactive: Build a simple notification system</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 10 min</span>
+                        <span class="difficulty medium">Medium</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('1-4')">Start Lesson</button>
+                </div>
+
+                <!-- Lesson 1.5 -->
+                <div class="lesson-card" data-lesson="1-5">
+                    <div class="lesson-header">
+                        <h3>1.5 Quiz: Foundations Check</h3>
+                        <span class="xp-badge">+150 XP</span>
+                    </div>
+                    <p class="lesson-description">Test your understanding (5 questions)</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 5 min</span>
+                        <span class="difficulty easy">Easy</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('1-5')">Take Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Module 2: Patterns -->
+        <section class="module">
+            <div class="module-header">
+                <h2>🔧 Module 2: EDA Patterns</h2>
+                <span class="module-progress" id="module-2-progress">0/6 Complete</span>
+            </div>
+
+            <div class="lessons">
+                <!-- Lesson 2.1 -->
+                <div class="lesson-card" data-lesson="2-1">
+                    <div class="lesson-header">
+                        <h3>2.1 Pub/Sub Pattern</h3>
+                        <span class="xp-badge">+100 XP</span>
+                    </div>
+                    <p class="lesson-description">The most common EDA pattern explained</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 8 min</span>
+                        <span class="difficulty medium">Medium</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('2-1')">Start Lesson</button>
+                </div>
+
+                <!-- Lesson 2.2 -->
+                <div class="lesson-card" data-lesson="2-2">
+                    <div class="lesson-header">
+                        <h3>2.2 Event Sourcing</h3>
+                        <span class="xp-badge">+100 XP</span>
+                    </div>
+                    <p class="lesson-description">Store events as the source of truth</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 10 min</span>
+                        <span class="difficulty medium">Medium</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('2-2')">Start Lesson</button>
+                </div>
+
+                <!-- Lesson 2.3 -->
+                <div class="lesson-card" data-lesson="2-3">
+                    <div class="lesson-header">
+                        <h3>2.3 CQRS (Command Query Responsibility Segregation)</h3>
+                        <span class="xp-badge">+125 XP</span>
+                    </div>
+                    <p class="lesson-description">Separate reads and writes for better performance</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 12 min</span>
+                        <span class="difficulty hard">Hard</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('2-3')">Start Lesson</button>
+                </div>
+
+                <!-- Lesson 2.4 -->
+                <div class="lesson-card" data-lesson="2-4">
+                    <div class="lesson-header">
+                        <h3>2.4 Event Streaming</h3>
+                        <span class="xp-badge">+100 XP</span>
+                    </div>
+                    <p class="lesson-description">Real-time data pipelines with Kafka</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 10 min</span>
+                        <span class="difficulty medium">Medium</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('2-4')">Start Lesson</button>
+                </div>
+
+                <!-- Lesson 2.5 -->
+                <div class="lesson-card" data-lesson="2-5">
+                    <div class="lesson-header">
+                        <h3>2.5 Choreography vs Orchestration</h3>
+                        <span class="xp-badge">+100 XP</span>
+                    </div>
+                    <p class="lesson-description">Two ways to coordinate events</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 9 min</span>
+                        <span class="difficulty medium">Medium</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('2-5')">Start Lesson</button>
+                </div>
+
+                <!-- Lesson 2.6 -->
+                <div class="lesson-card" data-lesson="2-6">
+                    <div class="lesson-header">
+                        <h3>2.6 Quiz: Pattern Recognition</h3>
+                        <span class="xp-badge">+150 XP</span>
+                    </div>
+                    <p class="lesson-description">Match patterns to use cases</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 5 min</span>
+                        <span class="difficulty medium">Medium</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('2-6')">Take Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Module 3: Hands-On Implementation -->
+        <section class="module">
+            <div class="module-header">
+                <h2>💻 Module 3: Build Real Systems</h2>
+                <span class="module-progress" id="module-3-progress">0/5 Complete</span>
+            </div>
+
+            <div class="lessons">
+                <!-- Lesson 3.1 -->
+                <div class="lesson-card" data-lesson="3-1">
+                    <div class="lesson-header">
+                        <h3>3.1 Project Setup: Node.js Event System</h3>
+                        <span class="xp-badge">+100 XP</span>
+                    </div>
+                    <p class="lesson-description">Set up your development environment</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 10 min</span>
+                        <span class="difficulty easy">Easy</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('3-1')">Start Lesson</button>
+                </div>
+
+                <!-- Lesson 3.2 -->
+                <div class="lesson-card" data-lesson="3-2">
+                    <div class="lesson-header">
+                        <h3>3.2 Build: In-Memory EventEmitter</h3>
+                        <span class="xp-badge">+150 XP</span>
+                    </div>
+                    <p class="lesson-description">Code your first event system from scratch</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 15 min</span>
+                        <span class="difficulty medium">Medium</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('3-2')">Start Lesson</button>
+                </div>
+
+                <!-- Lesson 3.3 -->
+                <div class="lesson-card" data-lesson="3-3">
+                    <div class="lesson-header">
+                        <h3>3.3 Build: Redis Pub/Sub System</h3>
+                        <span class="xp-badge">+200 XP</span>
+                    </div>
+                    <p class="lesson-description">Scale beyond a single process with Redis</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 20 min</span>
+                        <span class="difficulty hard">Hard</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('3-3')">Start Lesson</button>
+                </div>
+
+                <!-- Lesson 3.4 -->
+                <div class="lesson-card" data-lesson="3-4">
+                    <div class="lesson-header">
+                        <h3>3.4 Build: Event Sourcing with Event Store</h3>
+                        <span class="xp-badge">+200 XP</span>
+                    </div>
+                    <p class="lesson-description">Implement event sourcing pattern</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 25 min</span>
+                        <span class="difficulty hard">Hard</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('3-4')">Start Lesson</button>
+                </div>
+
+                <!-- Lesson 3.5 -->
+                <div class="lesson-card" data-lesson="3-5">
+                    <div class="lesson-header">
+                        <h3>3.5 Final Project: Complete Notification System</h3>
+                        <span class="xp-badge">+300 XP</span>
+                    </div>
+                    <p class="lesson-description">Build end-to-end event-driven application</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 45 min</span>
+                        <span class="difficulty hard">Hard</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('3-5')">Start Project</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Module 4: Production Ready -->
+        <section class="module">
+            <div class="module-header">
+                <h2>🚀 Module 4: Production Readiness</h2>
+                <span class="module-progress" id="module-4-progress">0/4 Complete</span>
+            </div>
+
+            <div class="lessons">
+                <!-- Lesson 4.1 -->
+                <div class="lesson-card" data-lesson="4-1">
+                    <div class="lesson-header">
+                        <h3>4.1 Error Handling & Dead Letter Queues</h3>
+                        <span class="xp-badge">+125 XP</span>
+                    </div>
+                    <p class="lesson-description">Handle failures gracefully</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 12 min</span>
+                        <span class="difficulty medium">Medium</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('4-1')">Start Lesson</button>
+                </div>
+
+                <!-- Lesson 4.2 -->
+                <div class="lesson-card" data-lesson="4-2">
+                    <div class="lesson-header">
+                        <h3>4.2 Monitoring & Observability</h3>
+                        <span class="xp-badge">+125 XP</span>
+                    </div>
+                    <p class="lesson-description">Track events in production</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 12 min</span>
+                        <span class="difficulty medium">Medium</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('4-2')">Start Lesson</button>
+                </div>
+
+                <!-- Lesson 4.3 -->
+                <div class="lesson-card" data-lesson="4-3">
+                    <div class="lesson-header">
+                        <h3>4.3 Scaling Event-Driven Systems</h3>
+                        <span class="xp-badge">+150 XP</span>
+                    </div>
+                    <p class="lesson-description">Handle millions of events per second</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 15 min</span>
+                        <span class="difficulty hard">Hard</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('4-3')">Start Lesson</button>
+                </div>
+
+                <!-- Lesson 4.4 -->
+                <div class="lesson-card" data-lesson="4-4">
+                    <div class="lesson-header">
+                        <h3>4.4 Final Assessment</h3>
+                        <span class="xp-badge">+250 XP</span>
+                    </div>
+                    <p class="lesson-description">Complete course exam (15 questions)</p>
+                    <div class="lesson-meta">
+                        <span class="duration">⏱️ 20 min</span>
+                        <span class="difficulty hard">Hard</span>
+                    </div>
+                    <button class="btn-start" onclick="startLesson('4-4')">Take Assessment</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Links -->
+        <section class="quick-links">
+            <h2>🔗 Resources</h2>
+            <div class="links-grid">
+                <a href="https://www.confluent.io/learn/event-driven-architecture/" target="_blank" class="link-card">
+                    <span class="link-icon">📚</span>
+                    <span class="link-title">Confluent EDA Guide</span>
+                </a>
+                <a href="https://github.com" target="_blank" class="link-card">
+                    <span class="link-icon">💻</span>
+                    <span class="link-title">Your Projects</span>
+                </a>
+                <a href="https://redis.io/university/" target="_blank" class="link-card">
+                    <span class="link-icon">🎓</span>
+                    <span class="link-title">Redis University</span>
+                </a>
+                <a href="../learning-tracker/" class="link-card">
+                    <span class="link-icon">📊</span>
+                    <span class="link-title">Progress Tracker</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Lesson Modal -->
+    <div class="modal" id="lesson-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="lesson-title">Lesson Title</h2>
+                <button class="btn-close" onclick="closeLesson()">&times;</button>
+            </div>
+            <div class="modal-body" id="lesson-content">
+                <!-- Lesson content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeLesson()">Close</button>
+                <button class="btn-primary" id="btn-complete" onclick="completeLesson()">Mark Complete & Earn XP</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
