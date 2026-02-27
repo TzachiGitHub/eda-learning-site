@@ -16,7 +16,9 @@ const lessons = {
         title: '1.1 What is Event-Driven Architecture?',
         xp: 50,
         content: `
-            <h3>🎯 What You'll Learn</h3>
+<div class="hook-story">🚀 <strong>Real World:</strong> Uber processes over 1 million events per second — driver location updates, ride requests, surge pricing calculations, payment confirmations. None of it is possible without Event-Driven Architecture. Today you'll understand how.</div>
+<div class="why-matters">💡 <strong>Why this matters:</strong> Every major tech company — Netflix, Slack, Uber, Airbnb — runs on EDA. Understanding it is the difference between junior and senior engineer thinking.</div>
+                        <h3>🎯 What You'll Learn</h3>
             <p>By the end of this 5-minute lesson, you'll understand what Event-Driven Architecture is and why it's revolutionary.</p>
 
             <h3>📖 The Core Concept</h3>
@@ -56,7 +58,9 @@ const lessons = {
         title: '1.2 Traditional vs Event-Driven',
         xp: 50,
         content: `
-            <h3>🎯 What You'll Learn</h3>
+<div class="hook-story">🚀 <strong>Real World:</strong> When Twitter switched from a monolithic to event-driven architecture, their system went from crashing during peak traffic (remember the "Fail Whale"?) to handling 500M+ tweets/day. The difference? Events.</div>
+<div class="why-matters">💡 <strong>Why this matters:</strong> Understanding the contrast makes the benefits concrete — you'll be able to spot opportunities to apply EDA in any system you work on.</div>
+                        <h3>🎯 What You'll Learn</h3>
             <p>See the concrete difference between traditional and event-driven approaches with real code examples.</p>
 
             <h3>📊 Scenario: User Registration System</h3>
@@ -145,13 +149,29 @@ eventBus.subscribe('user.registered', (user) => {
             <p><strong>Event-Driven = "Announce what happened, let others react independently"</strong></p>
 
             <p>Next lesson: Learn the three building blocks in detail!</p>
+
+            <div class="inline-quiz">
+                <h4>🧠 Quick Check</h4>
+                <p><strong>What is the main advantage of Event-Driven over Traditional when adding new features?</strong></p>
+                <button class="quiz-option" onclick="checkQuiz(this,'wrong','Not quite — EDA can be faster, but that\'s not the main advantage here.')">It\'s always faster</button>
+                <button class="quiz-option" onclick="checkQuiz(this,'correct','✅ Correct! With EDA you just add a new subscriber — no need to modify existing code.')">You can add features without touching existing code</button>
+                <button class="quiz-option" onclick="checkQuiz(this,'wrong','Not quite — EDA actually adds some complexity. The benefit is decoupling.')">It\'s simpler to code</button>
+                <div class="quiz-feedback" id="qf-1-2-1"></div>
+            </div>
+            <div class="teach-it-back">
+                <h4>🧠 Teach It Back</h4>
+                <p style="font-size:13px;margin-bottom:8px">In your own words, what was the main thing you learned? (No one sees this — writing it locks it in)</p>
+                <textarea placeholder="Type your takeaway here..."></textarea>
+            </div>
         `
     },
     '1-3': {
         title: '1.3 Core Components: Events, Publishers, Subscribers',
         xp: 75,
         content: `
-            <h3>🎯 What You'll Learn</h3>
+<div class="hook-story">🚀 <strong>Real World:</strong> When you tap "Request Uber", at least 12 different services receive that single event — dispatch, pricing, ETA calculation, driver notification, analytics, fraud detection, and more. You're about to meet the three components that make this possible.</div>
+<div class="why-matters">💡 <strong>Why this matters:</strong> Publishers, Subscribers, and Events are the atoms of every EDA system. Once you know these, you can understand any event-driven codebase.</div>
+                        <h3>🎯 What You'll Learn</h3>
             <p>Deep dive into the three essential components of every event-driven system.</p>
 
             <h3>1️⃣ Events</h3>
@@ -259,13 +279,21 @@ eventBus.subscribe('user.registered', (user) => {
             <p><strong>Subscribers</strong> react to events (independent handlers)</p>
 
             <p>Next: Build your first event system!</p>
+
+            <div class="teach-it-back">
+                <h4>🧠 Teach It Back</h4>
+                <p style="font-size:13px;margin-bottom:8px">In your own words, what was the main thing you learned? (No one sees this — writing it locks it in)</p>
+                <textarea placeholder="Type your takeaway here..."></textarea>
+            </div>
         `
     },
     '1-4': {
         title: '1.4 Your First Event Flow',
         xp: 100,
         content: `
-            <h3>🎯 What You'll Build</h3>
+<div class="hook-story">🚀 <strong>Real World:</strong> Discord uses this exact pattern — EventEmitter — to broadcast messages to thousands of connected clients instantly. You're about to build the same thing from scratch.</div>
+<div class="why-matters">💡 <strong>Why this matters:</strong> Hands-on building locks in concepts that reading can't. After this lesson, you'll have real working code to show.</div>
+                        <h3>🎯 What You'll Build</h3>
             <p>A simple notification system using Node.js EventEmitter (in-memory events).</p>
 
             <h3>📦 Setup (Copy this code)</h3>
@@ -462,7 +490,9 @@ const dbLogger = new DatabaseLogger();</code></pre>
         title: '2.1 Pub/Sub Pattern',
         xp: 100,
         content: `
-            <h3>🎯 What You'll Learn</h3>
+<div class="hook-story">🚀 <strong>Real World:</strong> YouTube notifies 50 million subscribers the instant a creator uploads a video. They don't call each subscriber individually — they publish to a topic and subscribers receive it. That's Pub/Sub at planetary scale.</div>
+<div class="why-matters">💡 <strong>Why this matters:</strong> Pub/Sub is the most widely used EDA pattern. It's in every major platform — Kafka, Google Cloud Pub/Sub, AWS SNS, Redis.</div>
+                        <h3>🎯 What You'll Learn</h3>
             <p>The Publish-Subscribe pattern is the foundation of most event-driven systems.</p>
 
             <h3>📖 What is Pub/Sub?</h3>
@@ -508,7 +538,9 @@ Publisher 3 ──┘                            ├──> Subscriber 2
         title: '2.2 Event Sourcing',
         xp: 100,
         content: `
-            <h3>🎯 What You'll Learn</h3>
+<div class="hook-story">🚀 <strong>Real World:</strong> Your bank account doesn't store "balance: $500". It stores every single transaction that ever happened — deposits, withdrawals, transfers — and calculates your balance by replaying them. That's Event Sourcing. It's why banks can show your complete history and never "lose" your money.</div>
+<div class="why-matters">💡 <strong>Why this matters:</strong> Event Sourcing gives you time travel — you can reconstruct the exact state of your system at any point in the past. Priceless for debugging and compliance.</div>
+                        <h3>🎯 What You'll Learn</h3>
             <p>Event Sourcing is a powerful pattern where you store every state change as an event.</p>
 
             <h3>📖 The Problem with Traditional Storage</h3>
@@ -574,7 +606,9 @@ Publisher 3 ──┘                            ├──> Subscriber 2
         title: '2.3 CQRS (Command Query Responsibility Segregation)',
         xp: 125,
         content: `
-            <h3>🎯 What You'll Learn</h3>
+<div class="hook-story">🚀 <strong>Real World:</strong> Amazon's product pages load in under 200ms despite billions of products and millions of simultaneous users. Their secret: the system that handles orders (writes) is completely separate from the system that displays products (reads). That's CQRS.</div>
+<div class="why-matters">💡 <strong>Why this matters:</strong> Reads and writes have completely different performance requirements. CQRS lets you optimize each independently without compromise.</div>
+                        <h3>🎯 What You'll Learn</h3>
             <p>CQRS separates reads and writes into different models for better performance and scalability.</p>
 
             <h3>📖 The Traditional Approach</h3>
@@ -674,7 +708,9 @@ Query → Read DB → Return data
         title: '2.4 Event Streaming',
         xp: 100,
         content: `
-            <h3>🎯 What You'll Learn</h3>
+<div class="hook-story">🚀 <strong>Real World:</strong> Spotify processes 600,000 events per second from listeners worldwide — song plays, skips, searches, playlist changes. They use Kafka (event streaming) to process all of it in real-time for recommendations, royalty calculations, and analytics.</div>
+<div class="why-matters">💡 <strong>Why this matters:</strong> Event Streaming (Kafka) is the backbone of real-time data pipelines at Netflix, LinkedIn, Uber, and thousands of other companies.</div>
+                        <h3>🎯 What You'll Learn</h3>
             <p>Event streaming processes continuous flows of events in real-time.</p>
 
             <h3>📖 Pub/Sub vs Event Streaming</h3>
@@ -762,7 +798,9 @@ consumer.poll((events) => {
         title: '2.5 Choreography vs Orchestration',
         xp: 100,
         content: `
-            <h3>🎯 What You'll Learn</h3>
+<div class="hook-story">🚀 <strong>Real World:</strong> When you book an Airbnb, at least 6 things happen — booking confirmed, payment charged, host notified, calendar blocked, review triggered, analytics logged. How do these all coordinate? Two patterns exist: Choreography (each reacts on its own) and Orchestration (one controller directs everything). Both are used at Airbnb.</div>
+<div class="why-matters">💡 <strong>Why this matters:</strong> Choosing the wrong coordination pattern causes spaghetti systems. This lesson gives you the mental model to choose correctly.</div>
+                        <h3>🎯 What You'll Learn</h3>
             <p>Two patterns for coordinating multiple services in event-driven systems.</p>
 
             <h3>🎭 Choreography (Decentralized)</h3>
@@ -1518,3 +1556,16 @@ document.addEventListener('DOMContentLoaded', () => {
     updateXPTitle(xp);
     showResumeButton();
 });
+
+// Inline quiz handler
+function checkQuiz(btn, result, feedback) {
+    const parent = btn.closest('.inline-quiz');
+    const buttons = parent.querySelectorAll('.quiz-option');
+    const feedbackEl = parent.querySelector('.quiz-feedback');
+    buttons.forEach(b => b.disabled = true);
+    btn.classList.add(result);
+    if (feedbackEl) {
+        feedbackEl.textContent = feedback;
+        feedbackEl.className = `quiz-feedback ${result}`;
+    }
+}

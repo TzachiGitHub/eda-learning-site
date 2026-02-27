@@ -755,3 +755,77 @@ body {
     .header-actions { flex-direction: column; align-items: center; }
     .flashcard-container { height: 220px; }
 }
+
+/* Hook Stories & Why This Matters boxes */
+.hook-story {
+    background: linear-gradient(135deg, #1a1a3e, #2d1b4e);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    font-size: 15px;
+    line-height: 1.6;
+    border-left: 4px solid #ffd93d;
+}
+.why-matters {
+    background: #fff9e6;
+    border: 1px solid #ffd93d;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+[data-theme="dark"] .why-matters { background: #2a2a1a; border-color: #ffd93d; color: #e0e0e0; }
+
+/* Inline quiz styles */
+.inline-quiz {
+    background: #f0f4ff;
+    border-radius: 12px;
+    padding: 18px;
+    margin: 20px 0;
+    border-left: 4px solid #4d96ff;
+}
+[data-theme="dark"] .inline-quiz { background: #1a1a3e; }
+.inline-quiz h4 { margin-top: 0; color: #4d96ff; }
+.quiz-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 16px;
+    margin: 6px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    background: white;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+[data-theme="dark"] .quiz-option { background: #2a2a3e; border-color: #444; color: #e0e0e0; }
+.quiz-option:hover { background: #e8f0ff; }
+.quiz-option.correct { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; }
+.quiz-option.wrong { background: #ffebee; border-color: #ef5350; color: #c62828; }
+.quiz-feedback { margin-top: 10px; font-size: 14px; padding: 10px; border-radius: 8px; display: none; }
+.quiz-feedback.correct { background: #e8f5e9; color: #2e7d32; display: block; }
+.quiz-feedback.wrong { background: #fff3cd; color: #7a5c00; display: block; }
+
+/* Teach it back prompt */
+.teach-it-back {
+    background: #f8f0ff;
+    border: 1px solid #c77dff;
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 20px;
+}
+[data-theme="dark"] .teach-it-back { background: #1e1a2e; }
+.teach-it-back h4 { color: #c77dff; margin-top: 0; }
+.teach-it-back textarea {
+    width: 100%;
+    min-height: 60px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+    resize: vertical;
+}
