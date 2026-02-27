@@ -395,39 +395,6 @@
         </div>
     </div>
 
-    <!-- Chat Widget -->
-    <div class="chat-widget" id="chat-widget">
-        <button class="chat-toggle" id="chat-toggle" onclick="toggleChat()">
-            <span class="chat-icon">💬</span>
-            <span class="chat-text">Ask Guy</span>
-        </button>
-
-        <div class="chat-window" id="chat-window">
-            <div class="chat-header">
-                <h3>🤖 Ask Guy - Your Learning Assistant</h3>
-                <button class="chat-close" onclick="toggleChat()">&times;</button>
-            </div>
-            <div class="chat-messages" id="chat-messages">
-                <div class="chat-message bot">
-                    <p>👋 Hi! I'm Guy, your EDA learning assistant!</p>
-                    <p>Ask me anything about Event-Driven Architecture, the lessons, or if you're stuck on a concept!</p>
-                </div>
-            </div>
-            <div class="chat-input-container">
-                <textarea
-                    id="chat-input"
-                    placeholder="Ask a question about EDA..."
-                    rows="2"
-                    onkeypress="handleChatKeypress(event)"
-                ></textarea>
-                <button class="chat-send" onclick="sendChatMessage()">Send</button>
-            </div>
-            <div class="chat-note">
-                <small>💡 Tip: Ask specific questions like "Explain pub/sub pattern" or "What's the difference between choreography and orchestration?"</small>
-            </div>
-        </div>
-    </div>
-
     <script src="app.js"></script>
 </body>
 </html>
