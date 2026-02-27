@@ -58,7 +58,8 @@ const lessons = {
         title: '1.2 Traditional vs Event-Driven',
         xp: 50,
         content: `
-<div class="hook-story">🚀 <strong>Real World:</strong> When Twitter switched from a monolithic to event-driven architecture, their system went from crashing during peak traffic (remember the "Fail Whale"?) to handling 500M+ tweets/day. The difference? Events.</div>
+<div class="lesson-recap">🔄 <strong>Last lesson:</strong> You learned that EDA means reacting to events instead of constantly checking — like a doorbell vs. opening the door every 30 seconds.</div>
+            <div class="hook-story">🚀 <strong>Real World:</strong> When Twitter switched from a monolithic to event-driven architecture, their system went from crashing during peak traffic (remember the "Fail Whale"?) to handling 500M+ tweets/day. The difference? Events.</div>
 <div class="why-matters">💡 <strong>Why this matters:</strong> Understanding the contrast makes the benefits concrete — you'll be able to spot opportunities to apply EDA in any system you work on.</div>
                         <h3>🎯 What You'll Learn</h3>
             <p>See the concrete difference between traditional and event-driven approaches with real code examples.</p>
@@ -169,7 +170,8 @@ eventBus.subscribe('user.registered', (user) => {
         title: '1.3 Core Components: Events, Publishers, Subscribers',
         xp: 75,
         content: `
-<div class="hook-story">🚀 <strong>Real World:</strong> When you tap "Request Uber", at least 12 different services receive that single event — dispatch, pricing, ETA calculation, driver notification, analytics, fraud detection, and more. You're about to meet the three components that make this possible.</div>
+<div class="lesson-recap">🔄 <strong>Last lesson:</strong> You saw how event-driven systems decouple services — registerUser() just publishes an event, and each service reacts independently. Result: 200ms response instead of 2-5 seconds.</div>
+            <div class="hook-story">🚀 <strong>Real World:</strong> When you tap "Request Uber", at least 12 different services receive that single event — dispatch, pricing, ETA calculation, driver notification, analytics, fraud detection, and more. You're about to meet the three components that make this possible.</div>
 <div class="why-matters">💡 <strong>Why this matters:</strong> Publishers, Subscribers, and Events are the atoms of every EDA system. Once you know these, you can understand any event-driven codebase.</div>
                         <h3>🎯 What You'll Learn</h3>
             <p>Deep dive into the three essential components of every event-driven system.</p>
@@ -369,7 +371,8 @@ eventBus.subscribe('user.registered', (user) => {
         title: '1.4 Your First Event Flow',
         xp: 100,
         content: `
-<div class="hook-story">🚀 <strong>Real World:</strong> Discord uses this exact pattern — EventEmitter — to broadcast messages to thousands of connected clients instantly. You're about to build the same thing from scratch.</div>
+<div class="lesson-recap">🔄 <strong>Last lesson:</strong> You met the three building blocks — Events (records of what happened), Publishers (announce events), Subscribers (react to events). They never need to know about each other.</div>
+            <div class="hook-story">🚀 <strong>Real World:</strong> Discord uses this exact pattern — EventEmitter — to broadcast messages to thousands of connected clients instantly. You're about to build the same thing from scratch.</div>
 <div class="why-matters">💡 <strong>Why this matters:</strong> Hands-on building locks in concepts that reading can't. After this lesson, you'll have real working code to show.</div>
                         <h3>🎯 What You'll Build</h3>
             <p>A simple notification system using Node.js EventEmitter (in-memory events).</p>
@@ -502,7 +505,8 @@ const dbLogger = new DatabaseLogger();</code></pre>
         title: '1.5 Quiz: Foundations Check',
         xp: 150,
         content: `
-            <h3>🎯 Test Your Understanding</h3>
+<div class="lesson-recap">🔄 <strong>Last lesson:</strong> You built a real notification system with Node.js EventEmitter — the same pattern Discord uses for message broadcasting.</div>
+                        <h3>🎯 Test Your Understanding</h3>
             <p>Answer these 5 questions to check your grasp of EDA foundations.</p>
 
             <h3>Question 1</h3>
@@ -568,7 +572,8 @@ const dbLogger = new DatabaseLogger();</code></pre>
         title: '2.1 Pub/Sub Pattern',
         xp: 100,
         content: `
-<div class="hook-story">🚀 <strong>Real World:</strong> YouTube notifies 50 million subscribers the instant a creator uploads a video. They don't call each subscriber individually — they publish to a topic and subscribers receive it. That's Pub/Sub at planetary scale.</div>
+<div class="lesson-recap">🔄 <strong>Module 1 complete!</strong> You know what EDA is, how it differs from traditional architecture, the three core components, and built your first event system. Now let's learn the patterns.</div>
+            <div class="hook-story">🚀 <strong>Real World:</strong> YouTube notifies 50 million subscribers the instant a creator uploads a video. They don't call each subscriber individually — they publish to a topic and subscribers receive it. That's Pub/Sub at planetary scale.</div>
 <div class="why-matters">💡 <strong>Why this matters:</strong> Pub/Sub is the most widely used EDA pattern. It's in every major platform — Kafka, Google Cloud Pub/Sub, AWS SNS, Redis.</div>
                         <h3>🎯 What You'll Learn</h3>
             <p>The Publish-Subscribe pattern is the foundation of most event-driven systems.</p>
@@ -617,7 +622,8 @@ Publisher 3 ──┘                            ├──> Subscriber 2
         title: '2.2 Event Sourcing',
         xp: 100,
         content: `
-<div class="hook-story">🚀 <strong>Real World:</strong> Your bank account doesn't store "balance: $500". It stores every single transaction that ever happened — deposits, withdrawals, transfers — and calculates your balance by replaying them. That's Event Sourcing. It's why banks can show your complete history and never "lose" your money.</div>
+<div class="lesson-recap">🔄 <strong>Last lesson:</strong> Pub/Sub — Publishers send to topics, Subscribers receive from topics. YouTube uses this to notify 50M subscribers instantly. Publishers and subscribers never know each other.</div>
+            <div class="hook-story">🚀 <strong>Real World:</strong> Your bank account doesn't store "balance: $500". It stores every single transaction that ever happened — deposits, withdrawals, transfers — and calculates your balance by replaying them. That's Event Sourcing. It's why banks can show your complete history and never "lose" your money.</div>
 <div class="why-matters">💡 <strong>Why this matters:</strong> Event Sourcing gives you time travel — you can reconstruct the exact state of your system at any point in the past. Priceless for debugging and compliance.</div>
                         <h3>🎯 What You'll Learn</h3>
             <p>Event Sourcing is a powerful pattern where you store every state change as an event.</p>
@@ -686,7 +692,8 @@ Publisher 3 ──┘                            ├──> Subscriber 2
         title: '2.3 CQRS (Command Query Responsibility Segregation)',
         xp: 125,
         content: `
-<div class="hook-story">🚀 <strong>Real World:</strong> Amazon's product pages load in under 200ms despite billions of products and millions of simultaneous users. Their secret: the system that handles orders (writes) is completely separate from the system that displays products (reads). That's CQRS.</div>
+<div class="lesson-recap">🔄 <strong>Last lesson:</strong> Event Sourcing — store every change as an event, reconstruct state by replaying them. Banks use this for complete transaction history and audit trails.</div>
+            <div class="hook-story">🚀 <strong>Real World:</strong> Amazon's product pages load in under 200ms despite billions of products and millions of simultaneous users. Their secret: the system that handles orders (writes) is completely separate from the system that displays products (reads). That's CQRS.</div>
 <div class="why-matters">💡 <strong>Why this matters:</strong> Reads and writes have completely different performance requirements. CQRS lets you optimize each independently without compromise.</div>
                         <h3>🎯 What You'll Learn</h3>
             <p>CQRS separates reads and writes into different models for better performance and scalability.</p>
@@ -789,7 +796,8 @@ Query → Read DB → Return data
         title: '2.4 Event Streaming',
         xp: 100,
         content: `
-<div class="hook-story">🚀 <strong>Real World:</strong> Spotify processes 600,000 events per second from listeners worldwide — song plays, skips, searches, playlist changes. They use Kafka (event streaming) to process all of it in real-time for recommendations, royalty calculations, and analytics.</div>
+<div class="lesson-recap">🔄 <strong>Last lesson:</strong> CQRS — separate your read model from your write model. Amazon loads product pages in &lt;200ms because reads and writes are completely independent systems.</div>
+            <div class="hook-story">🚀 <strong>Real World:</strong> Spotify processes 600,000 events per second from listeners worldwide — song plays, skips, searches, playlist changes. They use Kafka (event streaming) to process all of it in real-time for recommendations, royalty calculations, and analytics.</div>
 <div class="why-matters">💡 <strong>Why this matters:</strong> Event Streaming (Kafka) is the backbone of real-time data pipelines at Netflix, LinkedIn, Uber, and thousands of other companies.</div>
                         <h3>🎯 What You'll Learn</h3>
             <p>Event streaming processes continuous flows of events in real-time.</p>
@@ -880,7 +888,8 @@ consumer.poll((events) => {
         title: '2.5 Choreography vs Orchestration',
         xp: 100,
         content: `
-<div class="hook-story">🚀 <strong>Real World:</strong> When you book an Airbnb, at least 6 things happen — booking confirmed, payment charged, host notified, calendar blocked, review triggered, analytics logged. How do these all coordinate? Two patterns exist: Choreography (each reacts on its own) and Orchestration (one controller directs everything). Both are used at Airbnb.</div>
+<div class="lesson-recap">🔄 <strong>Last lesson:</strong> Event Streaming (Kafka) — events stored in persistent, replayable logs. Spotify processes 600K events/second this way. Unlike Pub/Sub, you can replay old events anytime.</div>
+            <div class="hook-story">🚀 <strong>Real World:</strong> When you book an Airbnb, at least 6 things happen — booking confirmed, payment charged, host notified, calendar blocked, review triggered, analytics logged. How do these all coordinate? Two patterns exist: Choreography (each reacts on its own) and Orchestration (one controller directs everything). Both are used at Airbnb.</div>
 <div class="why-matters">💡 <strong>Why this matters:</strong> Choosing the wrong coordination pattern causes spaghetti systems. This lesson gives you the mental model to choose correctly.</div>
                         <h3>🎯 What You'll Learn</h3>
             <p>Two patterns for coordinating multiple services in event-driven systems.</p>
@@ -1011,7 +1020,8 @@ async placeOrder(orderData) {
         title: '2.6 Quiz: Pattern Recognition',
         xp: 150,
         content: `
-            <h3>🎯 Test Your Understanding</h3>
+<div class="lesson-recap">🔄 <strong>Last lesson:</strong> Choreography vs Orchestration — services react independently (flash mob) vs. a central controller directs flow (conductor). Both have their place.</div>
+                        <h3>🎯 Test Your Understanding</h3>
             <p>Match the pattern to the use case!</p>
 
             <h3>Question 1: Which pattern stores all state changes as events?</h3>
@@ -1172,6 +1182,22 @@ function checkStreak() {
     updateUI();
 }
 
+// Module Review gate content
+const MODULE_REVIEWS = {
+    '2': {
+        gate: ['1-1','1-2','1-3','1-4','1-5'],
+        title: '📚 Module 1 Review — Before You Continue',
+        content: `<p>Great work finishing Module 1! Quick recap before Module 2:</p>
+            <ul>
+                <li>✅ <strong>EDA</strong> = react to events, don't poll constantly</li>
+                <li>✅ <strong>Traditional vs EDA</strong>: tightly coupled vs loosely coupled services</li>
+                <li>✅ <strong>3 Components</strong>: Publisher → Broker → Subscriber</li>
+                <li>✅ <strong>Events</strong> are immutable records in past tense (user.registered)</li>
+            </ul>
+            <p>Ready for the patterns? Let's go! 🚀</p>`
+    }
+};
+
 // Start lesson
 function startLesson(lessonId) {
     currentLesson = lessonId;
@@ -1180,6 +1206,21 @@ function startLesson(lessonId) {
     if (!lesson) {
         alert('This lesson content is coming soon! Check back later.');
         return;
+    }
+
+    // Module Review gate: show review when starting module 2 for the first time
+    const moduleNum = lessonId.split('-')[0];
+    const review = MODULE_REVIEWS[moduleNum];
+    if (review) {
+        const completed = JSON.parse(localStorage.getItem(STORAGE_KEYS.completedLessons) || '[]');
+        const gateKey = `eda_module_review_${moduleNum}_shown`;
+        const allPrevDone = review.gate.every(id => completed.includes(id));
+        const alreadyShown = localStorage.getItem(gateKey);
+        if (allPrevDone && !alreadyShown) {
+            localStorage.setItem(gateKey, '1');
+            showModuleReview(review, lessonId);
+            return;
+        }
     }
 
     // Show modal
@@ -1729,4 +1770,22 @@ function dropTerm(e) {
     }
     draggingTerm = null;
     document.querySelectorAll('.dd-term').forEach(t => t.style.opacity = '1');
+}
+
+// Module Review modal
+function showModuleReview(review, nextLessonId) {
+    const modal = document.getElementById('lesson-modal');
+    document.getElementById('lesson-title').textContent = review.title;
+    document.getElementById('lesson-content').innerHTML = review.content;
+    document.getElementById('btn-complete').style.display = 'none';
+    const nextBtn = document.getElementById('btn-next-lesson');
+    nextBtn.style.display = 'inline-block';
+    nextBtn.textContent = 'Continue to Lesson →';
+    nextBtn.onclick = () => {
+        closeLesson();
+        document.getElementById('btn-complete').style.display = '';
+        nextBtn.onclick = goToNextLesson;
+        setTimeout(() => startLesson(nextLessonId), 300);
+    };
+    modal.classList.add('active');
 }
