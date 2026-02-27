@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learn Event-Driven Architecture | Interactive Course</title>
+    <title>Dev Learning Hub | EDA & Redis Interactive Courses</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
 </head>
@@ -12,6 +12,12 @@
     <div id="top-progress-bar-container">
         <div id="top-progress-bar"></div>
         <span id="top-progress-label">0% Complete</span>
+    </div>
+
+    <!-- Subject Tabs -->
+    <div class="subject-tabs-bar">
+        <button class="subject-tab active" id="tab-eda" onclick="switchSubject('eda')">🎯 Event-Driven Architecture</button>
+        <button class="subject-tab" id="tab-redis" onclick="switchSubject('redis')">🔴 Redis</button>
     </div>
 
     <!-- Header with Progress -->
@@ -31,7 +37,7 @@
                 <button class="control-btn" onclick="shareProgress()" title="Share progress">📤</button>
             </div>
 
-            <h1>🎯 Event-Driven Architecture</h1>
+            <h1 id="site-title">🎯 Event-Driven Architecture</h1>
             <p class="tagline">Master EDA with ADHD-Friendly Bite-Sized Lessons</p>
 
             <div class="progress-overview">
@@ -509,6 +515,178 @@
     <!-- Confetti Container (Phase 4.3) -->
     <div id="confetti-container"></div>
 
+    <script src="redis-lessons.js"></script>
     <script src="app.js"></script>
+
+    <!-- Redis Content (hidden by default) -->
+    <main class="container subject-content" id="redis-content" style="display:none">
+        <!-- Module Nav -->
+        <div class="module-nav" id="redis-module-nav">
+            <div class="module-nav-inner">
+                <div class="module-nav-title">Modules</div>
+                <a href="#redis-module-1">🌱 Foundations</a>
+                <a href="#redis-module-2">🔧 Patterns</a>
+                <a href="#redis-module-3">💻 Build</a>
+                <a href="#redis-module-4">🚀 Production</a>
+            </div>
+        </div>
+
+        <section class="module" id="redis-module-1">
+            <div class="module-header">
+                <h2>🌱 Module 1: Redis Foundations</h2>
+                <span class="module-progress" id="redis-module-1-progress">0/5 Complete</span>
+            </div>
+            <div class="lessons-grid">
+                <div class="lesson-card" data-lesson="r1-1">
+                    <div class="lesson-header"><h3>1.1 What is Redis?</h3><span class="xp-badge">+50 XP</span></div>
+                    <p>In-memory key-value store — why it's 50x faster than databases</p>
+                    <div class="lesson-meta"><span>⏱️ ~5 min</span><span class="difficulty easy">Easy</span></div>
+                    <button class="btn-start" onclick="startLesson('r1-1')">Start Lesson</button>
+                </div>
+                <div class="lesson-card" data-lesson="r1-2">
+                    <div class="lesson-header"><h3>1.2 Redis vs Databases</h3><span class="xp-badge">+50 XP</span></div>
+                    <p>When to use Redis vs PostgreSQL vs MongoDB</p>
+                    <div class="lesson-meta"><span>⏱️ ~7 min</span><span class="difficulty easy">Easy</span></div>
+                    <button class="btn-start" onclick="startLesson('r1-2')">Start Lesson</button>
+                </div>
+                <div class="lesson-card" data-lesson="r1-3">
+                    <div class="lesson-header"><h3>1.3 Data Types</h3><span class="xp-badge">+75 XP</span></div>
+                    <p>Strings, Hashes, Lists, Sets, Sorted Sets — and when to use each</p>
+                    <div class="lesson-meta"><span>⏱️ ~10 min</span><span class="difficulty easy">Easy</span></div>
+                    <button class="btn-start" onclick="startLesson('r1-3')">Start Lesson</button>
+                </div>
+                <div class="lesson-card" data-lesson="r1-4">
+                    <div class="lesson-header"><h3>1.4 Core Commands</h3><span class="xp-badge">+100 XP</span></div>
+                    <p>GET, SET, EXPIRE, TTL, INCR — the 8 commands you use 80% of the time</p>
+                    <div class="lesson-meta"><span>⏱️ ~10 min</span><span class="difficulty easy">Easy</span></div>
+                    <button class="btn-start" onclick="startLesson('r1-4')">Start Lesson</button>
+                </div>
+                <div class="lesson-card" data-lesson="r1-5">
+                    <div class="lesson-header"><h3>1.5 Quiz: Foundations</h3><span class="xp-badge">+150 XP</span></div>
+                    <p>Test your Module 1 knowledge</p>
+                    <div class="lesson-meta"><span>⏱️ ~5 min</span><span class="difficulty easy">Easy</span></div>
+                    <button class="btn-start" onclick="startLesson('r1-5')">Take Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="module" id="redis-module-2">
+            <div class="module-header">
+                <h2>🔧 Module 2: Redis Patterns</h2>
+                <span class="module-progress" id="redis-module-2-progress">0/6 Complete</span>
+            </div>
+            <div class="lessons-grid">
+                <div class="lesson-card" data-lesson="r2-1">
+                    <div class="lesson-header"><h3>2.1 Caching: Cache-Aside</h3><span class="xp-badge">+100 XP</span></div>
+                    <p>The most common Redis pattern — serve data 50x faster</p>
+                    <div class="lesson-meta"><span>⏱️ ~8 min</span><span class="difficulty medium">Medium</span></div>
+                    <button class="btn-start" onclick="startLesson('r2-1')">Start Lesson</button>
+                </div>
+                <div class="lesson-card" data-lesson="r2-2">
+                    <div class="lesson-header"><h3>2.2 Session Storage</h3><span class="xp-badge">+100 XP</span></div>
+                    <p>HSET + EXPIRE — the standard for web authentication</p>
+                    <div class="lesson-meta"><span>⏱️ ~8 min</span><span class="difficulty medium">Medium</span></div>
+                    <button class="btn-start" onclick="startLesson('r2-2')">Start Lesson</button>
+                </div>
+                <div class="lesson-card" data-lesson="r2-3">
+                    <div class="lesson-header"><h3>2.3 Pub/Sub</h3><span class="xp-badge">+100 XP</span></div>
+                    <p>Real-time messaging — how chat apps deliver messages instantly</p>
+                    <div class="lesson-meta"><span>⏱️ ~8 min</span><span class="difficulty medium">Medium</span></div>
+                    <button class="btn-start" onclick="startLesson('r2-3')">Start Lesson</button>
+                </div>
+                <div class="lesson-card" data-lesson="r2-4">
+                    <div class="lesson-header"><h3>2.4 Rate Limiting</h3><span class="xp-badge">+125 XP</span></div>
+                    <p>INCR + EXPIRE — protect your API like GitHub does</p>
+                    <div class="lesson-meta"><span>⏱️ ~10 min</span><span class="difficulty medium">Medium</span></div>
+                    <button class="btn-start" onclick="startLesson('r2-4')">Start Lesson</button>
+                </div>
+                <div class="lesson-card" data-lesson="r2-5">
+                    <div class="lesson-header"><h3>2.5 Leaderboards</h3><span class="xp-badge">+125 XP</span></div>
+                    <p>Sorted Sets — real-time rankings like Stack Overflow</p>
+                    <div class="lesson-meta"><span>⏱️ ~10 min</span><span class="difficulty medium">Medium</span></div>
+                    <button class="btn-start" onclick="startLesson('r2-5')">Start Lesson</button>
+                </div>
+                <div class="lesson-card" data-lesson="r2-6">
+                    <div class="lesson-header"><h3>2.6 Quiz: Patterns</h3><span class="xp-badge">+150 XP</span></div>
+                    <p>Match patterns to real-world use cases</p>
+                    <div class="lesson-meta"><span>⏱️ ~5 min</span><span class="difficulty medium">Medium</span></div>
+                    <button class="btn-start" onclick="startLesson('r2-6')">Take Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="module" id="redis-module-3">
+            <div class="module-header">
+                <h2>💻 Module 3: Build Real Systems</h2>
+                <span class="module-progress" id="redis-module-3-progress">0/5 Complete</span>
+            </div>
+            <div class="lessons-grid">
+                <div class="lesson-card" data-lesson="r3-1">
+                    <div class="lesson-header"><h3>3.1 Project Setup</h3><span class="xp-badge">+100 XP</span></div>
+                    <p>Node.js + ioredis + Docker — production-ready setup</p>
+                    <div class="lesson-meta"><span>⏱️ ~10 min</span><span class="difficulty easy">Easy</span></div>
+                    <button class="btn-start" onclick="startLesson('r3-1')">Start Lesson</button>
+                </div>
+                <div class="lesson-card" data-lesson="r3-2">
+                    <div class="lesson-header"><h3>3.2 Build: Cache API</h3><span class="xp-badge">+150 XP</span></div>
+                    <p>Build a caching API — first request 500ms, second &lt;5ms</p>
+                    <div class="lesson-meta"><span>⏱️ ~15 min</span><span class="difficulty medium">Medium</span></div>
+                    <button class="btn-start" onclick="startLesson('r3-2')">Start Lesson</button>
+                </div>
+                <div class="lesson-card" data-lesson="r3-3">
+                    <div class="lesson-header"><h3>3.3 Build: Session Store</h3><span class="xp-badge">+150 XP</span></div>
+                    <p>express-session + connect-redis — the production auth pattern</p>
+                    <div class="lesson-meta"><span>⏱️ ~15 min</span><span class="difficulty medium">Medium</span></div>
+                    <button class="btn-start" onclick="startLesson('r3-3')">Start Lesson</button>
+                </div>
+                <div class="lesson-card" data-lesson="r3-4">
+                    <div class="lesson-header"><h3>3.4 Build: Leaderboard</h3><span class="xp-badge">+200 XP</span></div>
+                    <p>Real-time leaderboard with ZADD/ZINCRBY/ZRANGE</p>
+                    <div class="lesson-meta"><span>⏱️ ~20 min</span><span class="difficulty hard">Hard</span></div>
+                    <button class="btn-start" onclick="startLesson('r3-4')">Start Lesson</button>
+                </div>
+                <div class="lesson-card" data-lesson="r3-5">
+                    <div class="lesson-header"><h3>3.5 Final Project</h3><span class="xp-badge">+300 XP</span></div>
+                    <p>Rate-limited, cached API — production-ready</p>
+                    <div class="lesson-meta"><span>⏱️ ~30 min</span><span class="difficulty hard">Hard</span></div>
+                    <button class="btn-start" onclick="startLesson('r3-5')">Start Project</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="module" id="redis-module-4">
+            <div class="module-header">
+                <h2>🚀 Module 4: Production Redis</h2>
+                <span class="module-progress" id="redis-module-4-progress">0/4 Complete</span>
+            </div>
+            <div class="lessons-grid">
+                <div class="lesson-card" data-lesson="r4-1">
+                    <div class="lesson-header"><h3>4.1 Persistence: RDB vs AOF</h3><span class="xp-badge">+125 XP</span></div>
+                    <p>How Redis survives crashes — snapshots vs write logs</p>
+                    <div class="lesson-meta"><span>⏱️ ~12 min</span><span class="difficulty medium">Medium</span></div>
+                    <button class="btn-start" onclick="startLesson('r4-1')">Start Lesson</button>
+                </div>
+                <div class="lesson-card" data-lesson="r4-2">
+                    <div class="lesson-header"><h3>4.2 High Availability</h3><span class="xp-badge">+125 XP</span></div>
+                    <p>Redis Sentinel — automatic failover in 30 seconds</p>
+                    <div class="lesson-meta"><span>⏱️ ~12 min</span><span class="difficulty medium">Medium</span></div>
+                    <button class="btn-start" onclick="startLesson('r4-2')">Start Lesson</button>
+                </div>
+                <div class="lesson-card" data-lesson="r4-3">
+                    <div class="lesson-header"><h3>4.3 Redis Cluster</h3><span class="xp-badge">+150 XP</span></div>
+                    <p>Horizontal scaling — when one Redis isn't enough</p>
+                    <div class="lesson-meta"><span>⏱️ ~15 min</span><span class="difficulty hard">Hard</span></div>
+                    <button class="btn-start" onclick="startLesson('r4-3')">Start Lesson</button>
+                </div>
+                <div class="lesson-card" data-lesson="r4-4">
+                    <div class="lesson-header"><h3>4.4 Final Assessment</h3><span class="xp-badge">+250 XP</span></div>
+                    <p>Complete Redis course exam (5 scenario questions)</p>
+                    <div class="lesson-meta"><span>⏱️ ~20 min</span><span class="difficulty hard">Hard</span></div>
+                    <button class="btn-start" onclick="startLesson('r4-4')">Take Assessment</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
 </body>
 </html>

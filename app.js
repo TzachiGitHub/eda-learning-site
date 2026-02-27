@@ -1789,3 +1789,272 @@ function showModuleReview(review, nextLessonId) {
     };
     modal.classList.add('active');
 }
+
+// ============================================================
+// SUBJECT SWITCHER
+// ============================================================
+
+let currentSubject = localStorage.getItem('eda_subject') || 'eda';
+
+const SUBJECT_CONFIG = {
+    eda: {
+        title: '🎯 Event-Driven Architecture',
+        subtitle: 'Master EDA with ADHD-Friendly Bite-Sized Lessons',
+        storagePrefix: 'eda_',
+        lessons: () => lessons,
+        flashcards: () => FLASHCARDS,
+        totalLessons: 20,
+        moduleMap: { 1: 5, 2: 6, 3: 5, 4: 4 },
+        modulePrefix: ''
+    },
+    redis: {
+        title: '🔴 Redis',
+        subtitle: 'Master Redis with ADHD-Friendly Bite-Sized Lessons',
+        storagePrefix: 'redis_',
+        lessons: () => redisLessons,
+        flashcards: () => redisFlashcards,
+        totalLessons: 20,
+        moduleMap: { 1: 5, 2: 6, 3: 5, 4: 4 },
+        modulePrefix: 'redis-'
+    }
+};
+
+const SUBJECT_STORAGE = {
+    eda: {
+        completedLessons: 'eda_completed_lessons',
+        totalXP: 'eda_total_xp',
+        streak: 'eda_streak',
+        lastVisit: 'eda_last_visit',
+        lastLesson: 'eda_last_lesson'
+    },
+    redis: {
+        completedLessons: 'redis_completed_lessons',
+        totalXP: 'redis_total_xp',
+        streak: 'redis_streak',
+        lastVisit: 'redis_last_visit',
+        lastLesson: 'redis_last_lesson'
+    }
+};
+
+function switchSubject(subject) {
+    currentSubject = subject;
+    localStorage.setItem('eda_subject', subject);
+
+    // Update tabs
+    document.querySelectorAll('.subject-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + subject)?.classList.add('active');
+
+    // Show/hide content
+    const edaMain = document.querySelector('main.container:not(.subject-content)');
+    const redisMain = document.getElementById('redis-content');
+    if (edaMain) edaMain.style.display = subject === 'eda' ? '' : 'none';
+    if (redisMain) redisMain.style.display = subject === 'redis' ? '' : 'none';
+
+    // Update title
+    const config = SUBJECT_CONFIG[subject];
+    const titleEl = document.getElementById('site-title');
+    const subtitleEl = document.getElementById('site-subtitle');
+    if (titleEl) titleEl.textContent = config.title;
+    if (subtitleEl) subtitleEl.textContent = config.subtitle;
+
+    // Update STORAGE_KEYS to point to current subject
+    const store = SUBJECT_STORAGE[subject];
+    STORAGE_KEYS.completedLessons = store.completedLessons;
+    STORAGE_KEYS.totalXP = store.totalXP;
+    STORAGE_KEYS.streak = store.streak;
+    STORAGE_KEYS.lastVisit = store.lastVisit;
+
+    // Reload progress for this subject
+    loadProgressForSubject(subject);
+    updateUI();
+    updateTopProgressBar();
+    const xp = parseInt(localStorage.getItem(STORAGE_KEYS.totalXP) || '0');
+    updateXPTitle(xp);
+    showResumeButtonForSubject(subject);
+
+    // Scroll to top
+    window.scrollTo(0, 0);
+}
+
+function loadProgressForSubject(subject) {
+    const config = SUBJECT_CONFIG[subject];
+    const store = SUBJECT_STORAGE[subject];
+    const completed = JSON.parse(localStorage.getItem(store.completedLessons) || '[]');
+
+    // Reset all cards first
+    document.querySelectorAll('.lesson-card').forEach(card => {
+        const btn = card.querySelector('.btn-start');
+        if (btn) btn.textContent = btn.textContent.includes('Quiz') || btn.textContent.includes('Assessment') || btn.textContent.includes('Project') ? btn.getAttribute('data-original') || btn.textContent : 'Start Lesson';
+        card.classList.remove('completed');
+    });
+
+    // Mark completed
+    completed.forEach(lessonId => {
+        const card = document.querySelector(`[data-lesson="${lessonId}"]`);
+        if (card) {
+            card.classList.add('completed');
+            const btn = card.querySelector('.btn-start');
+            if (btn) btn.textContent = 'Review';
+        }
+    });
+}
+
+function showResumeButtonForSubject(subject) {
+    const lastLesson = localStorage.getItem(SUBJECT_STORAGE[subject].lastLesson);
+    const section = document.getElementById('resume-section');
+    const btn = document.getElementById('resume-btn');
+    if (lastLesson && section && btn) {
+        const allLessons = SUBJECT_CONFIG[subject].lessons();
+        const lesson = allLessons[lastLesson];
+        if (lesson) {
+            section.style.display = 'block';
+            btn.textContent = `▶️ Resume: ${lesson.title.substring(0, 30)}...`;
+            btn.onclick = () => startLesson(lastLesson);
+        }
+    }
+}
+
+// Patch startLesson to save to subject-specific storage
+const _origStartLesson = startLesson;
+// Override completeLesson to save to subject-specific storage
+const _origCompleteLesson = completeLesson;
+window._completeSubjectLesson = function() {
+    const subject = currentSubject;
+    const store = SUBJECT_STORAGE[subject];
+    const lesson = SUBJECT_CONFIG[subject].lessons()[currentLesson];
+    if (!lesson || !currentLesson) return;
+    
+    const completed = JSON.parse(localStorage.getItem(store.completedLessons) || '[]');
+    if (completed.includes(currentLesson)) { closeLesson(); return; }
+    
+    completed.push(currentLesson);
+    localStorage.setItem(store.completedLessons, JSON.stringify(completed));
+    
+    const currentXP = parseInt(localStorage.getItem(store.totalXP) || '0');
+    localStorage.setItem(store.totalXP, (currentXP + lesson.xp).toString());
+    localStorage.setItem(store.lastLesson, currentLesson);
+    
+    STORAGE_KEYS.completedLessons = store.completedLessons;
+    STORAGE_KEYS.totalXP = store.totalXP;
+    
+    const card = document.querySelector(`[data-lesson="${currentLesson}"]`);
+    if (card) {
+        card.classList.add('completed');
+        const btn = card.querySelector('.btn-start');
+        if (btn) btn.textContent = 'Review';
+    }
+    
+    updateUI();
+    updateTopProgressBar();
+    updateXPTitle(currentXP + lesson.xp);
+    showResumeButtonForSubject(subject);
+    launchConfetti();
+    showXPPopup(lesson.xp, currentXP + lesson.xp);
+    setTimeout(() => closeLesson(), 2500);
+};
+
+// Patch startLesson to use current subject's lessons
+const __origStart = startLesson;
+startLesson = function(lessonId) {
+    currentLesson = lessonId;
+    const allLessons = SUBJECT_CONFIG[currentSubject].lessons();
+    const lesson = allLessons[lessonId];
+    if (!lesson) { alert('Lesson coming soon!'); return; }
+    
+    const store = SUBJECT_STORAGE[currentSubject];
+    const completed = JSON.parse(localStorage.getItem(store.completedLessons) || '[]');
+    
+    document.getElementById('lesson-title').textContent = lesson.title;
+    document.getElementById('lesson-content').innerHTML = lesson.content;
+    
+    const btn = document.getElementById('btn-complete');
+    if (completed.includes(lessonId)) {
+        btn.textContent = 'Already Completed ✓';
+        btn.disabled = true;
+    } else {
+        btn.textContent = `Mark Complete & Earn ${lesson.xp} XP`;
+        btn.disabled = false;
+        btn.onclick = window._completeSubjectLesson;
+    }
+    
+    document.getElementById('lesson-modal').classList.add('active');
+    localStorage.setItem(store.lastLesson, lessonId);
+};
+
+// Update updateUI to work per subject
+const _origUpdateUI = updateUI;
+updateUI = function() {
+    const store = SUBJECT_STORAGE[currentSubject] || STORAGE_KEYS;
+    const completed = JSON.parse(localStorage.getItem(store.completedLessons || STORAGE_KEYS.completedLessons) || '[]');
+    const xp = parseInt(localStorage.getItem(store.totalXP || STORAGE_KEYS.totalXP) || '0');
+    const streak = parseInt(localStorage.getItem(store.streak || STORAGE_KEYS.streak) || '0');
+
+    document.getElementById('lessons-completed').textContent = completed.length;
+    document.getElementById('total-xp').textContent = xp;
+    document.getElementById('streak-count').textContent = streak;
+
+    if (currentSubject === 'eda') {
+        updateModuleProgress(1, completed.filter(id => id.startsWith('1-')).length, 5);
+        updateModuleProgress(2, completed.filter(id => id.startsWith('2-')).length, 6);
+        updateModuleProgress(3, completed.filter(id => id.startsWith('3-')).length, 5);
+        updateModuleProgress(4, completed.filter(id => id.startsWith('4-')).length, 4);
+    } else {
+        updateModuleProgress('redis-module-1', completed.filter(id => id.startsWith('r1-')).length, 5);
+        updateModuleProgress('redis-module-2', completed.filter(id => id.startsWith('r2-')).length, 6);
+        updateModuleProgress('redis-module-3', completed.filter(id => id.startsWith('r3-')).length, 5);
+        updateModuleProgress('redis-module-4', completed.filter(id => id.startsWith('r4-')).length, 4);
+    }
+    updateTopProgressBar();
+    updateXPTitle(xp);
+};
+
+// Update top progress bar to use current subject
+const _origBar = updateTopProgressBar;
+updateTopProgressBar = function() {
+    const store = SUBJECT_STORAGE[currentSubject];
+    if (!store) return;
+    const completed = JSON.parse(localStorage.getItem(store.completedLessons) || '[]');
+    const total = SUBJECT_CONFIG[currentSubject].totalLessons;
+    const pct = Math.round((completed.length / total) * 100);
+    const bar = document.getElementById('top-progress-bar');
+    const label = document.getElementById('top-progress-label');
+    if (bar) bar.style.width = pct + '%';
+    if (label) label.textContent = pct + '% Complete';
+};
+
+// Update flashcard open to use current subject's flashcards
+const _origFlashcard = openFlashcardReview;
+openFlashcardReview = function() {
+    const cards = SUBJECT_CONFIG[currentSubject].flashcards();
+    FLASHCARDS.length = 0;
+    cards.forEach(c => FLASHCARDS.push(c));
+    currentCardIndex = 0;
+    isFlipped = false;
+    document.getElementById('flashcard-modal').classList.add('active');
+    renderCard();
+};
+
+// Update module progress for redis
+const _origModuleProgress = updateModuleProgress;
+updateModuleProgress = function(moduleNum, completed, total) {
+    let elementId;
+    if (typeof moduleNum === 'string' && moduleNum.startsWith('redis-')) {
+        elementId = `${moduleNum}-progress`;
+    } else {
+        elementId = `module-${moduleNum}-progress`;
+    }
+    const element = document.getElementById(elementId);
+    if (element) element.textContent = `${completed}/${total} Complete`;
+};
+
+// Init on load
+document.addEventListener('DOMContentLoaded', () => {
+    // Apply saved subject
+    const saved = localStorage.getItem('eda_subject') || 'eda';
+    if (saved !== 'eda') {
+        switchSubject(saved);
+    } else {
+        STORAGE_KEYS.completedLessons = SUBJECT_STORAGE.eda.completedLessons;
+        STORAGE_KEYS.totalXP = SUBJECT_STORAGE.eda.totalXP;
+    }
+});

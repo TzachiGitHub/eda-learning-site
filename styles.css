@@ -998,3 +998,43 @@ body {
     line-height: 1.6;
 }
 [data-theme="dark"] .lesson-recap { background: #1a2e1a; color: #c8e6c9; }
+
+/* Subject Tabs */
+.subject-tabs-bar {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    background: #1a1a2e;
+    padding: 12px 16px;
+    position: sticky;
+    top: 6px;
+    z-index: 999;
+}
+.subject-tab {
+    padding: 10px 28px;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.6);
+    border-radius: 0;
+    transition: all 0.2s;
+}
+.subject-tab:first-child { border-radius: 10px 0 0 10px; }
+.subject-tab:last-child { border-radius: 0 10px 10px 0; }
+.subject-tab.active {
+    background: white;
+    color: #1a1a2e;
+}
+.subject-tab:hover:not(.active) {
+    background: rgba(255,255,255,0.2);
+    color: white;
+}
+
+/* Redis theme accent */
+#redis-content .module-header h2 { color: #D82C20; }
+#redis-content .btn-start { background: linear-gradient(135deg, #D82C20, #ff6b6b); }
+#redis-content .btn-start:hover { background: linear-gradient(135deg, #b71c1c, #D82C20); }
+#redis-content .xp-badge { background: #D82C20; }
+#redis-content .hook-story { border-left-color: #D82C20; }
