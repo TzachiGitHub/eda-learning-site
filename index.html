@@ -14,70 +14,108 @@
         <span id="top-progress-label">0% Complete</span>
     </div>
 
-    <!-- Subject Tabs -->
-    <div class="subject-tabs-bar">
-        <button class="subject-tab active" id="tab-eda" onclick="switchSubject('eda')">🎯 Event-Driven Architecture</button>
-        <button class="subject-tab" id="tab-redis" onclick="switchSubject('redis')">🔴 Redis</button>
-        <button class="subject-tab" id="tab-docker" onclick="switchSubject('docker')">🐳 Docker</button>
-        <button class="subject-tab" id="tab-graphql" onclick="switchSubject('graphql')">🔮 GraphQL</button>
-        <button class="subject-tab" id="tab-rq" onclick="switchSubject('rq')">⚡ React Query</button>
-    </div>
+    <!-- App Shell -->
+    <div class="app-shell" id="app-shell">
 
-    <!-- Header with Progress -->
-    <header class="header" id="main-header">
-        <div class="container">
-            <div class="header-top-controls">
-                <!-- Font Size Controls (Phase 6.2) -->
-                <div class="font-controls">
-                    <button class="control-btn" onclick="changeFontSize(-1)" title="Decrease font size">A-</button>
-                    <button class="control-btn" onclick="changeFontSize(1)" title="Increase font size">A+</button>
-                </div>
-                <!-- Dark Mode Toggle (Phase 1.5) -->
-                <button class="control-btn" id="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">🌙</button>
-                <!-- Focus Mode (Phase 6.1) -->
-                <button class="control-btn" id="focus-mode-btn" onclick="toggleFocusMode()" title="Focus mode">🎯</button>
-                <!-- Share Progress (Phase 6.4) -->
-                <button class="control-btn" onclick="shareProgress()" title="Share progress">📤</button>
+        <!-- SIDEBAR: Subject Navigator (N1.1-N1.5) -->
+        <aside class="subject-sidebar" id="subject-sidebar">
+            <div class="sidebar-brand">
+                <span class="sidebar-brand-icon">⚡</span>
+                <span class="sidebar-brand-text">DevLearn</span>
             </div>
-
-            <h1 id="site-title">🎯 Event-Driven Architecture</h1>
-            <p class="tagline">Master EDA with ADHD-Friendly Bite-Sized Lessons</p>
-
-            <div class="progress-overview">
-                <div class="stat">
-                    <span class="stat-number" id="lessons-completed">0</span>
-                    <span class="stat-label">Lessons</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-number" id="total-xp">0</span>
-                    <span class="stat-label">XP</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-number" id="streak-count">0</span>
-                    <span class="stat-label">Day Streak</span>
-                </div>
-                <!-- XP Title (Phase 4.1) -->
-                <div class="stat" id="xp-title-stat">
-                    <span class="stat-number" id="xp-title">🌱</span>
-                    <span class="stat-label" id="xp-title-label">Event Newbie</span>
-                </div>
-            </div>
-
-            <!-- Streak Forgiveness notice (Phase 4.2) -->
-            <div id="streak-forgiveness-notice" style="display:none;" class="streak-forgiveness">
-                ⏸️ Streak paused (not reset!) — come back today to continue
-            </div>
-
-            <!-- Resume Learning Button (Phase 1.1) -->
-            <div id="resume-section" style="display:none;" class="resume-section">
-                <button class="btn-resume" id="resume-btn" onclick="resumeLearning()">
-                    ▶️ Resume Learning
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-label">COURSES</div>
+                <button class="sidebar-item active" id="tab-eda" onclick="switchSubject('eda')">
+                    <span class="sidebar-item-icon">🎯</span>
+                    <span class="sidebar-item-text">EDA</span>
+                    <span class="sidebar-item-progress" id="nav-progress-eda">0/20</span>
                 </button>
+                <button class="sidebar-item" id="tab-redis" onclick="switchSubject('redis')">
+                    <span class="sidebar-item-icon">🔴</span>
+                    <span class="sidebar-item-text">Redis</span>
+                    <span class="sidebar-item-progress" id="nav-progress-redis">0/20</span>
+                </button>
+                <button class="sidebar-item" id="tab-docker" onclick="switchSubject('docker')">
+                    <span class="sidebar-item-icon">🐳</span>
+                    <span class="sidebar-item-text">Docker</span>
+                    <span class="sidebar-item-progress" id="nav-progress-docker">0/13</span>
+                </button>
+                <button class="sidebar-item" id="tab-graphql" onclick="switchSubject('graphql')">
+                    <span class="sidebar-item-icon">🔮</span>
+                    <span class="sidebar-item-text">GraphQL</span>
+                    <span class="sidebar-item-progress" id="nav-progress-graphql">0/11</span>
+                </button>
+                <button class="sidebar-item" id="tab-rq" onclick="switchSubject('rq')">
+                    <span class="sidebar-item-icon">⚡</span>
+                    <span class="sidebar-item-text">React Query</span>
+                    <span class="sidebar-item-progress" id="nav-progress-rq">0/10</span>
+                </button>
+            </nav>
+            <div class="sidebar-settings">
+                <button class="sidebar-setting-btn" id="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">🌙 Dark Mode</button>
+                <button class="sidebar-setting-btn" onclick="changeFontSize(-1)">A− Font</button>
+                <button class="sidebar-setting-btn" onclick="changeFontSize(1)">A+ Font</button>
+                <button class="sidebar-setting-btn" id="focus-mode-btn" onclick="toggleFocusMode()">🎯 Focus</button>
+                <button class="sidebar-setting-btn" onclick="shareProgress()">📤 Share</button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="main-content" id="main-content">
+
+            <!-- Progress Bar (H1.2) — always visible at top -->
+            <div class="progress-bar-container" id="top-progress-bar-container">
+                <div class="progress-bar-fill" id="top-progress-bar"></div>
+                <span class="progress-bar-label" id="top-progress-label">0% Complete</span>
             </div>
 
-            <!-- Daily Challenge Button (Phase 4.4) -->
-            <div class="header-actions">
-                <button class="btn-daily-challenge" onclick="openDailyChallenge()">
+            <!-- Header (H1.1-H1.5) -->
+            <header class="header" id="main-header">
+                <div class="header-inner">
+                    <!-- Mobile hamburger -->
+                    <button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()">☰</button>
+
+                    <!-- Identity Zone -->
+                    <div class="header-identity">
+                        <div class="header-level-badge" id="xp-title-badge">
+                            <span id="xp-title">🌱</span>
+                            <span id="xp-title-label">Event Newbie</span>
+                        </div>
+                        <div>
+                            <h1 id="site-title" class="header-title">Event-Driven Architecture</h1>
+                            <p id="site-subtitle" class="header-subtitle">ADHD-Friendly Bite-Sized Lessons</p>
+                        </div>
+                    </div>
+
+                    <!-- Stats Zone (H1.1) -->
+                    <div class="header-stats">
+                        <div class="stat-pill">
+                            <span class="stat-pill-num" id="lessons-completed">0</span>
+                            <span class="stat-pill-label">Lessons</span>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="stat-pill-num" id="total-xp">0</span>
+                            <span class="stat-pill-label">XP</span>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="stat-pill-num" id="streak-count">0</span>
+                            <span class="stat-pill-label">🔥 Streak</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Streak Forgiveness -->
+                <div id="streak-forgiveness-notice" style="display:none" class="streak-forgiveness">
+                    ⏸️ Streak paused (not reset!) — come back today to continue
+                </div>
+
+                <!-- Resume + Actions row -->
+                <div class="header-actions-row">
+                    <div id="resume-section" style="display:none" class="resume-section">
+                        <button class="btn-resume" id="resume-btn" onclick="resumeLearning()">▶️ Resume</button>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn-daily-challenge" onclick="openDailyChallenge()">
                     ⚡ Daily Challenge (+25 XP)
                 </button>
                 <button class="btn-flashcards" onclick="openFlashcardReview()">
@@ -1024,5 +1062,27 @@
             </div>
         </section>
     </main>
+
+    <!-- Mobile Bottom Nav (Mo3.2) -->
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+        <button class="mob-nav-item active" id="mobtab-eda" onclick="switchSubject('eda')">
+            <span>🎯</span><span>EDA</span>
+        </button>
+        <button class="mob-nav-item" id="mobtab-redis" onclick="switchSubject('redis')">
+            <span>🔴</span><span>Redis</span>
+        </button>
+        <button class="mob-nav-item" id="mobtab-docker" onclick="switchSubject('docker')">
+            <span>🐳</span><span>Docker</span>
+        </button>
+        <button class="mob-nav-item" id="mobtab-graphql" onclick="switchSubject('graphql')">
+            <span>🔮</span><span>GraphQL</span>
+        </button>
+        <button class="mob-nav-item" id="mobtab-rq" onclick="switchSubject('rq')">
+            <span>⚡</span><span>RQ</span>
+        </button>
+    </nav>
+        </div><!-- end .main-content -->
+    </div><!-- end .app-shell -->
+
 </body>
 </html>

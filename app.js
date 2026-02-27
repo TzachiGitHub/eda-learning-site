@@ -2145,3 +2145,160 @@ switchSubject = function(subject) {
     showResumeButtonForSubject(subject);
     window.scrollTo(0, 0);
 };
+
+// ============================================================
+// UI/UX REDESIGN — New functionality
+// ============================================================
+
+// Sidebar toggle (mobile)
+function toggleSidebar() {
+    const sidebar = document.getElementById('subject-sidebar');
+    const overlay = document.getElementById('sidebar-overlay') || createOverlay();
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('active');
+}
+function createOverlay() {
+    const o = document.createElement('div');
+    o.className = 'sidebar-overlay';
+    o.id = 'sidebar-overlay';
+    o.onclick = toggleSidebar;
+    document.body.appendChild(o);
+    return o;
+}
+
+// Reading progress bar (M3.2)
+function initReadingProgress() {
+    const body = document.getElementById('modal-body-scroll');
+    const fill = document.getElementById('modal-reading-fill');
+    if (!body || !fill) return;
+    body.addEventListener('scroll', () => {
+        const max = body.scrollHeight - body.clientHeight;
+        const pct = max > 0 ? (body.scrollTop / max) * 100 : 100;
+        fill.style.width = pct + '%';
+    });
+}
+
+// Breadcrumb updater (M3.1)
+function updateBreadcrumb(lessonId) {
+    const subjectNames = { eda: 'EDA', redis: 'Redis', docker: 'Docker', graphql: 'GraphQL', rq: 'React Query' };
+    const subEl = document.getElementById('breadcrumb-subject');
+    const modEl = document.getElementById('breadcrumb-module');
+    const lesEl = document.getElementById('breadcrumb-lesson');
+    if (subEl) subEl.textContent = subjectNames[currentSubject] || 'EDA';
+
+    const parts = lessonId.replace(/[a-z]+/i, '').split('-');
+    const modNum = parts[0] || '1';
+    const lesNum = parts[1] || '1';
+    if (modEl) modEl.textContent = `Module ${modNum}`;
+    if (lesEl) lesEl.textContent = `Lesson ${modNum}.${lesNum}`;
+}
+
+// Sidebar progress counters (N1.4)
+function updateSidebarProgress() {
+    const subjects = ['eda', 'redis', 'docker', 'graphql', 'rq'];
+    const totals = { eda: 20, redis: 20, docker: 13, graphql: 11, rq: 10 };
+    subjects.forEach(s => {
+        const store = SUBJECT_STORAGE[s];
+        if (!store) return;
+        const completed = JSON.parse(localStorage.getItem(store.completedLessons) || '[]');
+        const el = document.getElementById('nav-progress-' + s);
+        if (el) el.textContent = `${completed.length}/${totals[s]}`;
+    });
+}
+
+// Mobile bottom nav active state
+function updateMobileNav(subject) {
+    document.querySelectorAll('.mob-nav-item').forEach(b => b.classList.remove('active'));
+    const mob = document.getElementById('mobtab-' + subject);
+    if (mob) mob.classList.add('active');
+}
+
+// Today's Path (L3.1)
+function buildTodaysPath(subject) {
+    const store = SUBJECT_STORAGE[subject];
+    if (!store) return;
+    const completed = JSON.parse(localStorage.getItem(store.completedLessons) || '[]');
+    const allLessons = SUBJECT_CONFIG[subject]?.lessons() || {};
+    const section = document.getElementById('todays-path');
+    const container = document.getElementById('todays-path-lessons');
+    if (!section || !container) return;
+
+    // Find up to 3 incomplete lessons
+    const incomplete = Object.entries(allLessons)
+        .filter(([id]) => !completed.includes(id))
+        .slice(0, 3);
+
+    if (incomplete.length === 0) { section.style.display = 'none'; return; }
+
+    section.style.display = 'block';
+    container.innerHTML = '';
+    incomplete.forEach(([id, lesson]) => {
+        const card = document.createElement('button');
+        card.className = 'todays-path-card';
+        card.innerHTML = `▶ ${lesson.title.substring(0, 40)} <span style="color:var(--accent);font-size:11px">+${lesson.xp} XP</span>`;
+        card.onclick = () => startLesson(id);
+        container.appendChild(card);
+    });
+}
+
+// Keyboard navigation in modal (M3.6)
+document.addEventListener('keydown', (e) => {
+    const modal = document.getElementById('lesson-modal');
+    if (!modal?.classList.contains('active')) return;
+    if (e.key === 'Escape') closeLesson();
+    if (e.key === 'ArrowRight' && !e.target.matches('input, textarea')) goToNextLesson();
+});
+
+// Pomodoro — circular ring (P4.4)
+const POMODORO_TOTAL = 15 * 60;
+function updatePomodoroRing() {
+    const ring = document.getElementById('pomodoro-ring-fill');
+    if (!ring) return;
+    const pct = pomodoroSeconds / POMODORO_TOTAL;
+    const circumference = 283;
+    ring.style.strokeDashoffset = circumference * (1 - pct);
+}
+
+// Override updatePomodoroDisplay to also update ring
+const _origPomodoroDisplay = updatePomodoroDisplay;
+updatePomodoroDisplay = function() {
+    _origPomodoroDisplay();
+    updatePomodoroRing();
+};
+
+// Patch switchSubject to update all new UI
+const __prevSwitch = switchSubject;
+switchSubject = function(subject) {
+    __prevSwitch(subject);
+    updateSidebarProgress();
+    updateMobileNav(subject);
+    buildTodaysPath(subject);
+    // Close sidebar on mobile after switch
+    const sidebar = document.getElementById('subject-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sidebar?.classList.contains('open')) {
+        sidebar.classList.remove('open');
+        overlay?.classList.remove('active');
+    }
+};
+
+// Patch startLesson for breadcrumb + reading progress
+const ___origStart = startLesson;
+startLesson = function(lessonId) {
+    ___origStart(lessonId);
+    updateBreadcrumb(lessonId);
+    // Reset reading progress
+    const fill = document.getElementById('modal-reading-fill');
+    if (fill) fill.style.width = '0%';
+    const body = document.getElementById('modal-body-scroll');
+    if (body) body.scrollTop = 0;
+};
+
+// Init all new features on load
+document.addEventListener('DOMContentLoaded', () => {
+    initReadingProgress();
+    updateSidebarProgress();
+    updateMobileNav(currentSubject || 'eda');
+    buildTodaysPath(currentSubject || 'eda');
+    createOverlay(); // pre-create sidebar overlay
+});
