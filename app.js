@@ -503,6 +503,464 @@ Publisher 3 ──┘                            ├──> Subscriber 2
             <p><strong>Pub/Sub = Topic-based message distribution</strong></p>
             <p>Publishers post to topics. Subscribers listen to topics. Broker handles delivery.</p>
         `
+    },
+    '2-2': {
+        title: '2.2 Event Sourcing',
+        xp: 100,
+        content: `
+            <h3>🎯 What You'll Learn</h3>
+            <p>Event Sourcing is a powerful pattern where you store every state change as an event.</p>
+
+            <h3>📖 The Problem with Traditional Storage</h3>
+            <p><strong>Traditional:</strong> You only store the current state</p>
+            <pre><code>// Database: users table
+{
+    id: 123,
+    name: "John Doe",
+    email: "john@example.com",
+    balance: 500
+}</code></pre>
+
+            <p><strong>Problem:</strong> You lost the history! How did the balance become 500? You don't know.</p>
+
+            <h3>✅ Event Sourcing Solution</h3>
+            <p><strong>Instead of storing current state, store all events that led to that state:</strong></p>
+
+            <pre><code>// Event Store
+[
+    { type: 'AccountCreated', userId: 123, balance: 0, timestamp: '...' },
+    { type: 'MoneyDeposited', userId: 123, amount: 1000, timestamp: '...' },
+    { type: 'MoneyWithdrawn', userId: 123, amount: 300, timestamp: '...' },
+    { type: 'MoneyWithdrawn', userId: 123, amount: 200, timestamp: '...' }
+]
+
+// Current state = Replay all events
+// 0 + 1000 - 300 - 200 = 500</code></pre>
+
+            <h3>🔑 Key Concepts</h3>
+            <ul>
+                <li><strong>Events are immutable:</strong> Once written, never changed</li>
+                <li><strong>Events are append-only:</strong> Always add new events, never modify old ones</li>
+                <li><strong>State is derived:</strong> Current state = replay all events</li>
+                <li><strong>Complete audit trail:</strong> Know exactly what happened when</li>
+            </ul>
+
+            <h3>💡 Benefits</h3>
+            <ul>
+                <li><strong>Time Travel:</strong> Reconstruct state at any point in history</li>
+                <li><strong>Audit Trail:</strong> Perfect compliance and debugging</li>
+                <li><strong>Business Insights:</strong> Analyze how things changed over time</li>
+                <li><strong>Bug Recovery:</strong> Fix bugs by replaying events with corrected logic</li>
+            </ul>
+
+            <h3>⚠️ Challenges</h3>
+            <ul>
+                <li><strong>Storage:</strong> Events grow over time (use snapshots)</li>
+                <li><strong>Complexity:</strong> More complex than CRUD</li>
+                <li><strong>Eventual Consistency:</strong> Rebuilding state takes time</li>
+            </ul>
+
+            <h3>🎯 When to Use Event Sourcing</h3>
+            <p>✅ Financial systems (need audit trail)</p>
+            <p>✅ Collaboration tools (need history/undo)</p>
+            <p>✅ Analytics (need to analyze changes)</p>
+            <p>❌ Simple CRUD apps (overkill)</p>
+
+            <h3>🎯 Key Takeaway</h3>
+            <p><strong>Event Sourcing = Store events, not just current state</strong></p>
+        `
+    },
+    '2-3': {
+        title: '2.3 CQRS (Command Query Responsibility Segregation)',
+        xp: 125,
+        content: `
+            <h3>🎯 What You'll Learn</h3>
+            <p>CQRS separates reads and writes into different models for better performance and scalability.</p>
+
+            <h3>📖 The Traditional Approach</h3>
+            <p><strong>One model for everything:</strong></p>
+            <pre><code>class UserService {
+    createUser(data) { /* write */ }
+    updateUser(id, data) { /* write */ }
+    deleteUser(id) { /* write */ }
+    getUser(id) { /* read */ }
+    listUsers(filter) { /* read */ }
+    getUserStats() { /* read */ }
+}</code></pre>
+
+            <p><strong>Problem:</strong> Read and write needs are different!</p>
+            <ul>
+                <li>Writes: Simple, focused, validate, store</li>
+                <li>Reads: Complex queries, joins, aggregations, fast access</li>
+            </ul>
+
+            <h3>✅ CQRS Solution</h3>
+            <p><strong>Separate models for Commands (writes) and Queries (reads):</strong></p>
+
+            <pre><code>// COMMAND SIDE (Writes)
+class UserCommands {
+    createUser(data) {
+        // Validate
+        // Publish UserCreated event
+    }
+
+    updateUser(id, data) {
+        // Validate
+        // Publish UserUpdated event
+    }
+}
+
+// QUERY SIDE (Reads)
+class UserQueries {
+    getUser(id) {
+        // Read from optimized read database
+    }
+
+    searchUsers(criteria) {
+        // Read from search index (Elasticsearch)
+    }
+
+    getUserStats() {
+        // Read from pre-computed statistics table
+    }
+}</code></pre>
+
+            <h3>🔄 How It Works</h3>
+            <pre><code>
+Command → Validate → Event → Write DB
+                       ↓
+                   Event Handler
+                       ↓
+                   Update Read DB (optimized for queries)
+                       ↓
+Query → Read DB → Return data
+            </code></pre>
+
+            <h3>💡 Benefits</h3>
+            <ul>
+                <li><strong>Performance:</strong> Optimize reads and writes independently</li>
+                <li><strong>Scalability:</strong> Scale read and write databases separately</li>
+                <li><strong>Flexibility:</strong> Multiple read models for different use cases</li>
+                <li><strong>Simplicity:</strong> Each side is simpler on its own</li>
+            </ul>
+
+            <h3>🎯 Real-World Example</h3>
+            <p><strong>E-commerce system:</strong></p>
+            <ul>
+                <li><strong>Write side:</strong> Process orders (PostgreSQL)</li>
+                <li><strong>Read side #1:</strong> Product search (Elasticsearch)</li>
+                <li><strong>Read side #2:</strong> Order history (MongoDB)</li>
+                <li><strong>Read side #3:</strong> Analytics dashboard (Data warehouse)</li>
+            </ul>
+
+            <h3>⚠️ Challenges</h3>
+            <ul>
+                <li><strong>Eventual Consistency:</strong> Read side updated asynchronously</li>
+                <li><strong>Complexity:</strong> More moving parts</li>
+                <li><strong>Data Sync:</strong> Must keep read models in sync</li>
+            </ul>
+
+            <h3>🎯 When to Use CQRS</h3>
+            <p>✅ Complex queries + simple writes</p>
+            <p>✅ Need to scale reads independently</p>
+            <p>✅ Different read models for different purposes</p>
+            <p>❌ Simple CRUD apps (not worth the complexity)</p>
+
+            <h3>🎯 Key Takeaway</h3>
+            <p><strong>CQRS = Separate read and write models for optimal performance</strong></p>
+        `
+    },
+    '2-4': {
+        title: '2.4 Event Streaming',
+        xp: 100,
+        content: `
+            <h3>🎯 What You'll Learn</h3>
+            <p>Event streaming processes continuous flows of events in real-time.</p>
+
+            <h3>📖 Pub/Sub vs Event Streaming</h3>
+            <p><strong>Pub/Sub:</strong> Fire-and-forget messages</p>
+            <ul>
+                <li>Message delivered to active subscribers</li>
+                <li>Message deleted after delivery</li>
+                <li>Can't replay old messages</li>
+            </ul>
+
+            <p><strong>Event Streaming:</strong> Persistent, replayable event logs</p>
+            <ul>
+                <li>Events stored in ordered log</li>
+                <li>Consumers read at their own pace</li>
+                <li>Can replay from any point in history</li>
+            </ul>
+
+            <h3>🔑 Apache Kafka - Event Streaming Platform</h3>
+            <pre><code>
+Producer 1 ──┐
+             │
+Producer 2 ──┼──> Topic: "orders" (Persistent Log)
+             │     [Event1][Event2][Event3][Event4]...
+Producer 3 ──┘              ↓         ↓         ↓
+                      Consumer A  Consumer B  Consumer C
+                      (offset:1)  (offset:3)  (offset:2)
+            </code></pre>
+
+            <h3>💡 Key Concepts</h3>
+            <ul>
+                <li><strong>Topic:</strong> Named stream of events (like "orders", "payments")</li>
+                <li><strong>Partition:</strong> Topic divided for parallelism</li>
+                <li><strong>Offset:</strong> Position in the stream (like a bookmark)</li>
+                <li><strong>Consumer Group:</strong> Multiple consumers share the load</li>
+                <li><strong>Retention:</strong> How long to keep events (hours, days, forever)</li>
+            </ul>
+
+            <h3>🎯 Real-World Use Cases</h3>
+
+            <p><strong>1. Activity Tracking (Website Analytics)</strong></p>
+            <pre><code>User clicks → Stream → [Real-time Dashboard]
+                              → [ML Model Training]
+                              → [Data Warehouse]</code></pre>
+
+            <p><strong>2. Log Aggregation</strong></p>
+            <pre><code>100 Servers → Stream → [Central Logging]
+                              → [Alert System]
+                              → [Analytics]</code></pre>
+
+            <p><strong>3. Data Pipeline</strong></p>
+            <pre><code>Database Changes → Stream → [Search Index Update]
+                                   → [Cache Invalidation]
+                                   → [Analytics DB]</code></pre>
+
+            <h3>✅ Benefits</h3>
+            <ul>
+                <li><strong>Replay:</strong> Reprocess events if logic changes</li>
+                <li><strong>Multiple Consumers:</strong> Different teams use same data</li>
+                <li><strong>Fault Tolerance:</strong> Events persisted, can recover</li>
+                <li><strong>Scalability:</strong> Partitions enable massive throughput</li>
+            </ul>
+
+            <h3>⚙️ Quick Example with Kafka-like API</h3>
+            <pre><code>// Producer
+producer.send('orders', {
+    orderId: 123,
+    amount: 99.99,
+    timestamp: Date.now()
+});
+
+// Consumer
+consumer.subscribe(['orders']);
+consumer.poll((events) => {
+    events.forEach(event => {
+        processOrder(event);
+        consumer.commit(event.offset); // Save progress
+    });
+});</code></pre>
+
+            <h3>🎯 Key Takeaway</h3>
+            <p><strong>Event Streaming = Persistent, replayable event logs for real-time data pipelines</strong></p>
+        `
+    },
+    '2-5': {
+        title: '2.5 Choreography vs Orchestration',
+        xp: 100,
+        content: `
+            <h3>🎯 What You'll Learn</h3>
+            <p>Two patterns for coordinating multiple services in event-driven systems.</p>
+
+            <h3>🎭 Choreography (Decentralized)</h3>
+            <p><strong>Services react to events independently, no central controller</strong></p>
+
+            <pre><code>Order Service: "Order Placed" event published
+    ↓ (listens)
+Payment Service: Processes payment → "Payment Processed" event
+    ↓ (listens)
+Inventory Service: Reserves items → "Items Reserved" event
+    ↓ (listens)
+Shipping Service: Creates shipment → "Shipment Created" event
+    ↓ (listens)
+Notification Service: Sends confirmation email</code></pre>
+
+            <p><strong>Code Example:</strong></p>
+            <pre><code>// Order Service
+placeOrder(orderData) {
+    const order = saveOrder(orderData);
+    eventBus.publish('order.placed', order);
+}
+
+// Payment Service (listening)
+eventBus.on('order.placed', (order) => {
+    processPayment(order);
+    eventBus.publish('payment.processed', { orderId: order.id });
+});
+
+// Inventory Service (listening)
+eventBus.on('payment.processed', (data) => {
+    reserveItems(data.orderId);
+    eventBus.publish('items.reserved', data);
+});
+
+// Each service knows what to listen for
+// No central coordinator!</code></pre>
+
+            <h3>✅ Choreography Benefits</h3>
+            <ul>
+                <li><strong>Loose coupling:</strong> Services don't know about each other</li>
+                <li><strong>Scalable:</strong> Add/remove services easily</li>
+                <li><strong>Resilient:</strong> No single point of failure</li>
+            </ul>
+
+            <h3>⚠️ Choreography Challenges</h3>
+            <ul>
+                <li><strong>Hard to visualize:</strong> Workflow spread across services</li>
+                <li><strong>Difficult to debug:</strong> No single place to see flow</li>
+                <li><strong>Cyclic dependencies:</strong> Can create event loops</li>
+            </ul>
+
+            <h3>🎯 Orchestration (Centralized)</h3>
+            <p><strong>Central orchestrator controls the workflow</strong></p>
+
+            <pre><code>Order Orchestrator:
+1. Call Payment Service → wait for response
+2. Call Inventory Service → wait for response
+3. Call Shipping Service → wait for response
+4. Call Notification Service → done</code></pre>
+
+            <p><strong>Code Example:</strong></p>
+            <pre><code>// Order Orchestrator
+async placeOrder(orderData) {
+    const order = await orderService.create(orderData);
+
+    try {
+        // Step 1: Process payment
+        const payment = await paymentService.process(order);
+
+        // Step 2: Reserve inventory
+        const reservation = await inventoryService.reserve(order);
+
+        // Step 3: Create shipment
+        const shipment = await shippingService.create(order);
+
+        // Step 4: Notify customer
+        await notificationService.send(order);
+
+        return { success: true, order };
+    } catch (error) {
+        // Rollback/compensation logic
+        await this.handleFailure(order, error);
+    }
+}</code></pre>
+
+            <h3>✅ Orchestration Benefits</h3>
+            <ul>
+                <li><strong>Clear workflow:</strong> All logic in one place</li>
+                <li><strong>Easy to debug:</strong> Central point to monitor</li>
+                <li><strong>Error handling:</strong> Orchestrator manages failures</li>
+                <li><strong>Explicit order:</strong> Steps execute in defined sequence</li>
+            </ul>
+
+            <h3>⚠️ Orchestration Challenges</h3>
+            <ul>
+                <li><strong>Tight coupling:</strong> Orchestrator knows all services</li>
+                <li><strong>Single point of failure:</strong> If orchestrator fails, everything stops</li>
+                <li><strong>Bottleneck:</strong> All requests go through orchestrator</li>
+            </ul>
+
+            <h3>📊 When to Use Which?</h3>
+
+            <p><strong>Use Choreography when:</strong></p>
+            <ul>
+                <li>Simple workflows</li>
+                <li>Services are truly independent</li>
+                <li>Need maximum scalability</li>
+                <li>No complex error handling needed</li>
+            </ul>
+
+            <p><strong>Use Orchestration when:</strong></p>
+            <ul>
+                <li>Complex workflows with many steps</li>
+                <li>Need transactional guarantees</li>
+                <li>Require visibility into workflow state</li>
+                <li>Complex error handling/rollbacks</li>
+            </ul>
+
+            <h3>🎯 Key Takeaway</h3>
+            <p><strong>Choreography</strong> = Services react to events (decentralized)</p>
+            <p><strong>Orchestration</strong> = Central controller manages workflow (centralized)</p>
+        `
+    },
+    '2-6': {
+        title: '2.6 Quiz: Pattern Recognition',
+        xp: 150,
+        content: `
+            <h3>🎯 Test Your Understanding</h3>
+            <p>Match the pattern to the use case!</p>
+
+            <h3>Question 1: Which pattern stores all state changes as events?</h3>
+            <p>A) Pub/Sub<br>
+            B) Event Sourcing<br>
+            C) CQRS<br>
+            D) Choreography</p>
+            <p><em>Correct Answer: B - Event Sourcing stores every event that led to current state</em></p>
+
+            <h3>Question 2: You need to optimize reads independently from writes. Which pattern?</h3>
+            <p>A) Event Streaming<br>
+            B) Pub/Sub<br>
+            C) CQRS<br>
+            D) Orchestration</p>
+            <p><em>Correct Answer: C - CQRS separates read and write models</em></p>
+
+            <h3>Question 3: You want to replay events from 3 days ago. Which pattern?</h3>
+            <p>A) Simple Pub/Sub<br>
+            B) Event Streaming (Kafka)<br>
+            C) Orchestration<br>
+            D) None of the above</p>
+            <p><em>Correct Answer: B - Event Streaming persists events for replay</em></p>
+
+            <h3>Question 4: Multiple services react independently to "OrderPlaced" event. What pattern?</h3>
+            <p>A) Orchestration<br>
+            B) Choreography<br>
+            C) CQRS<br>
+            D) Event Sourcing</p>
+            <p><em>Correct Answer: B - Choreography = services react to events independently</em></p>
+
+            <h3>Question 5: Central workflow manager calls services in sequence. What pattern?</h3>
+            <p>A) Pub/Sub<br>
+            B) Choreography<br>
+            C) Orchestration<br>
+            D) Event Streaming</p>
+            <p><em>Correct Answer: C - Orchestration = central controller manages flow</em></p>
+
+            <h3>Scenario Question 6:</h3>
+            <p><strong>Banking app needs:</strong></p>
+            <ul>
+                <li>Complete audit trail of all transactions</li>
+                <li>Ability to reconstruct account state at any point in time</li>
+                <li>Regulatory compliance</li>
+            </ul>
+            <p><strong>Best pattern?</strong><br>
+            A) Simple Pub/Sub<br>
+            B) Event Sourcing<br>
+            C) Orchestration<br>
+            D) Choreography</p>
+            <p><em>Correct Answer: B - Event Sourcing provides complete history and audit trail</em></p>
+
+            <h3>✅ How Did You Do?</h3>
+            <ul>
+                <li><strong>6/6:</strong> 🌟 Pattern Master! Ready for Module 3!</li>
+                <li><strong>4-5/6:</strong> 👍 Great! Review the missed patterns</li>
+                <li><strong>0-3/6:</strong> 📚 Review Module 2 lessons again</li>
+            </ul>
+
+            <h3>🎯 Module 2 Complete!</h3>
+            <p>You now understand:</p>
+            <ul>
+                <li>✅ Pub/Sub pattern</li>
+                <li>✅ Event Sourcing (store events, not state)</li>
+                <li>✅ CQRS (separate reads and writes)</li>
+                <li>✅ Event Streaming (Kafka-style)</li>
+                <li>✅ Choreography vs Orchestration</li>
+            </ul>
+
+            <p><strong>Next:</strong> Module 3 - Build real systems with code!</p>
+        `
     }
 };
 
@@ -662,6 +1120,130 @@ document.getElementById('lesson-modal').addEventListener('click', (e) => {
         closeLesson();
     }
 });
+
+// Chat functionality
+function toggleChat() {
+    const chatWindow = document.getElementById('chat-window');
+    chatWindow.classList.toggle('active');
+
+    if (chatWindow.classList.contains('active')) {
+        document.getElementById('chat-input').focus();
+    }
+}
+
+function handleChatKeypress(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendChatMessage();
+    }
+}
+
+async function sendChatMessage() {
+    const input = document.getElementById('chat-input');
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    // Clear input
+    input.value = '';
+
+    // Add user message to chat
+    addChatMessage(message, 'user');
+
+    // Show loading indicator
+    const loadingId = addLoadingMessage();
+
+    // Send to Guy (via WhatsApp - this will send to your main group)
+    try {
+        // In a real implementation, this would call an API
+        // For now, we'll show a helpful response based on keywords
+        const response = await generateChatResponse(message);
+
+        // Remove loading
+        removeLoadingMessage(loadingId);
+
+        // Add bot response
+        addChatMessage(response, 'bot');
+    } catch (error) {
+        removeLoadingMessage(loadingId);
+        addChatMessage('Sorry, I encountered an error. Please try asking your question in the main chat.', 'bot');
+    }
+}
+
+function addChatMessage(text, type) {
+    const messagesContainer = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${type}`;
+
+    const p = document.createElement('p');
+    p.textContent = text;
+    messageDiv.appendChild(p);
+
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function addLoadingMessage() {
+    const messagesContainer = document.getElementById('chat-messages');
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'chat-message loading';
+    loadingDiv.id = 'loading-message';
+
+    const dotsDiv = document.createElement('div');
+    dotsDiv.className = 'chat-loading-dots';
+    dotsDiv.innerHTML = '<span></span><span></span><span></span>';
+
+    loadingDiv.appendChild(dotsDiv);
+    messagesContainer.appendChild(loadingDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    return 'loading-message';
+}
+
+function removeLoadingMessage(id) {
+    const loading = document.getElementById(id);
+    if (loading) loading.remove();
+}
+
+async function generateChatResponse(message) {
+    const lowerMessage = message.toLowerCase();
+
+    // Pattern matching for common questions
+    if (lowerMessage.includes('pub') && lowerMessage.includes('sub')) {
+        return "Pub/Sub is a messaging pattern where publishers send messages to topics, and subscribers receive them. Publishers don't know who subscribes - they just post to topics. Think of it like YouTube channels: you subscribe to channels you like, and get notified when they publish new videos!\n\nCheck out Lesson 2.1 for a deep dive!";
+    }
+
+    if (lowerMessage.includes('event sourcing')) {
+        return "Event Sourcing stores every state change as an event, rather than just the current state. Instead of storing 'balance: $500', you store all the events: AccountCreated → MoneyDeposited($1000) → MoneyWithdrawn($300) → MoneyWithdrawn($200). This gives you complete history and audit trail!\n\nLesson 2.2 covers this in detail!";
+    }
+
+    if (lowerMessage.includes('cqrs')) {
+        return "CQRS separates reads and writes into different models. Write side handles commands (create, update), read side handles queries. This lets you optimize each side independently. Like having one database for writing transactions and another (optimized) one for complex searches!\n\nLesson 2.3 explains this pattern!";
+    }
+
+    if (lowerMessage.includes('choreography') || lowerMessage.includes('orchestration')) {
+        return "Choreography vs Orchestration:\n\n• Choreography = Services react to events independently (decentralized). Like a flash mob - everyone knows their part.\n\n• Orchestration = Central controller manages the workflow (centralized). Like a conductor leading an orchestra.\n\nLesson 2.5 covers both patterns with code examples!";
+    }
+
+    if (lowerMessage.includes('kafka') || lowerMessage.includes('streaming')) {
+        return "Event Streaming (like Kafka) stores events in persistent, replayable logs. Unlike simple pub/sub where messages disappear after delivery, streaming keeps events so you can replay them anytime. Great for analytics, data pipelines, and recovery!\n\nLesson 2.4 has the details!";
+    }
+
+    if (lowerMessage.includes('difference') || lowerMessage.includes('vs')) {
+        return "Looks like you're comparing concepts! Here are the key differences in EDA:\n\n• Pub/Sub vs Streaming: Pub/Sub is fire-and-forget, Streaming persists events\n• Event Sourcing vs CQRS: Event Sourcing stores events, CQRS separates reads/writes\n• Choreography vs Orchestration: Choreography is decentralized, Orchestration is centralized\n\nWhich specific comparison interests you?";
+    }
+
+    if (lowerMessage.includes('help') || lowerMessage.includes('stuck')) {
+        return "I'm here to help! You can:\n\n1. Ask about specific EDA patterns\n2. Request clarification on lessons\n3. Get examples or use cases\n4. Compare different approaches\n\nTry asking: 'Explain pub/sub pattern' or 'When should I use event sourcing?'";
+    }
+
+    if (lowerMessage.includes('start') || lowerMessage.includes('begin')) {
+        return "Great! Start with Module 1 - Foundations:\n\n1. Lesson 1.1: What is EDA?\n2. Lesson 1.2: Traditional vs Event-Driven\n3. Lesson 1.3: Core Components\n4. Lesson 1.4: Build Your First Event Flow\n5. Lesson 1.5: Quiz\n\nEach lesson is 5-15 minutes. Take breaks between lessons for best ADHD-friendly learning!";
+    }
+
+    // Default response for questions we don't have patterns for
+    return `Great question! For detailed help with "${message}", you can:\n\n1. Check the relevant lesson in the modules above\n2. Review Module 1 for foundations\n3. Module 2 for patterns (Pub/Sub, Event Sourcing, CQRS, etc.)\n4. Message me in the main WhatsApp chat for more detailed explanations!\n\nWhich module are you currently working on?`;
+}
 
 // Expose for debugging
 window.edaApp = {
