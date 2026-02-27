@@ -280,6 +280,84 @@ eventBus.subscribe('user.registered', (user) => {
 
             <p>Next: Build your first event system!</p>
 
+            
+            <div class="eda-diagram">
+                <h4>📊 The Event Flow (Interactive)</h4>
+                <div class="flow-simulator">
+                    <div class="flow-node publisher-node">
+                        <div class="node-icon">📢</div>
+                        <div class="node-label">Publisher</div>
+                        <div class="node-sub">User Service</div>
+                    </div>
+                    <div class="flow-arrow" id="arrow-1">
+                        <div class="arrow-line"></div>
+                        <div class="arrow-event" id="event-dot">📨</div>
+                        <div class="arrow-label">user.registered</div>
+                    </div>
+                    <div class="flow-node broker-node">
+                        <div class="node-icon">🔀</div>
+                        <div class="node-label">Event Broker</div>
+                        <div class="node-sub">Event Bus</div>
+                    </div>
+                    <div class="flow-arrows-split">
+                        <div class="split-arrow">
+                            <div class="flow-node subscriber-node">
+                                <div class="node-icon">📧</div>
+                                <div class="node-label">Subscriber 1</div>
+                                <div class="node-sub">Email Service</div>
+                            </div>
+                        </div>
+                        <div class="split-arrow">
+                            <div class="flow-node subscriber-node">
+                                <div class="node-icon">📊</div>
+                                <div class="node-label">Subscriber 2</div>
+                                <div class="node-sub">Analytics</div>
+                            </div>
+                        </div>
+                        <div class="split-arrow">
+                            <div class="flow-node subscriber-node">
+                                <div class="node-icon">👤</div>
+                                <div class="node-label">Subscriber 3</div>
+                                <div class="node-sub">Profile Service</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-simulate" onclick="runSimulation()">▶ Publish Event!</button>
+                <div class="simulation-log" id="sim-log"></div>
+            </div>
+
+            <div class="drag-drop-quiz">
+                <h4>🎯 Match the Concept</h4>
+                <p style="font-size:13px;margin-bottom:12px">Drag each term to its correct definition:</p>
+                <div class="dd-container">
+                    <div class="dd-terms">
+                        <div class="dd-term" draggable="true" data-term="Publisher" ondragstart="dragStart(event)">📢 Publisher</div>
+                        <div class="dd-term" draggable="true" data-term="Subscriber" ondragstart="dragStart(event)">👂 Subscriber</div>
+                        <div class="dd-term" draggable="true" data-term="Event" ondragstart="dragStart(event)">📨 Event</div>
+                        <div class="dd-term" draggable="true" data-term="Broker" ondragstart="dragStart(event)">🔀 Broker</div>
+                    </div>
+                    <div class="dd-definitions">
+                        <div class="dd-def" data-answer="Event" ondragover="dragOver(event)" ondrop="dropTerm(event)">
+                            <div class="dd-placeholder">Drop here</div>
+                            <div class="dd-text">A record of something that happened (immutable, past tense)</div>
+                        </div>
+                        <div class="dd-def" data-answer="Publisher" ondragover="dragOver(event)" ondrop="dropTerm(event)">
+                            <div class="dd-placeholder">Drop here</div>
+                            <div class="dd-text">Announces/emits events when something happens</div>
+                        </div>
+                        <div class="dd-def" data-answer="Subscriber" ondragover="dragOver(event)" ondrop="dropTerm(event)">
+                            <div class="dd-placeholder">Drop here</div>
+                            <div class="dd-text">Listens for specific events and reacts to them</div>
+                        </div>
+                        <div class="dd-def" data-answer="Broker" ondragover="dragOver(event)" ondrop="dropTerm(event)">
+                            <div class="dd-placeholder">Drop here</div>
+                            <div class="dd-text">Middleware that routes events from publishers to subscribers</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="dd-result" style="margin-top:10px;font-weight:bold;"></div>
+            </div>
             <div class="teach-it-back">
                 <h4>🧠 Teach It Back</h4>
                 <p style="font-size:13px;margin-bottom:8px">In your own words, what was the main thing you learned? (No one sees this — writing it locks it in)</p>
@@ -532,6 +610,7 @@ Publisher 3 ──┘                            ├──> Subscriber 2
             <h3>🎯 Key Takeaway</h3>
             <p><strong>Pub/Sub = Topic-based message distribution</strong></p>
             <p>Publishers post to topics. Subscribers listen to topics. Broker handles delivery.</p>
+            <div class="who-uses"><h4>🏢 Who uses Pub/Sub?</h4><div class="company-list"><span class="company">YouTube</span><span class="company">Slack</span><span class="company">Google Cloud</span><span class="company">AWS SNS</span><span class="company">Redis</span></div><p class="company-note">YouTube uses Pub/Sub to instantly notify millions of subscribers when a creator uploads.</p></div>
         `
     },
     '2-2': {
@@ -600,6 +679,7 @@ Publisher 3 ──┘                            ├──> Subscriber 2
 
             <h3>🎯 Key Takeaway</h3>
             <p><strong>Event Sourcing = Store events, not just current state</strong></p>
+            <div class="who-uses"><h4>🏢 Who uses Event Sourcing?</h4><div class="company-list"><span class="company">Every Bank</span><span class="company">Netflix</span><span class="company">GitHub</span><span class="company">LinkedIn</span></div><p class="company-note">Banks store every transaction as an event — that's why they can show your complete history and reconstruct any balance at any point in time.</p></div>
         `
     },
     '2-3': {
@@ -702,6 +782,7 @@ Query → Read DB → Return data
 
             <h3>🎯 Key Takeaway</h3>
             <p><strong>CQRS = Separate read and write models for optimal performance</strong></p>
+            <div class="who-uses"><h4>🏢 Who uses CQRS?</h4><div class="company-list"><span class="company">Amazon</span><span class="company">Microsoft</span><span class="company">Zalando</span><span class="company">Stack Overflow</span></div><p class="company-note">Amazon separates the system that processes orders from the system that displays product pages — each optimized for its job.</p></div>
         `
     },
     '2-4': {
@@ -792,6 +873,7 @@ consumer.poll((events) => {
 
             <h3>🎯 Key Takeaway</h3>
             <p><strong>Event Streaming = Persistent, replayable event logs for real-time data pipelines</strong></p>
+            <div class="who-uses"><h4>🏢 Who uses Event Streaming (Kafka)?</h4><div class="company-list"><span class="company">Netflix</span><span class="company">Uber</span><span class="company">Spotify</span><span class="company">LinkedIn</span><span class="company">Twitter</span></div><p class="company-note">LinkedIn created Kafka. Spotify processes 600,000 events/second with it. Netflix uses it for real-time recommendations.</p></div>
         `
     },
     '2-5': {
@@ -922,6 +1004,7 @@ async placeOrder(orderData) {
             <h3>🎯 Key Takeaway</h3>
             <p><strong>Choreography</strong> = Services react to events (decentralized)</p>
             <p><strong>Orchestration</strong> = Central controller manages workflow (centralized)</p>
+            <div class="who-uses"><h4>🏢 Real examples</h4><div class="company-list"><span class="company">Airbnb (Choreography)</span><span class="company">Netflix (Orchestration)</span><span class="company">Uber (Both)</span></div><p class="company-note">Airbnb uses choreography for booking flows. Netflix uses orchestration for its complex streaming pipeline coordination.</p></div>
         `
     },
     '2-6': {
@@ -1568,4 +1651,82 @@ function checkQuiz(btn, result, feedback) {
         feedbackEl.textContent = feedback;
         feedbackEl.className = `quiz-feedback ${result}`;
     }
+}
+
+// ============================================================
+// EVENT FLOW SIMULATOR
+// ============================================================
+function runSimulation() {
+    const log = document.getElementById('sim-log');
+    if (!log) return;
+    log.innerHTML = '';
+    const steps = [
+        { delay: 0,    text: '📢 Publisher: User registered! Publishing event...', color: '#4d96ff' },
+        { delay: 600,  text: '📨 Event "user.registered" sent to broker', color: '#ffd93d' },
+        { delay: 1200, text: '🔀 Broker routing event to 3 subscribers...', color: '#c77dff' },
+        { delay: 1800, text: '📧 Subscriber 1 (Email Service): Sending welcome email...', color: '#6bcb77' },
+        { delay: 2100, text: '📊 Subscriber 2 (Analytics): Tracking registration event...', color: '#6bcb77' },
+        { delay: 2400, text: '👤 Subscriber 3 (Profile Service): Creating user profile...', color: '#6bcb77' },
+        { delay: 3000, text: '✅ All done! Publisher never waited for any of this.', color: '#ff6b6b' },
+    ];
+    steps.forEach(({ delay, text, color }) => {
+        setTimeout(() => {
+            const line = document.createElement('div');
+            line.style.cssText = `color:${color};padding:4px 0;font-size:13px;animation:fadeIn 0.3s ease`;
+            line.textContent = text;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }, delay);
+    });
+}
+
+// ============================================================
+// DRAG AND DROP QUIZ
+// ============================================================
+let draggingTerm = null;
+
+function dragStart(e) {
+    draggingTerm = e.target.dataset.term;
+    e.target.style.opacity = '0.5';
+    e.dataTransfer.effectAllowed = 'move';
+}
+
+function dragOver(e) {
+    e.preventDefault();
+    e.currentTarget.style.background = '#e8f0ff';
+}
+
+function dropTerm(e) {
+    e.preventDefault();
+    const def = e.currentTarget;
+    def.style.background = '';
+    const placeholder = def.querySelector('.dd-placeholder');
+    const correct = def.dataset.answer;
+    if (draggingTerm === correct) {
+        placeholder.textContent = draggingTerm;
+        placeholder.style.cssText = 'background:#e8f5e9;color:#2e7d32;border-color:#4caf50;font-weight:bold';
+        // Hide the dragged term
+        document.querySelectorAll('.dd-term').forEach(t => {
+            if (t.dataset.term === draggingTerm) t.style.visibility = 'hidden';
+        });
+    } else {
+        placeholder.textContent = '❌ Try again';
+        placeholder.style.background = '#ffebee';
+        setTimeout(() => {
+            placeholder.textContent = 'Drop here';
+            placeholder.style.background = '';
+        }, 1000);
+    }
+    // Check if all matched
+    const allDefs = document.querySelectorAll('.dd-def');
+    const allDone = [...allDefs].every(d => d.querySelector('.dd-placeholder').textContent !== 'Drop here' && !d.querySelector('.dd-placeholder').textContent.includes('❌'));
+    if (allDone) {
+        const result = document.getElementById('dd-result');
+        if (result) {
+            result.textContent = '🎉 Perfect match! You know your EDA components!';
+            result.style.color = '#4caf50';
+        }
+    }
+    draggingTerm = null;
+    document.querySelectorAll('.dd-term').forEach(t => t.style.opacity = '1');
 }

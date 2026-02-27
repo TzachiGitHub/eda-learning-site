@@ -829,3 +829,160 @@ body {
     box-sizing: border-box;
     resize: vertical;
 }
+
+/* Who Uses This */
+.who-uses {
+    background: linear-gradient(135deg, #f0f7ff, #f0fff4);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 16px 0;
+    border: 1px solid #e0e0e0;
+}
+[data-theme="dark"] .who-uses { background: #1a2a1a; border-color: #333; }
+.who-uses h4 { margin-top: 0; color: #333; }
+[data-theme="dark"] .who-uses h4 { color: #e0e0e0; }
+.company-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.company {
+    background: #4d96ff;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+}
+.company-note { font-size: 13px; color: #666; margin-bottom: 0; }
+[data-theme="dark"] .company-note { color: #aaa; }
+
+/* Event Flow Simulator */
+.eda-diagram {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #e0e0e0;
+}
+[data-theme="dark"] .eda-diagram { background: #1a1a2e; border-color: #333; }
+.eda-diagram h4 { margin-top: 0; }
+.flow-simulator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 16px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.flow-node {
+    text-align: center;
+    padding: 12px 16px;
+    border-radius: 10px;
+    min-width: 90px;
+}
+.publisher-node { background: #e3f2fd; border: 2px solid #4d96ff; }
+.broker-node { background: #f3e5f5; border: 2px solid #c77dff; }
+.subscriber-node { background: #e8f5e9; border: 2px solid #6bcb77; }
+.node-icon { font-size: 24px; }
+.node-label { font-weight: bold; font-size: 12px; margin-top: 4px; }
+.node-sub { font-size: 11px; color: #888; }
+.flow-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    min-width: 60px;
+}
+.arrow-line {
+    height: 2px;
+    background: #999;
+    width: 100%;
+    position: relative;
+}
+.arrow-line::after {
+    content: '→';
+    position: absolute;
+    right: -8px;
+    top: -10px;
+    color: #999;
+}
+.arrow-label { font-size: 10px; color: #666; margin-top: 4px; white-space: nowrap; }
+.flow-arrows-split {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.btn-simulate {
+    background: #4d96ff;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 12px;
+    transition: background 0.2s;
+}
+.btn-simulate:hover { background: #2979ff; }
+.simulation-log {
+    margin-top: 12px;
+    max-height: 160px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 13px;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    padding: 10px;
+    border-radius: 8px;
+    min-height: 40px;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+/* Drag and Drop Quiz */
+.drag-drop-quiz {
+    background: #fff9f0;
+    border: 1px solid #ffd93d;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 16px 0;
+}
+[data-theme="dark"] .drag-drop-quiz { background: #2a2010; }
+.drag-drop-quiz h4 { margin-top: 0; color: #e65100; }
+.dd-container { display: flex; gap: 16px; flex-wrap: wrap; }
+.dd-terms { display: flex; flex-direction: column; gap: 8px; min-width: 140px; }
+.dd-term {
+    background: #4d96ff;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: grab;
+    font-weight: bold;
+    font-size: 14px;
+    user-select: none;
+    transition: transform 0.2s;
+}
+.dd-term:hover { transform: scale(1.05); }
+.dd-definitions { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.dd-def {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    background: white;
+    transition: background 0.2s;
+    min-height: 50px;
+}
+[data-theme="dark"] .dd-def { background: #2a2a3e; border-color: #555; }
+.dd-placeholder {
+    min-width: 100px;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #999;
+    text-align: center;
+    background: #f5f5f5;
+}
+.dd-text { font-size: 13px; color: #555; }
+[data-theme="dark"] .dd-text { color: #bbb; }
