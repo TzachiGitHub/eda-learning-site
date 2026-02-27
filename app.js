@@ -2058,3 +2058,90 @@ document.addEventListener('DOMContentLoaded', () => {
         STORAGE_KEYS.totalXP = SUBJECT_STORAGE.eda.totalXP;
     }
 });
+
+// ============================================================
+// EXTEND SUBJECT CONFIG for Docker, GraphQL, React Query
+// ============================================================
+Object.assign(SUBJECT_CONFIG, {
+    docker: {
+        title: '🐳 Docker',
+        subtitle: 'Master Docker with ADHD-Friendly Bite-Sized Lessons',
+        storagePrefix: 'docker_',
+        lessons: () => dockerLessons,
+        flashcards: () => dockerFlashcards,
+        totalLessons: 13,
+        modulePrefix: 'docker-'
+    },
+    graphql: {
+        title: '🔮 GraphQL',
+        subtitle: 'Master GraphQL with ADHD-Friendly Bite-Sized Lessons',
+        storagePrefix: 'graphql_',
+        lessons: () => graphqlLessons,
+        flashcards: () => graphqlFlashcards,
+        totalLessons: 11,
+        modulePrefix: 'graphql-'
+    },
+    rq: {
+        title: '⚡ React Query',
+        subtitle: 'Master React Query (TanStack) with ADHD-Friendly Bite-Sized Lessons',
+        storagePrefix: 'rq_',
+        lessons: () => rqLessons,
+        flashcards: () => rqFlashcards,
+        totalLessons: 10,
+        modulePrefix: 'rq-'
+    }
+});
+
+Object.assign(SUBJECT_STORAGE, {
+    docker: { completedLessons: 'docker_completed_lessons', totalXP: 'docker_total_xp', streak: 'docker_streak', lastVisit: 'docker_last_visit', lastLesson: 'docker_last_lesson' },
+    graphql: { completedLessons: 'graphql_completed_lessons', totalXP: 'graphql_total_xp', streak: 'graphql_streak', lastVisit: 'graphql_last_visit', lastLesson: 'graphql_last_lesson' },
+    rq: { completedLessons: 'rq_completed_lessons', totalXP: 'rq_total_xp', streak: 'rq_streak', lastVisit: 'rq_last_visit', lastLesson: 'rq_last_lesson' }
+});
+
+// Patch switchSubject to handle all content panels
+const _origSwitch = switchSubject;
+switchSubject = function(subject) {
+    currentSubject = subject;
+    localStorage.setItem('eda_subject', subject);
+
+    document.querySelectorAll('.subject-tab').forEach(t => t.classList.remove('active'));
+    const activeTab = document.getElementById('tab-' + subject);
+    if (activeTab) activeTab.classList.add('active');
+
+    // Hide all subject content
+    const allContents = ['redis-content', 'docker-content', 'graphql-content', 'rq-content'];
+    const edaMain = document.querySelector('main.container:not(.subject-content)');
+    if (edaMain) edaMain.style.display = subject === 'eda' ? '' : 'none';
+    allContents.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    const targetContent = document.getElementById(subject + '-content');
+    if (targetContent) targetContent.style.display = '';
+
+    // Update title
+    const config = SUBJECT_CONFIG[subject];
+    if (config) {
+        const titleEl = document.getElementById('site-title');
+        const subtitleEl = document.getElementById('site-subtitle');
+        if (titleEl) titleEl.textContent = config.title;
+        if (subtitleEl) subtitleEl.textContent = config.subtitle;
+    }
+
+    // Update storage keys
+    const store = SUBJECT_STORAGE[subject];
+    if (store) {
+        STORAGE_KEYS.completedLessons = store.completedLessons;
+        STORAGE_KEYS.totalXP = store.totalXP;
+        STORAGE_KEYS.streak = store.streak;
+        STORAGE_KEYS.lastVisit = store.lastVisit;
+    }
+
+    loadProgressForSubject(subject);
+    updateUI();
+    updateTopProgressBar();
+    const xp = parseInt(localStorage.getItem(STORAGE_KEYS.totalXP) || '0');
+    updateXPTitle(xp);
+    showResumeButtonForSubject(subject);
+    window.scrollTo(0, 0);
+};

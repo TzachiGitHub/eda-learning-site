@@ -1038,3 +1038,24 @@ body {
 #redis-content .btn-start:hover { background: linear-gradient(135deg, #b71c1c, #D82C20); }
 #redis-content .xp-badge { background: #D82C20; }
 #redis-content .hook-story { border-left-color: #D82C20; }
+
+/* Docker theme */
+#docker-content .module-header h2 { color: #0db7ed; }
+#docker-content .btn-start { background: linear-gradient(135deg, #0db7ed, #066da5); }
+#docker-content .btn-start:hover { background: linear-gradient(135deg, #066da5, #0db7ed); }
+#docker-content .xp-badge { background: #0db7ed; }
+#docker-content .hook-story { border-left-color: #0db7ed; }
+
+/* GraphQL theme */
+#graphql-content .module-header h2 { color: #e535ab; }
+#graphql-content .btn-start { background: linear-gradient(135deg, #e535ab, #9b009b); }
+#graphql-content .btn-start:hover { background: linear-gradient(135deg, #9b009b, #e535ab); }
+#graphql-content .xp-badge { background: #e535ab; }
+#graphql-content .hook-story { border-left-color: #e535ab; }
+
+/* React Query theme */
+#rq-content .module-header h2 { color: #ff4154; }
+#rq-content .btn-start { background: linear-gradient(135deg, #ff4154, #c2185b); }
+#rq-content .btn-start:hover { background: linear-gradient(135deg, #c2185b, #ff4154); }
+#rq-content .xp-badge { background: #ff4154; }
+#rq-content .hook-story { border-left-color: #ff4154; }
