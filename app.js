@@ -994,6 +994,9 @@ function updateUI() {
     document.getElementById('lessons-completed').textContent = completed.length;
     document.getElementById('total-xp').textContent = xp;
     document.getElementById('streak-count').textContent = streak;
+    updateTopProgressBar();
+    updateXPTitle(xp);
+    showResumeButton();
 
     // Update module progress
     updateModuleProgress(1, completed.filter(id => id.startsWith('1-')).length, 5);
@@ -1028,8 +1031,16 @@ function checkStreak() {
                 const currentStreak = parseInt(localStorage.getItem(STORAGE_KEYS.streak) || '0');
                 localStorage.setItem(STORAGE_KEYS.streak, (currentStreak + 1).toString());
             } else if (lastDate < yesterdayStr) {
-                // Missed a day
-                localStorage.setItem(STORAGE_KEYS.streak, '1');
+                // Missed a day - show forgiveness notice if only 1 day ago
+                const twoDaysAgo = new Date();
+                twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+                if (new Date(lastVisit) > twoDaysAgo) {
+                    // Only missed yesterday - pause not reset
+                    const notice = document.getElementById('streak-forgiveness-notice');
+                    if (notice) notice.style.display = 'block';
+                } else {
+                    localStorage.setItem(STORAGE_KEYS.streak, '1');
+                }
             }
         }
     } else {
@@ -1107,11 +1118,18 @@ function completeLesson() {
 
     // Update UI
     updateUI();
+    updateTopProgressBar();
+    updateXPTitle(currentXP + lesson.xp);
+    
+    // Track last lesson for resume
+    localStorage.setItem('eda_last_lesson', currentLesson);
+    showResumeButton();
 
-    // Show celebration
-    alert(`🎉 Lesson Complete!\n\nYou earned ${lesson.xp} XP!\nTotal XP: ${currentXP + lesson.xp}`);
+    // Show confetti celebration
+    launchConfetti();
+    showXPPopup(lesson.xp, currentXP + lesson.xp);
 
-    closeLesson();
+    setTimeout(() => closeLesson(), 2500);
 }
 
 // Close modal on background click
@@ -1131,3 +1149,372 @@ window.edaApp = {
         }
     }
 };
+
+// ============================================================
+// PHASE 1: UX IMPROVEMENTS
+// ============================================================
+
+// Top progress bar
+function updateTopProgressBar() {
+    const completed = JSON.parse(localStorage.getItem(STORAGE_KEYS.completedLessons) || '[]');
+    const total = 20;
+    const pct = Math.round((completed.length / total) * 100);
+    const bar = document.getElementById('top-progress-bar');
+    const label = document.getElementById('top-progress-label');
+    if (bar) bar.style.width = pct + '%';
+    if (label) label.textContent = pct + '% Complete';
+}
+
+// XP Title system
+const XP_TITLES = [
+    { min: 0,    emoji: '🌱', title: 'Event Newbie' },
+    { min: 200,  emoji: '👀', title: 'Event Observer' },
+    { min: 500,  emoji: '📢', title: 'Event Publisher' },
+    { min: 1000, emoji: '🏗️', title: 'Event Architect' },
+    { min: 2000, emoji: '🎓', title: 'EDA Master' }
+];
+
+function updateXPTitle(xp) {
+    const level = [...XP_TITLES].reverse().find(l => xp >= l.min) || XP_TITLES[0];
+    const el = document.getElementById('xp-title');
+    const label = document.getElementById('xp-title-label');
+    if (el) el.textContent = level.emoji;
+    if (label) label.textContent = level.title;
+}
+
+// Resume Learning
+function showResumeButton() {
+    const lastLesson = localStorage.getItem('eda_last_lesson');
+    const section = document.getElementById('resume-section');
+    const btn = document.getElementById('resume-btn');
+    if (lastLesson && section && btn) {
+        section.style.display = 'block';
+        const lesson = lessons[lastLesson];
+        if (lesson) btn.textContent = `▶️ Resume: ${lesson.title.substring(0, 30)}...`;
+    }
+}
+
+function resumeLearning() {
+    const lastLesson = localStorage.getItem('eda_last_lesson');
+    if (lastLesson) startLesson(lastLesson);
+}
+
+// Next lesson
+function goToNextLesson() {
+    if (!currentLesson) return;
+    const allLessons = ['1-1','1-2','1-3','1-4','1-5','2-1','2-2','2-3','2-4','2-5','2-6','3-1','3-2','3-3','3-4','3-5','4-1','4-2','4-3','4-4'];
+    const idx = allLessons.indexOf(currentLesson);
+    if (idx >= 0 && idx < allLessons.length - 1) {
+        closeLesson();
+        setTimeout(() => startLesson(allLessons[idx + 1]), 300);
+    }
+}
+
+// Show Next Lesson button after lesson opens
+const origStartLesson = startLesson;
+// Patch: show Next Lesson btn
+document.addEventListener('DOMContentLoaded', () => {
+    // Show next lesson button logic is handled in startLesson
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        const modal = document.getElementById('lesson-modal');
+        if (e.key === 'Escape' && modal.classList.contains('active')) closeLesson();
+        if ((e.key === ' ' || e.key === 'Enter') && !modal.classList.contains('active')) {
+            e.preventDefault();
+            resumeLearning();
+        }
+    });
+});
+
+// Dark Mode
+function toggleDarkMode() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    localStorage.setItem('eda_dark_mode', isDark ? 'light' : 'dark');
+    document.getElementById('dark-mode-toggle').textContent = isDark ? '🌙' : '☀️';
+}
+
+// Font Size
+function changeFontSize(delta) {
+    const current = parseFloat(localStorage.getItem('eda_font_size') || '16');
+    const next = Math.max(12, Math.min(22, current + delta));
+    document.documentElement.style.fontSize = next + 'px';
+    localStorage.setItem('eda_font_size', next);
+}
+
+// Focus Mode
+function toggleFocusMode() {
+    const nav = document.getElementById('module-nav');
+    const header = document.getElementById('main-header');
+    const btn = document.getElementById('focus-mode-btn');
+    const isFocus = nav.classList.toggle('focus-hidden');
+    header.classList.toggle('focus-dimmed', isFocus);
+    btn.textContent = isFocus ? '👁️' : '🎯';
+}
+
+// Share Progress
+function shareProgress() {
+    const xp = parseInt(localStorage.getItem(STORAGE_KEYS.totalXP) || '0');
+    const completed = JSON.parse(localStorage.getItem(STORAGE_KEYS.completedLessons) || '[]');
+    const level = [...XP_TITLES].reverse().find(l => xp >= l.min) || XP_TITLES[0];
+    const text = `I'm a ${level.title} ${level.emoji} | ${xp} XP | ${completed.length}/20 lessons complete on EDA Learning! 🚀\nhttps://tzachigithub.github.io/eda-learning-site/`;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text);
+        showToast('Progress copied to clipboard! 📋');
+    } else {
+        alert(text);
+    }
+}
+
+// ============================================================
+// PHASE 4: GAMIFICATION
+// ============================================================
+
+// Confetti
+function launchConfetti() {
+    const container = document.getElementById('confetti-container');
+    if (!container) return;
+    const colors = ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c77dff'];
+    for (let i = 0; i < 50; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'confetti-dot';
+        dot.style.cssText = `
+            position:fixed;
+            width:${6+Math.random()*8}px;
+            height:${6+Math.random()*8}px;
+            border-radius:50%;
+            background:${colors[Math.floor(Math.random()*colors.length)]};
+            left:${Math.random()*100}vw;
+            top:-10px;
+            pointer-events:none;
+            z-index:9999;
+            animation: confettiFall ${1+Math.random()*2}s ease-in forwards;
+            animation-delay:${Math.random()*0.5}s;
+        `;
+        container.appendChild(dot);
+    }
+    setTimeout(() => { container.innerHTML = ''; }, 3500);
+}
+
+// XP Popup
+function showXPPopup(earned, total) {
+    const popup = document.createElement('div');
+    popup.style.cssText = `
+        position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+        background:#1a1a2e; color:#ffd93d; padding:24px 40px;
+        border-radius:16px; font-size:24px; font-weight:bold;
+        z-index:10000; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.4);
+        animation: popIn 0.3s ease;
+    `;
+    popup.innerHTML = `🎉 Lesson Complete!<br><span style="font-size:36px">+${earned} XP</span><br><small style="font-size:14px;opacity:0.8">Total: ${total} XP</small>`;
+    document.body.appendChild(popup);
+    setTimeout(() => popup.remove(), 2400);
+}
+
+// Toast notification
+function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+        background:#333; color:#fff; padding:12px 24px; border-radius:8px;
+        z-index:10000; font-size:14px; animation: popIn 0.3s ease;
+    `;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+}
+
+// Daily Challenge
+const DAILY_CHALLENGES = [
+    { q: "What does EDA stand for?", a: "Event-Driven Architecture", hint: "Think: what kind of 'architecture' reacts to things happening?" },
+    { q: "In EDA, what is a 'Publisher'?", a: "A component that emits/announces events", hint: "Think: who rings the doorbell?" },
+    { q: "What pattern stores every state change as an event?", a: "Event Sourcing", hint: "Think: your bank stores every transaction, not just the balance" },
+    { q: "What does CQRS stand for?", a: "Command Query Responsibility Segregation", hint: "It separates reading from writing" },
+    { q: "In Pub/Sub, what does a Subscriber do?", a: "Listens for and reacts to events", hint: "Think: YouTube notification bell" },
+    { q: "What's the difference between Choreography and Orchestration?", a: "Choreography = services react independently; Orchestration = central controller directs flow", hint: "Flash mob vs conductor" },
+    { q: "Why are events named in past tense? (e.g. user.registered)", a: "Because events describe something that already happened", hint: "Events are facts, not commands" },
+];
+
+function openDailyChallenge() {
+    const today = new Date().toDateString();
+    const lastChallenge = localStorage.getItem('eda_last_challenge');
+    if (lastChallenge === today) {
+        showToast('You already did today\'s challenge! Come back tomorrow 🌟');
+        return;
+    }
+    const idx = Math.floor(Date.now() / 86400000) % DAILY_CHALLENGES.length;
+    const challenge = DAILY_CHALLENGES[idx];
+    const modal = document.getElementById('challenge-modal');
+    document.getElementById('challenge-content').innerHTML = `
+        <div style="padding:16px">
+            <p style="font-size:18px;font-weight:bold;margin-bottom:16px">❓ ${challenge.q}</p>
+            <div id="challenge-hint" style="display:none;background:#fff3cd;padding:12px;border-radius:8px;margin-bottom:12px">
+                💡 Hint: ${challenge.hint}
+            </div>
+            <textarea id="challenge-answer" placeholder="Type your answer..." style="width:100%;min-height:80px;padding:12px;border-radius:8px;border:1px solid #ddd;font-size:14px;box-sizing:border-box"></textarea>
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+                <button onclick="document.getElementById('challenge-hint').style.display='block'" 
+                    style="padding:8px 16px;background:#f0f0f0;border:none;border-radius:6px;cursor:pointer">💡 Show Hint</button>
+                <button onclick="revealChallengeAnswer('${challenge.a.replace(/'/g, "\\'")}')"
+                    style="padding:8px 16px;background:#4d96ff;color:white;border:none;border-radius:6px;cursor:pointer">✅ Reveal Answer (+25 XP)</button>
+            </div>
+        </div>
+    `;
+    modal.classList.add('active');
+}
+
+function revealChallengeAnswer(answer) {
+    const content = document.getElementById('challenge-content');
+    const today = new Date().toDateString();
+    localStorage.setItem('eda_last_challenge', today);
+    const xp = parseInt(localStorage.getItem(STORAGE_KEYS.totalXP) || '0') + 25;
+    localStorage.setItem(STORAGE_KEYS.totalXP, xp);
+    updateUI();
+    content.innerHTML = `
+        <div style="padding:16px;text-align:center">
+            <div style="font-size:48px">✅</div>
+            <p style="font-size:16px;font-weight:bold;margin:12px 0">Answer:</p>
+            <p style="background:#e8f5e9;padding:12px;border-radius:8px">${answer}</p>
+            <p style="color:#4caf50;font-weight:bold;margin-top:12px">+25 XP earned! Come back tomorrow for another challenge 🌟</p>
+        </div>
+    `;
+}
+
+function closeDailyChallenge() {
+    document.getElementById('challenge-modal').classList.remove('active');
+}
+
+// ============================================================
+// PHASE 5: FLASHCARDS
+// ============================================================
+
+const FLASHCARDS = [
+    { term: 'Event', def: 'A record of something that happened (immutable, past tense). E.g. "user.registered", "payment.processed"' },
+    { term: 'Publisher (Producer)', def: 'A component that detects significant occurrences and emits events. It does not know who is listening.' },
+    { term: 'Subscriber (Consumer)', def: 'A component that listens for specific event types and reacts when they occur. Independent of the publisher.' },
+    { term: 'Event Broker / Bus', def: 'Middleware that receives events from publishers and routes them to subscribers. E.g. Kafka, RabbitMQ.' },
+    { term: 'Pub/Sub Pattern', def: 'Publishers send events to topics; subscribers receive events from topics. Publishers and subscribers are decoupled.' },
+    { term: 'Event Sourcing', def: 'Store every state change as an event. Reconstruct state by replaying events. Provides complete audit trail.' },
+    { term: 'CQRS', def: 'Command Query Responsibility Segregation — separate read (query) model from write (command) model for independent optimization.' },
+    { term: 'Event Streaming', def: 'Events stored in persistent, replayable logs (e.g. Kafka). Unlike Pub/Sub, events are retained and can be replayed.' },
+    { term: 'Choreography', def: 'Services react to events independently — no central controller. Like a flash mob where everyone knows their part.' },
+    { term: 'Orchestration', def: 'A central controller directs the workflow, calling services in sequence. Like a conductor leading an orchestra.' },
+    { term: 'Dead Letter Queue (DLQ)', def: 'A queue where failed/unprocessable events are sent for later inspection. Prevents data loss on processing errors.' },
+    { term: 'Idempotency', def: 'Processing the same event multiple times produces the same result as processing it once. Essential for reliable event handling.' },
+];
+
+let currentCardIndex = 0;
+let isFlipped = false;
+
+function openFlashcardReview() {
+    currentCardIndex = 0;
+    isFlipped = false;
+    document.getElementById('flashcard-modal').classList.add('active');
+    renderCard();
+}
+
+function closeFlashcards() {
+    document.getElementById('flashcard-modal').classList.remove('active');
+}
+
+function renderCard() {
+    const card = FLASHCARDS[currentCardIndex];
+    document.getElementById('flashcard-front').textContent = card.term;
+    document.getElementById('flashcard-back').textContent = card.def;
+    document.getElementById('flashcard-progress').textContent = `Card ${currentCardIndex + 1} of ${FLASHCARDS.length}`;
+    const fc = document.getElementById('flashcard');
+    fc.classList.remove('flipped');
+    isFlipped = false;
+}
+
+function flipCard() {
+    const fc = document.getElementById('flashcard');
+    isFlipped = !isFlipped;
+    fc.classList.toggle('flipped', isFlipped);
+}
+
+function nextCard() {
+    if (currentCardIndex < FLASHCARDS.length - 1) {
+        currentCardIndex++;
+        renderCard();
+    }
+}
+
+function prevCard() {
+    if (currentCardIndex > 0) {
+        currentCardIndex--;
+        renderCard();
+    }
+}
+
+// ============================================================
+// PHASE 1: POMODORO TIMER
+// ============================================================
+
+let pomodoroInterval = null;
+let pomodoroSeconds = 15 * 60;
+let pomodoroRunning = false;
+
+function togglePomodoro() {
+    const panel = document.getElementById('pomodoro-panel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function startPomodoro() {
+    if (pomodoroRunning) return;
+    pomodoroRunning = true;
+    pomodoroInterval = setInterval(() => {
+        pomodoroSeconds--;
+        updatePomodoroDisplay();
+        if (pomodoroSeconds <= 0) {
+            clearInterval(pomodoroInterval);
+            pomodoroRunning = false;
+            showToast('🍅 Pomodoro complete! Take a 5 min break 🎉');
+            pomodoroSeconds = 15 * 60;
+            updatePomodoroDisplay();
+        }
+    }, 1000);
+}
+
+function pausePomodoro() {
+    clearInterval(pomodoroInterval);
+    pomodoroRunning = false;
+}
+
+function resetPomodoro() {
+    clearInterval(pomodoroInterval);
+    pomodoroRunning = false;
+    pomodoroSeconds = 15 * 60;
+    updatePomodoroDisplay();
+}
+
+function updatePomodoroDisplay() {
+    const m = Math.floor(pomodoroSeconds / 60).toString().padStart(2, '0');
+    const s = (pomodoroSeconds % 60).toString().padStart(2, '0');
+    const el = document.getElementById('pomodoro-display');
+    if (el) el.textContent = `${m}:${s}`;
+}
+
+// ============================================================
+// INIT: Apply saved preferences on load
+// ============================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Apply dark mode
+    const theme = localStorage.getItem('eda_dark_mode');
+    if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        const btn = document.getElementById('dark-mode-toggle');
+        if (btn) btn.textContent = '☀️';
+    }
+    // Apply font size
+    const fontSize = localStorage.getItem('eda_font_size');
+    if (fontSize) document.documentElement.style.fontSize = fontSize + 'px';
+
+    // Update full UI
+    updateTopProgressBar();
+    const xp = parseInt(localStorage.getItem(STORAGE_KEYS.totalXP) || '0');
+    updateXPTitle(xp);
+    showResumeButton();
+});

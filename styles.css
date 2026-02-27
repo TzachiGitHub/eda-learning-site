@@ -476,3 +476,282 @@ body {
         padding: 1rem;
     }
 }
+
+/* ============================================================
+   PHASE 1-6: NEW FEATURE STYLES
+   ============================================================ */
+
+/* Top Progress Bar */
+#top-progress-bar-container {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: rgba(255,255,255,0.2);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+}
+#top-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #ffd93d, #6bcb77);
+    transition: width 0.5s ease;
+    width: 0%;
+}
+#top-progress-label {
+    display: none;
+}
+
+/* Dark Mode */
+[data-theme="dark"] {
+    --bg: #0f0f1a;
+    --surface: #1a1a2e;
+    --text: #e0e0e0;
+    --border: #333;
+}
+[data-theme="dark"] body { background: #0f0f1a; color: #e0e0e0; }
+[data-theme="dark"] .lesson-card { background: #1a1a2e; color: #e0e0e0; border-color: #333; }
+[data-theme="dark"] .module { background: #13131f; }
+[data-theme="dark"] .modal-content { background: #1a1a2e; color: #e0e0e0; }
+[data-theme="dark"] pre, [data-theme="dark"] code { background: #0d0d18; color: #a8ff78; }
+[data-theme="dark"] .header { background: linear-gradient(135deg, #1a1a3e, #2d1b4e); }
+
+/* Header Controls */
+.header-top-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.control-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: white;
+    transition: background 0.2s;
+}
+.control-btn:hover { background: rgba(255,255,255,0.3); }
+
+/* Resume Button */
+.resume-section { margin: 12px 0; }
+.btn-resume {
+    background: #6bcb77;
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+}
+.btn-resume:hover { background: #4caf50; transform: scale(1.03); }
+
+/* Header Actions */
+.header-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+.btn-daily-challenge {
+    background: linear-gradient(135deg, #ffd93d, #ff6b6b);
+    color: #1a1a2e;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    transition: transform 0.2s;
+}
+.btn-daily-challenge:hover { transform: scale(1.05); }
+.btn-flashcards {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+.btn-flashcards:hover { background: rgba(255,255,255,0.3); }
+
+/* Streak Forgiveness */
+.streak-forgiveness {
+    background: rgba(255,213,61,0.2);
+    border: 1px solid #ffd93d;
+    border-radius: 8px;
+    padding: 8px 16px;
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+/* Next Lesson Button */
+.btn-next-lesson {
+    background: linear-gradient(135deg, #4d96ff, #6bcb77);
+    color: white;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.btn-next-lesson:hover { transform: scale(1.05); }
+
+/* Pomodoro Widget */
+.pomodoro-widget {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 500;
+}
+.pomodoro-toggle-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #ff6b6b;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+}
+.pomodoro-toggle-btn:hover { transform: scale(1.1); }
+.pomodoro-panel {
+    position: absolute;
+    bottom: 60px;
+    right: 0;
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    min-width: 180px;
+    text-align: center;
+}
+[data-theme="dark"] .pomodoro-panel { background: #1a1a2e; color: #e0e0e0; }
+.pomodoro-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-weight: bold;
+}
+.pomodoro-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+}
+.pomodoro-display {
+    font-size: 36px;
+    font-weight: bold;
+    color: #ff6b6b;
+    margin: 8px 0;
+    font-family: monospace;
+}
+.pomodoro-controls {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+.btn-sm {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    background: white;
+}
+[data-theme="dark"] .btn-sm { background: #2a2a3e; color: #e0e0e0; border-color: #444; }
+
+/* Flashcard */
+.modal-flashcard .modal-content { max-width: 500px; }
+.flashcard-body { padding: 16px; text-align: center; }
+.flashcard-progress-text { font-size: 13px; color: #888; margin-bottom: 12px; }
+.flashcard-container {
+    perspective: 1000px;
+    cursor: pointer;
+    height: 180px;
+    margin: 0 auto 12px;
+}
+.flashcard {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+    border-radius: 12px;
+}
+.flashcard.flipped { transform: rotateY(180deg); }
+.flashcard-front, .flashcard-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    font-size: 18px;
+    font-weight: bold;
+}
+.flashcard-front { background: linear-gradient(135deg, #4d96ff, #c77dff); color: white; }
+.flashcard-back { background: linear-gradient(135deg, #6bcb77, #4d96ff); color: white; transform: rotateY(180deg); font-size: 14px; font-weight: normal; }
+.flashcard-hint { font-size: 13px; color: #888; margin-bottom: 12px; }
+.flashcard-controls { display: flex; gap: 10px; justify-content: center; }
+
+/* Module Nav */
+.module-nav {
+    position: sticky;
+    top: 20px;
+    float: left;
+    width: 140px;
+    margin-right: 20px;
+}
+.module-nav-inner {
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+[data-theme="dark"] .module-nav-inner { background: #1a1a2e; }
+.module-nav-title { font-weight: bold; font-size: 12px; text-transform: uppercase; color: #888; margin-bottom: 8px; }
+.module-nav a { display: block; padding: 6px 0; font-size: 13px; color: #4d96ff; text-decoration: none; }
+.module-nav a:hover { text-decoration: underline; }
+.module-nav.focus-hidden { display: none; }
+.header.focus-dimmed { opacity: 0.5; transition: opacity 0.3s; }
+
+/* Confetti animation */
+@keyframes confettiFall {
+    0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* Pop animation */
+@keyframes popIn {
+    0% { transform: translate(-50%,-50%) scale(0.5); opacity: 0; }
+    70% { transform: translate(-50%,-50%) scale(1.1); }
+    100% { transform: translate(-50%,-50%) scale(1); opacity: 1; }
+}
+
+/* Challenge Modal */
+.modal-challenge .modal-content { max-width: 500px; }
+
+/* Mobile */
+@media (max-width: 600px) {
+    .module-nav { display: none; }
+    .header-actions { flex-direction: column; align-items: center; }
+    .flashcard-container { height: 220px; }
+}

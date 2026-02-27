@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,9 +8,29 @@
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
+    <!-- Top Progress Bar (Phase 1.2) -->
+    <div id="top-progress-bar-container">
+        <div id="top-progress-bar"></div>
+        <span id="top-progress-label">0% Complete</span>
+    </div>
+
     <!-- Header with Progress -->
-    <header class="header">
+    <header class="header" id="main-header">
         <div class="container">
+            <div class="header-top-controls">
+                <!-- Font Size Controls (Phase 6.2) -->
+                <div class="font-controls">
+                    <button class="control-btn" onclick="changeFontSize(-1)" title="Decrease font size">A-</button>
+                    <button class="control-btn" onclick="changeFontSize(1)" title="Increase font size">A+</button>
+                </div>
+                <!-- Dark Mode Toggle (Phase 1.5) -->
+                <button class="control-btn" id="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">🌙</button>
+                <!-- Focus Mode (Phase 6.1) -->
+                <button class="control-btn" id="focus-mode-btn" onclick="toggleFocusMode()" title="Focus mode">🎯</button>
+                <!-- Share Progress (Phase 6.4) -->
+                <button class="control-btn" onclick="shareProgress()" title="Share progress">📤</button>
+            </div>
+
             <h1>🎯 Event-Driven Architecture</h1>
             <p class="tagline">Master EDA with ADHD-Friendly Bite-Sized Lessons</p>
 
@@ -27,15 +47,54 @@
                     <span class="stat-number" id="streak-count">0</span>
                     <span class="stat-label">Day Streak</span>
                 </div>
+                <!-- XP Title (Phase 4.1) -->
+                <div class="stat" id="xp-title-stat">
+                    <span class="stat-number" id="xp-title">🌱</span>
+                    <span class="stat-label" id="xp-title-label">Event Newbie</span>
+                </div>
+            </div>
+
+            <!-- Streak Forgiveness notice (Phase 4.2) -->
+            <div id="streak-forgiveness-notice" style="display:none;" class="streak-forgiveness">
+                ⏸️ Streak paused (not reset!) — come back today to continue
+            </div>
+
+            <!-- Resume Learning Button (Phase 1.1) -->
+            <div id="resume-section" style="display:none;" class="resume-section">
+                <button class="btn-resume" id="resume-btn" onclick="resumeLearning()">
+                    ▶️ Resume Learning
+                </button>
+            </div>
+
+            <!-- Daily Challenge Button (Phase 4.4) -->
+            <div class="header-actions">
+                <button class="btn-daily-challenge" onclick="openDailyChallenge()">
+                    ⚡ Daily Challenge (+25 XP)
+                </button>
+                <button class="btn-flashcards" onclick="openFlashcardReview()">
+                    🃏 Flashcard Review
+                </button>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="container">
+    <main class="container" id="main-content">
 
+        <!-- Module Sidebar for focus mode -->
+        <nav class="module-nav" id="module-nav">
+            <div class="module-nav-inner">
+                <p class="module-nav-title">Modules</p>
+                <a href="#module-1">📚 Foundations</a>
+                <a href="#module-2">🔧 Patterns</a>
+                <a href="#module-3">💻 Build</a>
+                <a href="#module-4">🚀 Production</a>
+            </div>
+        </nav>
+
+        <div id="lessons-area">
         <!-- Module 1: Foundations -->
-        <section class="module">
+        <section class="module" id="module-1">
             <div class="module-header">
                 <h2>📚 Module 1: Foundations</h2>
                 <span class="module-progress" id="module-1-progress">0/5 Complete</span>
@@ -43,70 +102,70 @@
 
             <div class="lessons">
                 <!-- Lesson 1.1 -->
-                <div class="lesson-card" data-lesson="1-1">
+                <div class="lesson-card" data-lesson="1-1" data-time="5">
                     <div class="lesson-header">
                         <h3>1.1 What is Event-Driven Architecture?</h3>
                         <span class="xp-badge">+50 XP</span>
                     </div>
                     <p class="lesson-description">Learn the core concept of EDA and why it's revolutionary</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 5 min</span>
+                        <span class="duration">⏱️ ~5 min</span>
                         <span class="difficulty easy">Easy</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('1-1')">Start Lesson</button>
                 </div>
 
                 <!-- Lesson 1.2 -->
-                <div class="lesson-card" data-lesson="1-2">
+                <div class="lesson-card" data-lesson="1-2" data-time="7">
                     <div class="lesson-header">
                         <h3>1.2 Traditional vs Event-Driven</h3>
                         <span class="xp-badge">+50 XP</span>
                     </div>
                     <p class="lesson-description">See the difference with real-world examples</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 7 min</span>
+                        <span class="duration">⏱️ ~7 min</span>
                         <span class="difficulty easy">Easy</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('1-2')">Start Lesson</button>
                 </div>
 
                 <!-- Lesson 1.3 -->
-                <div class="lesson-card" data-lesson="1-3">
+                <div class="lesson-card" data-lesson="1-3" data-time="8">
                     <div class="lesson-header">
                         <h3>1.3 Core Components: Events, Publishers, Subscribers</h3>
                         <span class="xp-badge">+75 XP</span>
                     </div>
                     <p class="lesson-description">The three building blocks of every EDA system</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 8 min</span>
+                        <span class="duration">⏱️ ~8 min</span>
                         <span class="difficulty easy">Easy</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('1-3')">Start Lesson</button>
                 </div>
 
                 <!-- Lesson 1.4 -->
-                <div class="lesson-card" data-lesson="1-4">
+                <div class="lesson-card" data-lesson="1-4" data-time="10">
                     <div class="lesson-header">
                         <h3>1.4 Your First Event Flow</h3>
                         <span class="xp-badge">+100 XP</span>
                     </div>
                     <p class="lesson-description">Interactive: Build a simple notification system</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 10 min</span>
+                        <span class="duration">⏱️ ~10 min</span>
                         <span class="difficulty medium">Medium</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('1-4')">Start Lesson</button>
                 </div>
 
                 <!-- Lesson 1.5 -->
-                <div class="lesson-card" data-lesson="1-5">
+                <div class="lesson-card" data-lesson="1-5" data-time="5">
                     <div class="lesson-header">
                         <h3>1.5 Quiz: Foundations Check</h3>
                         <span class="xp-badge">+150 XP</span>
                     </div>
                     <p class="lesson-description">Test your understanding (5 questions)</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 5 min</span>
+                        <span class="duration">⏱️ ~5 min</span>
                         <span class="difficulty easy">Easy</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('1-5')">Take Quiz</button>
@@ -115,7 +174,7 @@
         </section>
 
         <!-- Module 2: Patterns -->
-        <section class="module">
+        <section class="module" id="module-2">
             <div class="module-header">
                 <h2>🔧 Module 2: EDA Patterns</h2>
                 <span class="module-progress" id="module-2-progress">0/6 Complete</span>
@@ -123,84 +182,84 @@
 
             <div class="lessons">
                 <!-- Lesson 2.1 -->
-                <div class="lesson-card" data-lesson="2-1">
+                <div class="lesson-card" data-lesson="2-1" data-time="8">
                     <div class="lesson-header">
                         <h3>2.1 Pub/Sub Pattern</h3>
                         <span class="xp-badge">+100 XP</span>
                     </div>
                     <p class="lesson-description">The most common EDA pattern explained</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 8 min</span>
+                        <span class="duration">⏱️ ~8 min</span>
                         <span class="difficulty medium">Medium</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('2-1')">Start Lesson</button>
                 </div>
 
                 <!-- Lesson 2.2 -->
-                <div class="lesson-card" data-lesson="2-2">
+                <div class="lesson-card" data-lesson="2-2" data-time="10">
                     <div class="lesson-header">
                         <h3>2.2 Event Sourcing</h3>
                         <span class="xp-badge">+100 XP</span>
                     </div>
                     <p class="lesson-description">Store events as the source of truth</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 10 min</span>
+                        <span class="duration">⏱️ ~10 min</span>
                         <span class="difficulty medium">Medium</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('2-2')">Start Lesson</button>
                 </div>
 
                 <!-- Lesson 2.3 -->
-                <div class="lesson-card" data-lesson="2-3">
+                <div class="lesson-card" data-lesson="2-3" data-time="12">
                     <div class="lesson-header">
                         <h3>2.3 CQRS (Command Query Responsibility Segregation)</h3>
                         <span class="xp-badge">+125 XP</span>
                     </div>
                     <p class="lesson-description">Separate reads and writes for better performance</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 12 min</span>
+                        <span class="duration">⏱️ ~12 min</span>
                         <span class="difficulty hard">Hard</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('2-3')">Start Lesson</button>
                 </div>
 
                 <!-- Lesson 2.4 -->
-                <div class="lesson-card" data-lesson="2-4">
+                <div class="lesson-card" data-lesson="2-4" data-time="10">
                     <div class="lesson-header">
                         <h3>2.4 Event Streaming</h3>
                         <span class="xp-badge">+100 XP</span>
                     </div>
                     <p class="lesson-description">Real-time data pipelines with Kafka</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 10 min</span>
+                        <span class="duration">⏱️ ~10 min</span>
                         <span class="difficulty medium">Medium</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('2-4')">Start Lesson</button>
                 </div>
 
                 <!-- Lesson 2.5 -->
-                <div class="lesson-card" data-lesson="2-5">
+                <div class="lesson-card" data-lesson="2-5" data-time="9">
                     <div class="lesson-header">
                         <h3>2.5 Choreography vs Orchestration</h3>
                         <span class="xp-badge">+100 XP</span>
                     </div>
                     <p class="lesson-description">Two ways to coordinate events</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 9 min</span>
+                        <span class="duration">⏱️ ~9 min</span>
                         <span class="difficulty medium">Medium</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('2-5')">Start Lesson</button>
                 </div>
 
                 <!-- Lesson 2.6 -->
-                <div class="lesson-card" data-lesson="2-6">
+                <div class="lesson-card" data-lesson="2-6" data-time="5">
                     <div class="lesson-header">
                         <h3>2.6 Quiz: Pattern Recognition</h3>
                         <span class="xp-badge">+150 XP</span>
                     </div>
                     <p class="lesson-description">Match patterns to use cases</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 5 min</span>
+                        <span class="duration">⏱️ ~5 min</span>
                         <span class="difficulty medium">Medium</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('2-6')">Take Quiz</button>
@@ -209,78 +268,73 @@
         </section>
 
         <!-- Module 3: Hands-On Implementation -->
-        <section class="module">
+        <section class="module" id="module-3">
             <div class="module-header">
                 <h2>💻 Module 3: Build Real Systems</h2>
                 <span class="module-progress" id="module-3-progress">0/5 Complete</span>
             </div>
 
             <div class="lessons">
-                <!-- Lesson 3.1 -->
-                <div class="lesson-card" data-lesson="3-1">
+                <div class="lesson-card" data-lesson="3-1" data-time="10">
                     <div class="lesson-header">
                         <h3>3.1 Project Setup: Node.js Event System</h3>
                         <span class="xp-badge">+100 XP</span>
                     </div>
                     <p class="lesson-description">Set up your development environment</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 10 min</span>
+                        <span class="duration">⏱️ ~10 min</span>
                         <span class="difficulty easy">Easy</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('3-1')">Start Lesson</button>
                 </div>
 
-                <!-- Lesson 3.2 -->
-                <div class="lesson-card" data-lesson="3-2">
+                <div class="lesson-card" data-lesson="3-2" data-time="15">
                     <div class="lesson-header">
                         <h3>3.2 Build: In-Memory EventEmitter</h3>
                         <span class="xp-badge">+150 XP</span>
                     </div>
                     <p class="lesson-description">Code your first event system from scratch</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 15 min</span>
+                        <span class="duration">⏱️ ~15 min</span>
                         <span class="difficulty medium">Medium</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('3-2')">Start Lesson</button>
                 </div>
 
-                <!-- Lesson 3.3 -->
-                <div class="lesson-card" data-lesson="3-3">
+                <div class="lesson-card" data-lesson="3-3" data-time="20">
                     <div class="lesson-header">
                         <h3>3.3 Build: Redis Pub/Sub System</h3>
                         <span class="xp-badge">+200 XP</span>
                     </div>
                     <p class="lesson-description">Scale beyond a single process with Redis</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 20 min</span>
+                        <span class="duration">⏱️ ~20 min</span>
                         <span class="difficulty hard">Hard</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('3-3')">Start Lesson</button>
                 </div>
 
-                <!-- Lesson 3.4 -->
-                <div class="lesson-card" data-lesson="3-4">
+                <div class="lesson-card" data-lesson="3-4" data-time="25">
                     <div class="lesson-header">
                         <h3>3.4 Build: Event Sourcing with Event Store</h3>
                         <span class="xp-badge">+200 XP</span>
                     </div>
                     <p class="lesson-description">Implement event sourcing pattern</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 25 min</span>
+                        <span class="duration">⏱️ ~25 min</span>
                         <span class="difficulty hard">Hard</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('3-4')">Start Lesson</button>
                 </div>
 
-                <!-- Lesson 3.5 -->
-                <div class="lesson-card" data-lesson="3-5">
+                <div class="lesson-card" data-lesson="3-5" data-time="45">
                     <div class="lesson-header">
                         <h3>3.5 Final Project: Complete Notification System</h3>
                         <span class="xp-badge">+300 XP</span>
                     </div>
                     <p class="lesson-description">Build end-to-end event-driven application</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 45 min</span>
+                        <span class="duration">⏱️ ~45 min</span>
                         <span class="difficulty hard">Hard</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('3-5')">Start Project</button>
@@ -289,64 +343,60 @@
         </section>
 
         <!-- Module 4: Production Ready -->
-        <section class="module">
+        <section class="module" id="module-4">
             <div class="module-header">
                 <h2>🚀 Module 4: Production Readiness</h2>
                 <span class="module-progress" id="module-4-progress">0/4 Complete</span>
             </div>
 
             <div class="lessons">
-                <!-- Lesson 4.1 -->
-                <div class="lesson-card" data-lesson="4-1">
+                <div class="lesson-card" data-lesson="4-1" data-time="12">
                     <div class="lesson-header">
                         <h3>4.1 Error Handling & Dead Letter Queues</h3>
                         <span class="xp-badge">+125 XP</span>
                     </div>
                     <p class="lesson-description">Handle failures gracefully</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 12 min</span>
+                        <span class="duration">⏱️ ~12 min</span>
                         <span class="difficulty medium">Medium</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('4-1')">Start Lesson</button>
                 </div>
 
-                <!-- Lesson 4.2 -->
-                <div class="lesson-card" data-lesson="4-2">
+                <div class="lesson-card" data-lesson="4-2" data-time="12">
                     <div class="lesson-header">
                         <h3>4.2 Monitoring & Observability</h3>
                         <span class="xp-badge">+125 XP</span>
                     </div>
                     <p class="lesson-description">Track events in production</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 12 min</span>
+                        <span class="duration">⏱️ ~12 min</span>
                         <span class="difficulty medium">Medium</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('4-2')">Start Lesson</button>
                 </div>
 
-                <!-- Lesson 4.3 -->
-                <div class="lesson-card" data-lesson="4-3">
+                <div class="lesson-card" data-lesson="4-3" data-time="15">
                     <div class="lesson-header">
                         <h3>4.3 Scaling Event-Driven Systems</h3>
                         <span class="xp-badge">+150 XP</span>
                     </div>
                     <p class="lesson-description">Handle millions of events per second</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 15 min</span>
+                        <span class="duration">⏱️ ~15 min</span>
                         <span class="difficulty hard">Hard</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('4-3')">Start Lesson</button>
                 </div>
 
-                <!-- Lesson 4.4 -->
-                <div class="lesson-card" data-lesson="4-4">
+                <div class="lesson-card" data-lesson="4-4" data-time="20">
                     <div class="lesson-header">
                         <h3>4.4 Final Assessment</h3>
                         <span class="xp-badge">+250 XP</span>
                     </div>
                     <p class="lesson-description">Complete course exam (15 questions)</p>
                     <div class="lesson-meta">
-                        <span class="duration">⏱️ 20 min</span>
+                        <span class="duration">⏱️ ~20 min</span>
                         <span class="difficulty hard">Hard</span>
                     </div>
                     <button class="btn-start" onclick="startLesson('4-4')">Take Assessment</button>
@@ -376,6 +426,7 @@
                 </a>
             </div>
         </section>
+        </div><!-- /lessons-area -->
     </main>
 
     <!-- Lesson Modal -->
@@ -383,17 +434,80 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="lesson-title">Lesson Title</h2>
-                <button class="btn-close" onclick="closeLesson()">&times;</button>
+                <button class="btn-close" onclick="closeLesson()" title="Close (Esc)">&times;</button>
             </div>
             <div class="modal-body" id="lesson-content">
-                <!-- Lesson content will be loaded here -->
+                <!-- Lesson content loaded here -->
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeLesson()">Close</button>
-                <button class="btn-primary" id="btn-complete" onclick="completeLesson()">Mark Complete & Earn XP</button>
+                <!-- Next Lesson button (Phase 1.6) - prominent -->
+                <button class="btn-next-lesson" id="btn-next-lesson" onclick="goToNextLesson()" style="display:none;">
+                    Next Lesson →
+                </button>
+                <button class="btn-complete" id="btn-complete" onclick="completeLesson()">Mark Complete & Earn XP</button>
             </div>
         </div>
     </div>
+
+    <!-- Flashcard Review Modal (Phase 5.3) -->
+    <div class="modal" id="flashcard-modal">
+        <div class="modal-content modal-flashcard">
+            <div class="modal-header">
+                <h2>🃏 Flashcard Review</h2>
+                <button class="btn-close" onclick="closeFlashcards()">&times;</button>
+            </div>
+            <div class="modal-body flashcard-body">
+                <div class="flashcard-progress-text" id="flashcard-progress">Card 1 of 12</div>
+                <div class="flashcard-container" id="flashcard-container" onclick="flipCard()">
+                    <div class="flashcard" id="flashcard">
+                        <div class="flashcard-front" id="flashcard-front">Term</div>
+                        <div class="flashcard-back" id="flashcard-back">Definition</div>
+                    </div>
+                </div>
+                <p class="flashcard-hint">Click card to flip</p>
+                <div class="flashcard-controls">
+                    <button class="btn-secondary" onclick="prevCard()">← Previous</button>
+                    <button class="btn-primary" onclick="nextCard()">Next →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Challenge Modal (Phase 4.4) -->
+    <div class="modal" id="challenge-modal">
+        <div class="modal-content modal-challenge">
+            <div class="modal-header">
+                <h2>⚡ Daily Challenge</h2>
+                <button class="btn-close" onclick="closeDailyChallenge()">&times;</button>
+            </div>
+            <div class="modal-body" id="challenge-content">
+                <!-- Challenge content loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Pomodoro Timer Widget (Phase 1.4) -->
+    <div id="pomodoro-widget" class="pomodoro-widget">
+        <button class="pomodoro-toggle-btn" onclick="togglePomodoro()" id="pomodoro-btn" title="Pomodoro Timer">
+            🍅
+        </button>
+        <div class="pomodoro-panel" id="pomodoro-panel" style="display:none;">
+            <div class="pomodoro-header">
+                <span>🍅 Focus Timer</span>
+                <button class="pomodoro-close" onclick="togglePomodoro()">×</button>
+            </div>
+            <div class="pomodoro-display" id="pomodoro-display">15:00</div>
+            <div class="pomodoro-controls">
+                <button class="btn-sm" onclick="startPomodoro()">▶ Start</button>
+                <button class="btn-sm" onclick="pausePomodoro()">⏸ Pause</button>
+                <button class="btn-sm" onclick="resetPomodoro()">↺ Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confetti Container (Phase 4.3) -->
+    <div id="confetti-container"></div>
 
     <script src="app.js"></script>
 </body>
