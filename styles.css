@@ -1051,3 +1051,22 @@ button { -webkit-tap-highlight-color: transparent; }
     .stat-pill-label { font-size: 10px; }
     .header-title { font-size: 16px; }
 }
+
+/* Kubernetes, PostgreSQL, TypeScript subject colors */
+#kubernetes-content .lesson-card:hover { border-color: #326CE5; }
+#kubernetes-content .btn-start { background: #326CE5; }
+#kubernetes-content .btn-start:hover { background: #2554c7; box-shadow: 0 4px 12px rgba(50,108,229,0.35); }
+#kubernetes-content .module-header h2 { color: #326CE5; }
+#kubernetes-content .xp-badge { background: linear-gradient(135deg, #326CE5, #00b4d8); }
+
+#postgres-content .lesson-card:hover { border-color: #336791; }
+#postgres-content .btn-start { background: #336791; }
+#postgres-content .btn-start:hover { background: #1e3a52; box-shadow: 0 4px 12px rgba(51,103,145,0.35); }
+#postgres-content .module-header h2 { color: #336791; }
+#postgres-content .xp-badge { background: linear-gradient(135deg, #336791, #00b4d8); }
+
+#typescript-content .lesson-card:hover { border-color: #3178C6; }
+#typescript-content .btn-start { background: #3178C6; }
+#typescript-content .btn-start:hover { background: #235fa8; box-shadow: 0 4px 12px rgba(49,120,198,0.35); }
+#typescript-content .module-header h2 { color: #3178C6; }
+#typescript-content .xp-badge { background: linear-gradient(135deg, #3178C6, #7209b7); }

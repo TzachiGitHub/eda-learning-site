@@ -2494,3 +2494,91 @@ window._completeSubjectLesson = function() {
         checkSubjectCompletion();
     }, 100);
 };
+
+// ============================================================
+// NEW SUBJECTS: Kubernetes, PostgreSQL, TypeScript
+// ============================================================
+Object.assign(SUBJECT_CONFIG, {
+    kubernetes: {
+        title: 'Kubernetes',
+        subtitle: 'Container Orchestration at Scale',
+        color: '#326CE5',
+        totalLessons: 13,
+        lessons: () => kubernetesLessons,
+        flashcards: () => kubernetesFlashcards,
+    },
+    postgres: {
+        title: 'PostgreSQL',
+        subtitle: "The World's Most Advanced Open Source Database",
+        color: '#336791',
+        totalLessons: 13,
+        lessons: () => postgresLessons,
+        flashcards: () => postgresFlashcards,
+    },
+    typescript: {
+        title: 'TypeScript',
+        subtitle: 'JavaScript That Scales',
+        color: '#3178C6',
+        totalLessons: 13,
+        lessons: () => typescriptLessons,
+        flashcards: () => typescriptFlashcards,
+    },
+});
+
+Object.assign(SUBJECT_STORAGE, {
+    kubernetes: { completedLessons: 'k8s_completedLessons', totalXP: 'k8s_totalXP', streak: 'k8s_streak', lastVisit: 'k8s_lastVisit' },
+    postgres: { completedLessons: 'pg_completedLessons', totalXP: 'pg_totalXP', streak: 'pg_streak', lastVisit: 'pg_lastVisit' },
+    typescript: { completedLessons: 'ts_completedLessons', totalXP: 'ts_totalXP', streak: 'ts_streak', lastVisit: 'ts_lastVisit' },
+});
+
+// Patch subject list for display toggling
+const ALL_SUBJECTS = ['eda','redis','docker','graphql','rq','kubernetes','postgres','typescript'];
+const _baseSwitch = switchSubject;
+switchSubject = function(subject) {
+    ALL_SUBJECTS.forEach(s => {
+        const el = document.getElementById(s + '-content');
+        if (el) el.style.display = s === subject ? '' : 'none';
+    });
+    // Update active tab
+    document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+    const tab = document.getElementById('tab-' + subject);
+    if (tab) tab.classList.add('active');
+    // Update mobile nav
+    document.querySelectorAll('.mob-nav-item').forEach(b => b.classList.remove('active'));
+    const mob = document.getElementById('mobtab-' + subject);
+    if (mob) mob.classList.add('active');
+
+    currentSubject = subject;
+    updateUI();
+    updateSidebarProgress();
+    buildTodaysPath(subject);
+
+    const config = SUBJECT_CONFIG[subject];
+    if (config) {
+        const titleEl = document.getElementById('site-title');
+        const subEl = document.getElementById('site-subtitle');
+        if (titleEl) titleEl.textContent = config.title;
+        if (subEl) subEl.textContent = config.subtitle || '';
+        document.documentElement.style.setProperty('--accent', config.color || '#4361ee');
+    }
+    const sidebar = document.getElementById('subject-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sidebar?.classList.contains('open')) {
+        sidebar.classList.remove('open');
+        overlay?.classList.remove('active');
+    }
+};
+
+// Patch sidebar progress totals
+const _origSidebarProgress = updateSidebarProgress;
+updateSidebarProgress = function() {
+    const subjects = ['eda','redis','docker','graphql','rq','kubernetes','postgres','typescript'];
+    const totals = { eda: 20, redis: 20, docker: 13, graphql: 11, rq: 10, kubernetes: 13, postgres: 13, typescript: 13 };
+    subjects.forEach(s => {
+        const store = SUBJECT_STORAGE[s];
+        if (!store) return;
+        const completed = JSON.parse(localStorage.getItem(store.completedLessons) || '[]');
+        const el = document.getElementById('nav-progress-' + s);
+        if (el) el.textContent = completed.length + '/' + (totals[s] || '?');
+    });
+};

@@ -50,6 +50,21 @@
                     <span class="sidebar-item-text">React Query</span>
                     <span class="sidebar-item-progress" id="nav-progress-rq">0/10</span>
                 </button>
+                <button class="sidebar-item" id="tab-kubernetes" onclick="switchSubject('kubernetes')">
+                    <span class="sidebar-item-icon">☸️</span>
+                    <span class="sidebar-item-text">Kubernetes</span>
+                    <span class="sidebar-item-progress" id="nav-progress-kubernetes">0/13</span>
+                </button>
+                <button class="sidebar-item" id="tab-postgres" onclick="switchSubject('postgres')">
+                    <span class="sidebar-item-icon">🐘</span>
+                    <span class="sidebar-item-text">PostgreSQL</span>
+                    <span class="sidebar-item-progress" id="nav-progress-postgres">0/13</span>
+                </button>
+                <button class="sidebar-item" id="tab-typescript" onclick="switchSubject('typescript')">
+                    <span class="sidebar-item-icon">🔷</span>
+                    <span class="sidebar-item-text">TypeScript</span>
+                    <span class="sidebar-item-progress" id="nav-progress-typescript">0/13</span>
+                </button>
             </nav>
             <div class="sidebar-settings">
                 <button class="sidebar-setting-btn" id="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">🌙 Dark Mode</button>
@@ -574,6 +589,9 @@
     <script src="docker-lessons.js"></script>
     <script src="graphql-lessons.js"></script>
     <script src="rq-lessons.js"></script>
+    <script src="kubernetes-lessons.js"></script>
+    <script src="postgres-lessons.js"></script>
+    <script src="typescript-lessons.js"></script>
     <script src="app.js"></script>
 
     <!-- Redis Content (hidden by default) -->
@@ -1093,6 +1111,15 @@
         </button>
         <button class="mob-nav-item" id="mobtab-rq" onclick="switchSubject('rq')">
             <span>⚡</span><span>RQ</span>
+        </button>
+        <button class="mob-nav-item" id="mobtab-kubernetes" onclick="switchSubject('kubernetes')">
+            <span>☸️</span><span>K8s</span>
+        </button>
+        <button class="mob-nav-item" id="mobtab-postgres" onclick="switchSubject('postgres')">
+            <span>🐘</span><span>PG</span>
+        </button>
+        <button class="mob-nav-item" id="mobtab-typescript" onclick="switchSubject('typescript')">
+            <span>🔷</span><span>TS</span>
         </button>
     </nav>
         </div><!-- end .main-content -->
