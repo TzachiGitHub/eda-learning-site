@@ -434,14 +434,14 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: \${{ github.actor }}
+          password: \${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push image
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          tags: ghcr.io/\${{ github.repository }}:latest
           cache-from: type=gha     # GitHub Actions cache
           cache-to: type=gha,mode=max</code></pre>
         <div class="teach-it-back"><h4>🧠 Teach It Back</h4><p style="font-size:13px;margin-bottom:8px">What happens automatically when you push to main with this pipeline?</p><textarea placeholder="When I push to main..."></textarea></div>
