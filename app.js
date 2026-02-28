@@ -1845,10 +1845,10 @@ function switchSubject(subject) {
     document.getElementById('tab-' + subject)?.classList.add('active');
 
     // Show/hide content
-    const edaMain = document.querySelector('main.container:not(.subject-content)');
-    const redisMain = document.getElementById('redis-content');
-    if (edaMain) edaMain.style.display = subject === 'eda' ? '' : 'none';
-    if (redisMain) redisMain.style.display = subject === 'redis' ? '' : 'none';
+    ['eda','redis','docker','graphql','rq'].forEach(s => {
+        const el = document.getElementById(s + '-content');
+        if (el) el.style.display = s === subject ? '' : 'none';
+    });
 
     // Update title
     const config = SUBJECT_CONFIG[subject];
@@ -2110,8 +2110,7 @@ switchSubject = function(subject) {
 
     // Hide all subject content
     const allContents = ['redis-content', 'docker-content', 'graphql-content', 'rq-content'];
-    const edaMain = document.querySelector('main.container:not(.subject-content)');
-    if (edaMain) edaMain.style.display = subject === 'eda' ? '' : 'none';
+    // (handled by base switchSubject)
     allContents.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -2302,3 +2301,196 @@ document.addEventListener('DOMContentLoaded', () => {
     buildTodaysPath(currentSubject || 'eda');
     createOverlay(); // pre-create sidebar overlay
 });
+
+// ============================================================
+// REMAINING UI/UX ITEMS
+// ============================================================
+
+// C2.5 — Recommended card highlight (first incomplete in each module)
+function highlightRecommendedCards() {
+    document.querySelectorAll('.recommended-card').forEach(c => c.classList.remove('recommended-card'));
+    const store = SUBJECT_STORAGE[currentSubject];
+    if (!store) return;
+    const completed = JSON.parse(localStorage.getItem(store.completedLessons) || '[]');
+
+    // Find first incomplete card per module section
+    document.querySelectorAll('.module').forEach(module => {
+        const cards = module.querySelectorAll('.lesson-card:not(.completed)');
+        if (cards.length > 0) {
+            cards[0].classList.add('recommended-card');
+        }
+    });
+}
+
+// L3.2 — Streak calendar (last 7 days)
+function buildStreakCalendar() {
+    const container = document.getElementById('streak-calendar');
+    if (!container) return;
+    const visits = JSON.parse(localStorage.getItem('eda_visit_history') || '[]');
+    const today = new Date();
+    container.innerHTML = '';
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toDateString();
+        const active = visits.includes(dateStr);
+        const day = document.createElement('div');
+        day.className = `cal-day ${active ? 'cal-active' : ''}`;
+        day.title = dateStr;
+        day.innerHTML = `<span>${['Su','Mo','Tu','We','Th','Fr','Sa'][d.getDay()]}</span>`;
+        container.appendChild(day);
+    }
+    // Record today
+    if (!visits.includes(today.toDateString())) {
+        visits.push(today.toDateString());
+        if (visits.length > 30) visits.shift();
+        localStorage.setItem('eda_visit_history', JSON.stringify(visits));
+    }
+}
+
+// L3.3 — "You're on a roll!" after 2 consecutive lessons
+let lessonsThisSession = 0;
+const _origXPPopup = showXPPopup;
+showXPPopup = function(earned, total) {
+    _origXPPopup(earned, total);
+    lessonsThisSession++;
+    if (lessonsThisSession === 2) {
+        setTimeout(() => showToast("🔥 You're on a roll! 2 lessons in a row!"), 2600);
+    } else if (lessonsThisSession >= 3) {
+        setTimeout(() => showToast(`⚡ ${lessonsThisSession} lessons in one session! Keep going!`), 2600);
+    }
+};
+
+// L3.4 — "Due for review" badge
+function markReviewDue() {
+    const store = SUBJECT_STORAGE[currentSubject];
+    if (!store) return;
+    const completionTimes = JSON.parse(localStorage.getItem((store.completedLessons || '') + '_times') || '{}');
+    const now = Date.now();
+    const THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
+    Object.entries(completionTimes).forEach(([id, time]) => {
+        if (now - time > THREE_DAYS) {
+            const card = document.querySelector(`[data-lesson="${id}"]`);
+            if (card && !card.querySelector('.review-due-badge')) {
+                const badge = document.createElement('div');
+                badge.className = 'review-due-badge';
+                badge.textContent = '🔔 Review Due';
+                card.appendChild(badge);
+            }
+        }
+    });
+}
+
+// Store completion timestamps
+const _origCompleteForTimestamp = window._completeSubjectLesson;
+window._completeSubjectLesson = function() {
+    const store = SUBJECT_STORAGE[currentSubject];
+    if (store && currentLesson) {
+        const times = JSON.parse(localStorage.getItem((store.completedLessons || '') + '_times') || '{}');
+        times[currentLesson] = Date.now();
+        localStorage.setItem((store.completedLessons || '') + '_times', JSON.stringify(times));
+    }
+    if (_origCompleteForTimestamp) _origCompleteForTimestamp();
+};
+
+// L3.6 — Subject completion celebration
+function checkSubjectCompletion() {
+    const store = SUBJECT_STORAGE[currentSubject];
+    const config = SUBJECT_CONFIG[currentSubject];
+    if (!store || !config) return;
+    const completed = JSON.parse(localStorage.getItem(store.completedLessons) || '[]');
+    if (completed.length >= config.totalLessons) {
+        setTimeout(() => showCompletionCertificate(), 3000);
+    }
+}
+
+function showCompletionCertificate() {
+    const cert = document.createElement('div');
+    cert.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;`;
+    cert.innerHTML = `
+        <div style="background:linear-gradient(135deg,#1a1d2e,#2d2f6b);color:white;border-radius:20px;padding:48px;text-align:center;max-width:480px;border:2px solid #fbbf24;box-shadow:0 24px 64px rgba(0,0,0,0.5)">
+            <div style="font-size:64px;margin-bottom:16px">🎓</div>
+            <h2 style="font-size:28px;font-weight:800;color:#fbbf24;margin-bottom:8px">Course Complete!</h2>
+            <p style="font-size:18px;opacity:0.8;margin-bottom:24px">You've mastered ${SUBJECT_CONFIG[currentSubject]?.title}</p>
+            <p style="font-size:14px;opacity:0.6;margin-bottom:32px">Every lesson completed · All XP earned · You're ready for production</p>
+            <button onclick="this.closest('[style*=inset]').remove()" style="background:#fbbf24;color:#1a1d2e;border:none;padding:14px 32px;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer">Continue Learning 🚀</button>
+        </div>`;
+    document.body.appendChild(cert);
+    launchConfetti();
+}
+
+// L3.7 — First-time onboarding
+function checkFirstTimeOnboarding() {
+    if (localStorage.getItem('eda_onboarded')) return;
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10002;display:flex;align-items:center;justify-content:center;padding:20px;`;
+    overlay.innerHTML = `
+        <div style="background:var(--surface,#fff);border-radius:20px;padding:40px;text-align:center;max-width:460px;box-shadow:0 24px 64px rgba(0,0,0,0.4)">
+            <div style="font-size:52px;margin-bottom:16px">⚡</div>
+            <h2 style="font-size:24px;font-weight:800;margin-bottom:10px;color:var(--text,#1a1d2e)">Welcome to DevLearn!</h2>
+            <p style="font-size:15px;color:var(--text-muted,#666);margin-bottom:24px;line-height:1.6">Bite-sized, ADHD-friendly lessons for developers. Each lesson = 5–15 min. Start anywhere.</p>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;text-align:left">
+                <div style="background:var(--surface-2,#f5f5f5);padding:12px 16px;border-radius:10px;font-size:14px">🎯 <strong>EDA</strong> — Event-Driven Architecture</div>
+                <div style="background:var(--surface-2,#f5f5f5);padding:12px 16px;border-radius:10px;font-size:14px">🔴 <strong>Redis</strong> — In-memory speed layer</div>
+                <div style="background:var(--surface-2,#f5f5f5);padding:12px 16px;border-radius:10px;font-size:14px">🐳 <strong>Docker</strong> — Containers & deployment</div>
+                <div style="background:var(--surface-2,#f5f5f5);padding:12px 16px;border-radius:10px;font-size:14px">🔮 <strong>GraphQL</strong> + <strong>⚡ React Query</strong></div>
+            </div>
+            <button onclick="dismissOnboarding(this)" style="background:#4361ee;color:white;border:none;padding:14px 36px;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer;width:100%">Start Learning →</button>
+        </div>`;
+    document.body.appendChild(overlay);
+}
+
+function dismissOnboarding(btn) {
+    localStorage.setItem('eda_onboarded', '1');
+    btn.closest('[style*=inset]').remove();
+}
+
+// M3.5 — Pulse animation on correct quiz answer
+const _origCheckQuiz = checkQuiz;
+checkQuiz = function(btn, result, feedback) {
+    _origCheckQuiz(btn, result, feedback);
+    if (result === 'correct') {
+        btn.style.animation = 'correctPulse 0.4s ease';
+        setTimeout(() => btn.style.animation = '', 400);
+    }
+};
+
+// P4.6 — Favicon (inline SVG as data URL)
+function setFavicon() {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#4361ee"/><text x="16" y="22" text-anchor="middle" font-size="20" fill="white">⚡</text></svg>`;
+    const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+    link.type = 'image/svg+xml';
+    link.rel = 'icon';
+    link.href = 'data:image/svg+xml,' + encodeURIComponent(svg);
+    document.head.appendChild(link);
+}
+
+// Patch updateUI to run new features
+const ___origUpdateUI = updateUI;
+updateUI = function() {
+    ___origUpdateUI();
+    highlightRecommendedCards();
+    buildStreakCalendar();
+    markReviewDue();
+    updateSidebarProgress();
+};
+
+// Init on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    setFavicon();
+    checkFirstTimeOnboarding();
+    buildStreakCalendar();
+    highlightRecommendedCards();
+    markReviewDue();
+});
+
+// Run after lesson completion
+const ___prevComplete = window._completeSubjectLesson;
+window._completeSubjectLesson = function() {
+    ___prevComplete?.();
+    setTimeout(() => {
+        highlightRecommendedCards();
+        markReviewDue();
+        checkSubjectCompletion();
+    }, 100);
+};

@@ -895,3 +895,159 @@ code {
 .subject-content { display: none; }
 #eda-content { display: block; }
 
+
+/* C2.5 — Recommended card pulse */
+.recommended-card {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 2px var(--accent), 0 4px 16px rgba(67,97,238,0.2) !important;
+    animation: recommendedPulse 2s ease-in-out infinite;
+}
+@keyframes recommendedPulse {
+    0%, 100% { box-shadow: 0 0 0 2px var(--accent), 0 4px 16px rgba(67,97,238,0.15); }
+    50% { box-shadow: 0 0 0 4px var(--accent), 0 8px 24px rgba(67,97,238,0.3); }
+}
+
+/* L3.2 — Streak calendar */
+.streak-calendar-wrap {
+    padding: 12px 28px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+.streak-calendar-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; }
+.streak-calendar { display: flex; gap: 6px; }
+.cal-day {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    flex-direction: column;
+}
+.cal-day.cal-active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+/* L3.4 — Review due badge */
+.review-due-badge {
+    position: absolute;
+    bottom: 54px;
+    left: 12px;
+    background: #f59e0b;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+/* M3.5 — Correct answer pulse */
+@keyframes correctPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
+/* ── Bug Fixes & Visual Polish ──────────────────────── */
+
+/* All subject-content display control */
+.subject-content { display: none; }
+/* EDA shows by default via inline style */
+
+/* Lesson card grid — ensure consistent across all subjects */
+.lessons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+/* Card min-height so short descriptions don't look squished */
+.lesson-card {
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.lesson-card .lesson-header { flex-shrink: 0; }
+.lesson-card p { flex: 1; }
+.lesson-card .lesson-meta { flex-shrink: 0; }
+.lesson-card .btn-start { flex-shrink: 0; margin-top: auto; }
+
+/* Fix header subtitle — was missing in DOM */
+#site-subtitle { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+
+/* Fix module-nav spacing */
+.module-nav { margin-bottom: 20px; }
+
+/* Fix Today's Path container sizing */
+.todays-path { padding: 14px 28px; }
+
+/* Sidebar active item — ensure correct subject color changes dynamically */
+.sidebar-item.active { border-left-color: var(--subject-color, var(--accent)); }
+
+/* Mobile: stack lesson cards to single column, which is already handled */
+
+/* Fix stat-pill layout in header */
+.header-stats { align-items: flex-start; }
+
+/* Progress bar z-index fix so it's above header bg */
+.progress-bar-container { z-index: 110; }
+
+/* Ensure modal is scrollable on short viewports */
+.modal-body { -webkit-overflow-scrolling: touch; }
+
+/* Fix flashcard review button alignment */
+.btn-flashcards { white-space: nowrap; }
+
+/* Fix XP badge from being clipped */
+.xp-badge { flex-shrink: 0; font-size: 11px; }
+
+/* Ensure all buttons are tappable */
+button { -webkit-tap-highlight-color: transparent; }
+
+/* Pomodoro widget — don't overlap mobile bottom nav */
+@media (max-width: 768px) {
+    .pomodoro-widget { bottom: 72px; right: 12px; }
+}
+
+/* Better module section separator */
+.module { border-top: 3px solid var(--surface-2); }
+.module:first-child { border-top: none; }
+
+/* Fix recommended card z-index for pulse shadow */
+.recommended-card { z-index: 1; }
+
+/* EDA subject accent */
+#eda-content .lesson-card:hover { border-color: var(--accent); }
+#eda-content .module-header h2 { color: var(--accent); }
+#eda-content .xp-badge { background: linear-gradient(135deg, var(--accent), #7209b7); }
+
+/* Smooth subject switch */
+.subject-content { animation: fadeSlideUp 0.35s var(--ease) both; }
+
+/* Daily challenge button text fix */
+.btn-daily-challenge { white-space: nowrap; }
+
+/* Tab active state in sidebar — update all tabs */
+#tab-eda.active, #tab-redis.active, #tab-docker.active,
+#tab-graphql.active, #tab-rq.active {
+    color: white;
+    font-weight: 700;
+}
+
+/* Fix header on very narrow viewports */
+@media (max-width: 480px) {
+    .header-identity { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .header-level-badge { flex-direction: row; min-width: auto; padding: 6px 10px; gap: 6px; }
+    .stat-pill-num { font-size: 14px; }
+    .stat-pill-label { font-size: 10px; }
+    .header-title { font-size: 16px; }
+}
