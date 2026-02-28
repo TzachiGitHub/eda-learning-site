@@ -2582,3 +2582,115 @@ updateSidebarProgress = function() {
         if (el) el.textContent = completed.length + '/' + (totals[s] || '?');
     });
 };
+
+// ============================================================
+// CRITICAL FIX: startLesson must look up lesson from current subject
+// ============================================================
+(function() {
+    const _base = startLesson;
+    startLesson = function(lessonId) {
+        currentLesson = lessonId;
+
+        // Get lesson from current subject's config
+        const config = SUBJECT_CONFIG[currentSubject];
+        const subjectLessons = config ? config.lessons() : {};
+        const lesson = subjectLessons[lessonId];
+
+        if (!lesson) {
+            // Fall back to EDA lessons for EDA IDs
+            _base(lessonId);
+            return;
+        }
+
+        // Show modal directly (bypass EDA-only lookup)
+        const modal = document.getElementById('lesson-modal');
+        if (!modal) return;
+
+        document.getElementById('lesson-title').textContent = lesson.title;
+        document.getElementById('lesson-content').innerHTML = lesson.content;
+        modal.classList.add('active');
+
+        // Update breadcrumb
+        if (typeof updateBreadcrumb === 'function') updateBreadcrumb(lessonId);
+
+        // Reset reading progress
+        const fill = document.getElementById('modal-reading-fill');
+        if (fill) fill.style.width = '0%';
+        const body = document.getElementById('modal-body-scroll');
+        if (body) body.scrollTop = 0;
+
+        // Check completion state
+        const store = SUBJECT_STORAGE[currentSubject];
+        const storageKey = store ? store.completedLessons : 'eda_completedLessons';
+        const completed = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        const btn = document.getElementById('btn-complete');
+        if (btn) {
+            if (completed.includes(lessonId)) {
+                btn.textContent = 'Already Completed ✓';
+                btn.disabled = true;
+            } else {
+                btn.textContent = 'Mark Complete & Earn ' + lesson.xp + ' XP';
+                btn.disabled = false;
+            }
+        }
+
+        // Next lesson button
+        const nextBtn = document.getElementById('btn-next-lesson');
+        if (nextBtn) nextBtn.style.display = 'none';
+    };
+})();
+
+// CRITICAL FIX: completeLesson must save to subject-specific storage
+(function() {
+    const _baseComplete = completeLesson;
+    completeLesson = function() {
+        const subject = currentSubject;
+        const store = SUBJECT_STORAGE[subject];
+        const config = SUBJECT_CONFIG[subject];
+
+        // If it's EDA or no config found, use base
+        if (!store || !config || subject === 'eda') {
+            _baseComplete();
+            return;
+        }
+
+        const subjectLessons = config.lessons();
+        const lesson = subjectLessons[currentLesson];
+        if (!lesson) { _baseComplete(); return; }
+
+        const completed = JSON.parse(localStorage.getItem(store.completedLessons) || '[]');
+        if (completed.includes(currentLesson)) {
+            closeLesson();
+            return;
+        }
+
+        completed.push(currentLesson);
+        localStorage.setItem(store.completedLessons, JSON.stringify(completed));
+
+        const currentXP = parseInt(localStorage.getItem(store.totalXP) || '0');
+        const newXP = currentXP + lesson.xp;
+        localStorage.setItem(store.totalXP, newXP.toString());
+        localStorage.setItem(store.lastVisit, Date.now().toString());
+
+        // Mark card as completed
+        const card = document.querySelector('[data-lesson="' + currentLesson + '"]');
+        if (card) {
+            card.classList.add('completed');
+            const btn = card.querySelector('.btn-start');
+            if (btn) btn.textContent = 'Review';
+        }
+
+        // XP popup
+        if (typeof showXPPopup === 'function') showXPPopup(lesson.xp, newXP);
+        if (typeof launchConfetti === 'function') launchConfetti();
+
+        // Update sidebar progress
+        if (typeof updateSidebarProgress === 'function') updateSidebarProgress();
+
+        // Show next lesson button
+        const nextBtn = document.getElementById('btn-next-lesson');
+        if (nextBtn) nextBtn.style.display = 'inline-flex';
+
+        closeLesson();
+    };
+})();
