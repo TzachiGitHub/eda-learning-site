@@ -126,6 +126,14 @@
     </header>
 
     <!-- Main Content -->
+    <!-- TODAY'S PATH (L3.1) -->
+    <div class="todays-path" id="todays-path" style="display:none">
+        <div class="todays-path-inner">
+            <h3 class="todays-path-title">🗺️ Today's Path</h3>
+            <div class="todays-path-lessons" id="todays-path-lessons"></div>
+        </div>
+    </div>
+
     <main class="container subject-content" id="eda-content" style="display:block">
 
         <!-- Module Sidebar for focus mode -->
@@ -544,11 +552,17 @@
                 <span>🍅 Focus Timer</span>
                 <button class="pomodoro-close" onclick="togglePomodoro()">×</button>
             </div>
-            <div class="pomodoro-display" id="pomodoro-display">15:00</div>
+            <div class="pomodoro-ring">
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                    <circle class="pomodoro-ring-track" cx="50" cy="50" r="45"/>
+                    <circle class="pomodoro-ring-fill" id="pomodoro-ring-fill" cx="50" cy="50" r="45" stroke-dasharray="283" stroke-dashoffset="0"/>
+                </svg>
+                <div class="pomodoro-display" id="pomodoro-display">15:00</div>
+            </div>
             <div class="pomodoro-controls">
-                <button class="btn-sm" onclick="startPomodoro()">▶ Start</button>
-                <button class="btn-sm" onclick="pausePomodoro()">⏸ Pause</button>
-                <button class="btn-sm" onclick="resetPomodoro()">↺ Reset</button>
+                <button class="btn-sm" onclick="startPomodoro()">▶</button>
+                <button class="btn-sm" onclick="pausePomodoro()">⏸</button>
+                <button class="btn-sm" onclick="resetPomodoro()">↺</button>
             </div>
         </div>
     </div>
