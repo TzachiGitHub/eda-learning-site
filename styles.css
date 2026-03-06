@@ -2073,3 +2073,73 @@ kbd {
     .on-this-page { display: none; }
     .nav-cards-container { grid-template-columns: 1fr; }
 }
+
+/* === SPRINT 3 === */
+
+/* S3.1 — Lesson card visual states */
+.lesson-card.card-completed {
+    border-left: 4px solid var(--success) !important;
+    opacity: 0.88;
+}
+.lesson-card.card-completed .btn-start {
+    background: var(--success) !important;
+}
+.lesson-card.card-in-progress {
+    border-left: 4px solid var(--accent) !important;
+}
+.lesson-card.card-in-progress::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.4); }
+}
+.lesson-card { position: relative; transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease); }
+.lesson-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+
+/* S3.2 — Module progress ring */
+.module-progress-ring {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+.progress-ring-circle {
+    transition: stroke-dashoffset 0.6s ease;
+}
+
+/* S3.3 — Difficulty badge polish */
+.difficulty {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+.difficulty.easy {
+    background: rgba(16,185,129,0.15);
+    color: #10b981;
+}
+.difficulty.medium {
+    background: rgba(245,158,11,0.15);
+    color: #f59e0b;
+}
+.difficulty.hard {
+    background: rgba(239,68,68,0.15);
+    color: #ef4444;
+}
+
+/* S3.6 — Sidebar active glow */
+.sidebar-item.sidebar-glow {
+    box-shadow: inset 3px 0 0 var(--accent), 0 0 12px rgba(67,97,238,0.2);
+}
