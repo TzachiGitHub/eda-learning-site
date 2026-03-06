@@ -3926,52 +3926,152 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================================
 
 // ============================================================
-// SPRINT 4: GAMIFICATION
+// SPRINT 4: SKILL TREE, CERTIFICATES, TABS, STREAK, REPETITION
 // ============================================================
 
-// --- S4.1: Certificate shown on subject overview ---
-function injectCertificateBanner(subject) {
+// --- S4.1: Skill tree — SVG connectors + lock overlays + current pulse ---
+function renderSkillTree() {
+    document.querySelectorAll('.lessons-grid').forEach(grid => {
+        // Remove old SVG
+        grid.querySelector('.skill-tree-svg')?.remove();
+
+        const cards = [...grid.querySelectorAll('.lesson-card')];
+        if (cards.length < 2) return;
+
+        const store = SUBJECT_STORAGE[currentSubject];
+        const completed = store ? JSON.parse(localStorage.getItem(store.completedLessons) || '[]') : [];
+        let foundCurrent = false;
+
+        // Mark card states: completed, current, locked
+        cards.forEach((card, i) => {
+            const lid = card.getAttribute('data-lesson');
+            card.classList.remove('card-locked', 'card-current');
+            card.querySelector('.lock-overlay')?.remove();
+
+            if (completed.includes(lid)) {
+                // Already completed — card-completed class handled elsewhere
+            } else if (!foundCurrent) {
+                // First uncompleted = current
+                foundCurrent = true;
+                card.classList.add('card-current');
+            } else {
+                // Future = locked (previous not complete)
+                const prevLid = cards[i - 1]?.getAttribute('data-lesson');
+                if (prevLid && !completed.includes(prevLid)) {
+                    card.classList.add('card-locked');
+                    const lock = document.createElement('span');
+                    lock.className = 'lock-overlay';
+                    lock.textContent = '🔒';
+                    card.appendChild(lock);
+                }
+            }
+        });
+
+        // SVG connectors
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.classList.add('skill-tree-svg');
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+        grid.style.position = 'relative';
+        grid.insertBefore(svg, grid.firstChild);
+
+        // Wait for layout to calculate positions
+        requestAnimationFrame(() => {
+            const gridRect = grid.getBoundingClientRect();
+            svg.setAttribute('width', grid.scrollWidth);
+            svg.setAttribute('height', grid.scrollHeight);
+
+            for (let i = 0; i < cards.length - 1; i++) {
+                const a = cards[i];
+                const b = cards[i + 1];
+                const aRect = a.getBoundingClientRect();
+                const bRect = b.getBoundingClientRect();
+
+                const x1 = aRect.left + aRect.width / 2 - gridRect.left;
+                const y1 = aRect.top + aRect.height - gridRect.top;
+                const x2 = bRect.left + bRect.width / 2 - gridRect.left;
+                const y2 = bRect.top - gridRect.top;
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x1);
+                line.setAttribute('y1', y1);
+                line.setAttribute('x2', x2);
+                line.setAttribute('y2', y2);
+
+                const aLid = a.getAttribute('data-lesson');
+                if (completed.includes(aLid)) {
+                    line.classList.add('connector-done');
+                }
+                svg.appendChild(line);
+            }
+        });
+    });
+}
+
+// --- S4.2: Certificate preview card at bottom of subject content ---
+function injectCertificatePreview(subject) {
     const contentEl = document.getElementById(subject + '-content');
     if (!contentEl) return;
-    if (contentEl.querySelector('.cert-banner')) return;
+    // Remove old
+    contentEl.querySelector('.cert-preview-card')?.remove();
+    contentEl.querySelector('.cert-banner')?.remove();
 
     const config = SUBJECT_CONFIG[subject];
     if (!config) return;
-    const completed = JSON.parse(localStorage.getItem(
-        SUBJECT_STORAGE[subject]?.completedLessons || '') || '[]');
-    const total = config.totalLessons || Object.keys(config.lessons()).length;
+    const store = SUBJECT_STORAGE[subject];
+    if (!store) return;
+    const completed = JSON.parse(localStorage.getItem(store.completedLessons) || '[]');
+    const total = config.totalLessons || 20;
     const done = completed.length;
     const allDone = done >= total;
+    const subjectTitle = (config.title || subject).replace(/^[^\w]*/, '');
 
-    const banner = document.createElement('div');
-    banner.className = 'cert-banner' + (allDone ? ' cert-earned' : '');
-    banner.innerHTML = allDone
-        ? `<span class="cert-icon">🏆</span>
-           <div><strong>Certificate Earned!</strong>
-           <p>You've completed ${config.title || subject}. <button onclick="generateCertificate('${subject}')" class="cert-btn">Download Certificate</button></p></div>`
-        : `<span class="cert-icon">🎓</span>
-           <div><strong>Earn the ${config.title || subject} Certificate</strong>
-           <p>Complete all ${total} lessons — ${total - done} remaining — to earn your certificate.</p></div>`;
+    const card = document.createElement('div');
+    card.className = 'cert-preview-card' + (allDone ? ' cert-earned' : '');
 
-    // Insert at top of content area
-    contentEl.insertBefore(banner, contentEl.firstChild);
+    if (allDone) {
+        card.innerHTML = `
+            <div class="cert-preview-title">🏆 ${subjectTitle} Certificate</div>
+            <div class="cert-preview-subtitle">Congratulations! You've completed all ${total} lessons.</div>
+            <div class="cert-mini-preview">
+                <div class="cert-mini-header">DevLearn</div>
+                <div class="cert-mini-name">Certificate of Completion</div>
+                <div class="cert-mini-course">${subjectTitle}</div>
+                <div class="cert-mini-date">${new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'})}</div>
+            </div>
+            <button class="cert-claim-btn" onclick="generateCertificate('${subject}')">🎓 Claim Certificate</button>`;
+    } else {
+        card.innerHTML = `
+            <div class="cert-preview-title">🏆 ${subjectTitle} Certificate</div>
+            <div class="cert-preview-subtitle">Complete all ${total} lessons to earn this certificate — ${total - done} remaining</div>
+            <div class="cert-mini-preview" style="opacity:0.5">
+                <div class="cert-mini-header">DevLearn</div>
+                <div class="cert-mini-name">Certificate of Completion</div>
+                <div class="cert-mini-course">${subjectTitle}</div>
+                <div class="cert-mini-date">Your Name Here</div>
+            </div>`;
+    }
+
+    // Append at end of the lessons area
+    const lessonsArea = contentEl.querySelector('#lessons-area') || contentEl;
+    lessonsArea.appendChild(card);
 }
 
-// --- S4.2: Certificate generator (canvas) ---
+// --- Certificate generator (canvas) ---
 function generateCertificate(subject) {
     const config = SUBJECT_CONFIG[subject];
-    const title = config?.title || subject;
+    const title = (config?.title || subject).replace(/^[^\w]*/, '');
     const canvas = document.createElement('canvas');
     canvas.width = 900; canvas.height = 600;
     const ctx = canvas.getContext('2d');
 
-    // Background gradient
+    // Background
     const grd = ctx.createLinearGradient(0, 0, 900, 600);
     grd.addColorStop(0, '#0d1117'); grd.addColorStop(1, '#1a1d2e');
     ctx.fillStyle = grd;
     ctx.fillRect(0, 0, 900, 600);
 
-    // Border
+    // Decorative double border
     ctx.strokeStyle = '#4361ee';
     ctx.lineWidth = 6;
     ctx.strokeRect(18, 18, 864, 564);
@@ -3979,28 +4079,44 @@ function generateCertificate(subject) {
     ctx.lineWidth = 1;
     ctx.strokeRect(26, 26, 848, 548);
 
-    // Title
+    // Corner decorations
+    const corners = [[30,30],[860,30],[30,560],[860,560]];
+    corners.forEach(([x,y]) => {
+        ctx.fillStyle = 'rgba(67,97,238,0.3)';
+        ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.fill();
+    });
+
+    ctx.textAlign = 'center';
+
+    // Header
     ctx.fillStyle = '#4361ee';
     ctx.font = 'bold 22px system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('DEVLEARN', 450, 80);
+    ctx.fillText('⚡ DEVLEARN', 450, 80);
 
+    // Main title
     ctx.fillStyle = '#e2e8f0';
     ctx.font = 'bold 44px system-ui, sans-serif';
     ctx.fillText('Certificate of Completion', 450, 170);
 
+    // Subtitle
     ctx.fillStyle = 'rgba(226,232,240,0.6)';
     ctx.font = '20px system-ui, sans-serif';
-    ctx.fillText('This certifies successful completion of', 450, 240);
+    ctx.fillText('This certifies that a DevLearn learner has completed', 450, 240);
 
+    // Course name
     ctx.fillStyle = '#4361ee';
     ctx.font = 'bold 36px system-ui, sans-serif';
     ctx.fillText(title, 450, 310);
 
+    // Description
     ctx.fillStyle = 'rgba(226,232,240,0.5)';
     ctx.font = '16px system-ui, sans-serif';
-    ctx.fillText(new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'}), 450, 380);
+    ctx.fillText('all lessons and assessments in the ' + title + ' course', 450, 350);
 
+    // Date
+    ctx.fillText(new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'}), 450, 400);
+
+    // Footer
     ctx.fillStyle = '#10b981';
     ctx.font = 'bold 28px system-ui, sans-serif';
     ctx.fillText('⚡ DevLearn', 450, 500);
@@ -4012,113 +4128,340 @@ function generateCertificate(subject) {
     a.click();
 }
 
-// --- S4.3: 7-day streak calendar dots ---
-function renderStreakCalendar() {
-    const el = document.getElementById('streak-calendar');
-    if (!el) return;
+// --- S4.3: Lesson modal tabs (Lesson / Key Points / Notes) ---
+function injectModalTabs(lessonId) {
+    const modalContent = document.getElementById('lesson-modal')?.querySelector('.modal-content');
+    if (!modalContent) return;
 
-    const activityLog = JSON.parse(localStorage.getItem('eda_activity_log') || '[]');
+    // Remove old tab bar
+    modalContent.querySelector('.modal-tab-bar')?.remove();
+
+    const config = SUBJECT_CONFIG[currentSubject];
+    const lesson = config?.lessons()[lessonId];
+    if (!lesson) return;
+
+    // Create tab bar
+    const tabBar = document.createElement('div');
+    tabBar.className = 'modal-tab-bar';
+    tabBar.innerHTML = `
+        <button class="modal-tab active" data-tab="lesson">📖 Lesson</button>
+        <button class="modal-tab" data-tab="keypoints">💡 Key Points</button>
+        <button class="modal-tab" data-tab="notes">💬 Notes</button>`;
+
+    // Insert after modal-title-row or modal-header
+    const titleRow = modalContent.querySelector('.modal-title-row');
+    const header = modalContent.querySelector('.modal-header');
+    const insertAfter = titleRow || header;
+    if (insertAfter?.nextSibling) {
+        modalContent.insertBefore(tabBar, insertAfter.nextSibling);
+    } else {
+        modalContent.appendChild(tabBar);
+    }
+
+    // Extract key points from lesson content
+    const keyPoints = extractKeyPoints(lesson.content);
+
+    // Load saved notes
+    const notesKey = 'eda_notes_' + lessonId;
+    const savedNotes = localStorage.getItem(notesKey) || '';
+
+    // Create panels
+    const contentEl = document.getElementById('lesson-content');
+    if (!contentEl) return;
+
+    // Wrap existing content in a panel div
+    const lessonPanel = document.createElement('div');
+    lessonPanel.className = 'modal-tab-panel active';
+    lessonPanel.setAttribute('data-panel', 'lesson');
+    while (contentEl.firstChild) {
+        lessonPanel.appendChild(contentEl.firstChild);
+    }
+
+    const keyPointsPanel = document.createElement('div');
+    keyPointsPanel.className = 'modal-tab-panel';
+    keyPointsPanel.setAttribute('data-panel', 'keypoints');
+    keyPointsPanel.innerHTML = `
+        <h3 style="margin-bottom:14px;font-size:17px">💡 Key Points</h3>
+        <ul class="key-points-list">
+            ${keyPoints.map(p => `<li>${p}</li>`).join('')}
+        </ul>`;
+
+    const notesPanel = document.createElement('div');
+    notesPanel.className = 'modal-tab-panel';
+    notesPanel.setAttribute('data-panel', 'notes');
+    notesPanel.innerHTML = `
+        <h3 style="margin-bottom:14px;font-size:17px">💬 Personal Notes</h3>
+        <textarea class="notes-textarea" placeholder="Type your notes for this lesson...">${savedNotes}</textarea>
+        <div class="notes-save-hint">Notes are saved automatically to your browser</div>`;
+
+    contentEl.appendChild(lessonPanel);
+    contentEl.appendChild(keyPointsPanel);
+    contentEl.appendChild(notesPanel);
+
+    // Auto-save notes
+    const textarea = notesPanel.querySelector('.notes-textarea');
+    let saveTimer;
+    textarea.addEventListener('input', () => {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+            localStorage.setItem(notesKey, textarea.value);
+        }, 500);
+    });
+
+    // Tab click handlers
+    tabBar.querySelectorAll('.modal-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabBar.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const panelName = tab.getAttribute('data-tab');
+            contentEl.querySelectorAll('.modal-tab-panel').forEach(p => {
+                p.classList.toggle('active', p.getAttribute('data-panel') === panelName);
+            });
+        });
+    });
+}
+
+function extractKeyPoints(htmlContent) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = htmlContent;
+    const points = [];
+
+    // Extract from key takeaway boxes
+    tmp.querySelectorAll('.key-takeaway-box').forEach(box => {
+        const text = box.textContent.replace(/Key Takeaway[s]?\s*/i, '').trim();
+        if (text) points.push(text);
+    });
+
+    // Extract from strong tags in list items
+    tmp.querySelectorAll('li').forEach(li => {
+        const strong = li.querySelector('strong');
+        if (strong) {
+            points.push(li.textContent.trim());
+        }
+    });
+
+    // Extract h3 headings as topic markers
+    tmp.querySelectorAll('h3').forEach(h => {
+        const text = h.textContent.replace(/^[^\w]+/, '').trim();
+        if (text && !text.toLowerCase().includes('quick check') && !text.toLowerCase().includes('teach it')) {
+            points.push(text);
+        }
+    });
+
+    // Dedupe and limit
+    const unique = [...new Set(points)];
+    return unique.slice(0, 12);
+}
+
+// --- S4.4: 7-day streak calendar with circle dots ---
+function renderStreakCalendar7Day() {
+    // Find the streak stat pill
+    const streakPill = document.getElementById('streak-count')?.closest('.stat-pill');
+    if (!streakPill) return;
+
+    // Remove old calendar row
+    const existingCal = streakPill.parentElement?.querySelector('.streak-calendar-row');
+    if (existingCal) existingCal.remove();
+
+    // Get activity dates
+    const activityDates = JSON.parse(localStorage.getItem('eda_activity_dates') || '[]');
     const today = new Date();
+    const dayLabels = ['S','M','T','W','T','F','S'];
 
-    const dots = [];
+    const row = document.createElement('div');
+    row.className = 'streak-calendar-row';
+
     for (let i = 6; i >= 0; i--) {
         const d = new Date(today);
         d.setDate(d.getDate() - i);
-        const dateStr = d.toDateString();
-        const hasActivity = activityLog.some(a => new Date(a.timestamp).toDateString() === dateStr);
+        const dateStr = d.toISOString().split('T')[0]; // YYYY-MM-DD
+        const hasActivity = activityDates.includes(dateStr);
         const isToday = i === 0;
-        dots.push(`<span class="streak-dot ${hasActivity ? 'active' : ''} ${isToday ? 'today' : ''}" title="${dateStr}"></span>`);
+
+        const day = document.createElement('div');
+        day.className = 'streak-day';
+        day.innerHTML = `
+            <span class="streak-day-label">${dayLabels[d.getDay()]}</span>
+            <span class="streak-day-dot ${hasActivity ? 'filled' : ''} ${isToday ? 'today' : ''}" title="${dateStr}"></span>`;
+        row.appendChild(day);
     }
-    el.innerHTML = dots.join('');
+
+    // Insert after the streak stat pill's parent (header-stats)
+    streakPill.parentElement.insertAdjacentElement('afterend', row);
 }
 
-// --- S4.4: Spaced repetition nudge ---
-function checkSpacedRepetition() {
-    const nudgeEl = document.getElementById('spaced-rep-nudge');
-    if (!nudgeEl) return;
+function logActivityDate() {
+    const today = new Date().toISOString().split('T')[0];
+    const dates = JSON.parse(localStorage.getItem('eda_activity_dates') || '[]');
+    if (!dates.includes(today)) {
+        dates.push(today);
+        // Keep last 30 days
+        if (dates.length > 30) dates.splice(0, dates.length - 30);
+        localStorage.setItem('eda_activity_dates', JSON.stringify(dates));
+    }
+}
+
+// --- S4.5: Course time breakdown per module header ---
+function injectModuleTimeBreakdown() {
+    document.querySelectorAll('.module').forEach(mod => {
+        // Skip if already injected
+        if (mod.querySelector('.module-time-badge')) return;
+
+        const cards = mod.querySelectorAll('.lesson-card[data-time]');
+        if (cards.length === 0) return;
+
+        let totalMins = 0;
+        cards.forEach(c => {
+            totalMins += parseInt(c.getAttribute('data-time') || '0');
+        });
+
+        const hrs = Math.floor(totalMins / 60);
+        const mins = totalMins % 60;
+        const timeStr = hrs > 0 ? `~${hrs}h ${mins}m` : `~${mins}m`;
+
+        const badge = document.createElement('span');
+        badge.className = 'module-time-badge';
+        badge.textContent = `${timeStr} total · ${cards.length} lessons`;
+
+        const progress = mod.querySelector('.module-progress');
+        if (progress) {
+            progress.parentElement.insertBefore(badge, progress);
+        }
+    });
+}
+
+// --- S4.6: Spaced repetition nudge ---
+function checkSpacedRepetitionNudge(subject) {
+    const store = SUBJECT_STORAGE[subject];
+    if (!store) return;
 
     const now = Date.now();
-    const intervals = [3, 7, 14].map(d => d * 24 * 60 * 60 * 1000);
+    const THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
+    const completed = JSON.parse(localStorage.getItem(store.completedLessons) || '[]');
     const due = [];
 
-    Object.keys(SUBJECT_STORAGE).forEach(subj => {
-        const completed = JSON.parse(localStorage.getItem(SUBJECT_STORAGE[subj].completedLessons) || '[]');
-        completed.forEach(lid => {
-            const ts = parseInt(localStorage.getItem(lid + '_completed_ts') || '0');
-            if (!ts) return;
-            const age = now - ts;
-            const isDue = intervals.some(iv => age >= iv && age < iv + 24 * 60 * 60 * 1000);
-            if (isDue) {
-                const lesson = SUBJECT_CONFIG[subj]?.lessons()[lid];
-                if (lesson) due.push({ lid, subj, title: lesson.title });
-            }
-        });
+    completed.forEach(lid => {
+        const ts = parseInt(localStorage.getItem(lid + '_completed_ts') || '0');
+        if (!ts) return;
+        if ((now - ts) >= THREE_DAYS) {
+            const config = SUBJECT_CONFIG[subject];
+            const lesson = config?.lessons()[lid];
+            if (lesson) due.push({ lid, title: lesson.title });
+        }
     });
 
-    if (due.length > 0) {
-        nudgeEl.style.display = '';
-        nudgeEl.textContent = '🔁 ' + due.length + ' review' + (due.length > 1 ? 's' : '') + ' due';
-        nudgeEl.title = due.map(d => d.title).join('\n');
-        nudgeEl.onclick = () => {
-            if (due[0]) {
-                if (currentSubject !== due[0].subj) switchSubject(due[0].subj);
-                startLesson(due[0].lid);
+    // Update sidebar badge
+    const tabBtn = document.getElementById('tab-' + subject);
+    if (tabBtn) {
+        tabBtn.querySelector('.spaced-rep-badge')?.remove();
+        if (due.length > 0) {
+            const badge = document.createElement('span');
+            badge.className = 'spaced-rep-badge';
+            badge.textContent = due.length;
+            tabBtn.style.position = 'relative';
+            tabBtn.appendChild(badge);
+        }
+    }
+
+    // Inject/remove review pill in subject content
+    const contentEl = document.getElementById(subject + '-content');
+    if (!contentEl) return;
+    contentEl.querySelector('.spaced-rep-pill')?.remove();
+
+    // Clear old highlights
+    contentEl.querySelectorAll('.lesson-card.review-highlight').forEach(c => c.classList.remove('review-highlight'));
+
+    if (due.length > 0 && subject === currentSubject) {
+        const pill = document.createElement('div');
+        pill.className = 'spaced-rep-pill';
+        pill.innerHTML = `<span>🔁 ${due.length} concept${due.length > 1 ? 's' : ''} due for review</span>
+            <button class="dismiss-btn" title="Dismiss">×</button>`;
+
+        pill.addEventListener('click', (e) => {
+            if (e.target.classList.contains('dismiss-btn')) {
+                pill.remove();
+                contentEl.querySelectorAll('.lesson-card.review-highlight').forEach(c => c.classList.remove('review-highlight'));
+                return;
             }
-        };
-    } else {
-        nudgeEl.style.display = 'none';
+            // Highlight due cards
+            due.forEach(d => {
+                const card = contentEl.querySelector(`[data-lesson="${d.lid}"]`);
+                if (card) card.classList.add('review-highlight');
+            });
+        });
+
+        const firstModule = contentEl.querySelector('.module');
+        if (firstModule) {
+            firstModule.parentElement.insertBefore(pill, firstModule);
+        }
     }
 }
 
-// Track completion timestamp
+// --- Track completion timestamp on _completeSubjectLesson ---
 (function() {
-    const _origComplete = markLessonComplete || null;
-    if (typeof markLessonComplete === 'function') {
-        const _prev = markLessonComplete;
-        markLessonComplete = function(lessonId) {
-            _prev(lessonId);
-            localStorage.setItem((lessonId || currentLesson) + '_completed_ts', Date.now());
-        };
-    }
+    const _prevComplete = window._completeSubjectLesson;
+    window._completeSubjectLesson = function() {
+        const lessonId = currentLesson;
+        if (_prevComplete) _prevComplete();
+        // Store completion timestamp
+        if (lessonId) {
+            localStorage.setItem(lessonId + '_completed_ts', Date.now().toString());
+        }
+        // Log activity date
+        logActivityDate();
+        // Refresh skill tree and streak
+        setTimeout(() => {
+            renderSkillTree();
+            renderStreakCalendar7Day();
+            injectCertificatePreview(currentSubject);
+            checkSpacedRepetitionNudge(currentSubject);
+        }, 300);
+    };
 })();
 
-// --- Inject streak calendar HTML into stats bar ---
+// --- Patch startLesson to inject tabs ---
+(function() {
+    const _prevStart = startLesson;
+    startLesson = function(lessonId) {
+        _prevStart(lessonId);
+        const modal = document.getElementById('lesson-modal');
+        if (!modal || !modal.classList.contains('active')) return;
+        injectModalTabs(lessonId);
+    };
+})();
+
+// --- Patch switchSubject for Sprint 4 features ---
+(function() {
+    const _prevSwitch = switchSubject;
+    switchSubject = function(subject) {
+        _prevSwitch(subject);
+        setTimeout(() => {
+            renderSkillTree();
+            injectCertificatePreview(subject);
+            injectModuleTimeBreakdown();
+            checkSpacedRepetitionNudge(subject);
+            renderStreakCalendar7Day();
+        }, 250);
+    };
+})();
+
+// --- Initialize all Sprint 4 features on load ---
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
-        // Find the streak display element and add calendar next to it
-        const streakEl = document.querySelector('.stat-streak, [id*="streak"], .streak-count');
-        if (streakEl && !document.getElementById('streak-calendar')) {
-            const cal = document.createElement('div');
-            cal.id = 'streak-calendar';
-            cal.className = 'streak-calendar';
-            streakEl.parentNode?.insertBefore(cal, streakEl.nextSibling);
-        }
+        renderSkillTree();
+        renderStreakCalendar7Day();
+        injectModuleTimeBreakdown();
 
-        // Add spaced rep nudge to sidebar
-        if (!document.getElementById('spaced-rep-nudge')) {
-            const nudge = document.createElement('button');
-            nudge.id = 'spaced-rep-nudge';
-            nudge.className = 'spaced-rep-nudge';
-            nudge.style.display = 'none';
-            const nav = document.querySelector('.sidebar-nav');
-            if (nav) nav.insertBefore(nudge, nav.firstChild);
-        }
-
-        renderStreakCalendar();
-        checkSpacedRepetition();
-
-        // Inject cert banners for all subjects
+        // Cert preview for all subjects
         Object.keys(SUBJECT_CONFIG).forEach(s => {
             if (document.getElementById(s + '-content')) {
-                injectCertificateBanner(s);
+                injectCertificatePreview(s);
             }
         });
 
-        // Patch switchSubject for cert banner
-        const _prevCert = switchSubject;
-        switchSubject = function(subject) {
-            _prevCert(subject);
-            setTimeout(() => injectCertificateBanner(subject), 200);
-        };
-    }, 500);
+        // Spaced repetition for all subjects
+        Object.keys(SUBJECT_STORAGE).forEach(s => {
+            checkSpacedRepetitionNudge(s);
+        });
+    }, 600);
 });

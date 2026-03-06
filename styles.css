@@ -2146,7 +2146,317 @@ kbd {
 
 /* === SPRINT 4 === */
 
-/* S4.1 — Certificate banner */
+/* S4.1 — Skill tree SVG connectors */
+.lessons-grid {
+    position: relative;
+}
+.skill-tree-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+.skill-tree-svg line {
+    stroke: var(--border);
+    stroke-width: 2;
+    stroke-dasharray: 6 4;
+    opacity: 0.6;
+}
+.skill-tree-svg line.connector-done {
+    stroke: var(--success);
+    stroke-dasharray: none;
+    opacity: 0.8;
+}
+.lesson-card { z-index: 1; position: relative; }
+
+/* Locked card overlay */
+.lesson-card.card-locked {
+    opacity: 0.55;
+    pointer-events: auto;
+    filter: grayscale(0.3);
+}
+.lesson-card.card-locked .btn-start {
+    background: var(--surface-2) !important;
+    color: var(--text-muted) !important;
+    cursor: not-allowed;
+}
+.lock-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    z-index: 3;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+}
+/* Current lesson pulsing border */
+.lesson-card.card-current {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 2px var(--accent), 0 0 12px rgba(67,97,238,0.25);
+    animation: currentLessonPulse 2s ease-in-out infinite;
+}
+@keyframes currentLessonPulse {
+    0%, 100% { box-shadow: 0 0 0 2px var(--accent), 0 0 8px rgba(67,97,238,0.2); }
+    50% { box-shadow: 0 0 0 4px var(--accent), 0 0 20px rgba(67,97,238,0.4); }
+}
+
+/* S4.2 — Certificate preview card */
+.cert-preview-card {
+    background: var(--surface);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-top: 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.cert-preview-card.cert-earned {
+    border-color: var(--success);
+    border-style: solid;
+    background: linear-gradient(135deg, rgba(16,185,129,0.05), rgba(67,97,238,0.05));
+}
+.cert-preview-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--text);
+}
+.cert-preview-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+.cert-mini-preview {
+    background: linear-gradient(135deg, #0d1117, #1a1d2e);
+    border-radius: var(--radius);
+    padding: 24px 32px;
+    max-width: 400px;
+    margin: 0 auto 20px;
+    border: 2px solid rgba(67,97,238,0.3);
+    color: white;
+}
+.cert-mini-header {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #4361ee;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+.cert-mini-name {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    color: #e2e8f0;
+}
+.cert-mini-course {
+    font-size: 14px;
+    color: rgba(226,232,240,0.6);
+    margin-bottom: 8px;
+}
+.cert-mini-date {
+    font-size: 11px;
+    color: rgba(226,232,240,0.4);
+}
+.cert-claim-btn {
+    background: linear-gradient(135deg, var(--success), #059669);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 44px;
+}
+.cert-claim-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(16,185,129,0.4); }
+
+/* S4.3 — Lesson modal tabs */
+.modal-tab-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border);
+    padding: 0 20px;
+    flex-shrink: 0;
+}
+.modal-tab {
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.modal-tab:hover { color: var(--text); }
+.modal-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 700;
+}
+.modal-tab-panel { display: none; }
+.modal-tab-panel.active { display: block; }
+
+/* Key Points tab */
+.key-points-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.key-points-list li {
+    padding: 10px 14px;
+    border-left: 3px solid var(--accent);
+    margin-bottom: 8px;
+    background: rgba(67,97,238,0.05);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Notes tab */
+.notes-textarea {
+    width: 100%;
+    min-height: 200px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: var(--font);
+    line-height: 1.6;
+    resize: vertical;
+    background: var(--surface);
+    color: var(--text);
+    box-sizing: border-box;
+}
+.notes-textarea:focus { outline: none; border-color: var(--accent); }
+.notes-save-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+}
+
+/* S4.4 — 7-day streak calendar */
+.streak-calendar-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-top: 6px;
+    padding: 0 16px 8px;
+}
+.streak-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+.streak-day-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+}
+.streak-day-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    transition: all 0.2s;
+}
+.streak-day-dot.filled {
+    background: var(--accent);
+    box-shadow: 0 0 6px rgba(67,97,238,0.4);
+}
+.streak-day-dot.today {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    animation: todayDotPulse 2s ease-in-out infinite;
+}
+.streak-day-dot.filled.today {
+    background: var(--success);
+    outline-color: var(--success);
+    box-shadow: 0 0 6px rgba(16,185,129,0.4);
+}
+@keyframes todayDotPulse {
+    0%, 100% { outline-offset: 2px; opacity: 1; }
+    50% { outline-offset: 4px; opacity: 0.7; }
+}
+
+/* S4.5 — Module time breakdown badge */
+.module-time-badge {
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--surface-2);
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    margin-left: 8px;
+}
+
+/* S4.6 — Spaced repetition nudge */
+.spaced-rep-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #f59e0b;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    box-shadow: 0 2px 6px rgba(245,158,11,0.4);
+    animation: repBadgeBounce 2s ease-in-out infinite;
+}
+@keyframes repBadgeBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+.spaced-rep-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: var(--radius-sm);
+    padding: 8px 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #f59e0b;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.spaced-rep-pill:hover { background: rgba(245,158,11,0.18); }
+.spaced-rep-pill .dismiss-btn {
+    background: none;
+    border: none;
+    color: #f59e0b;
+    font-size: 16px;
+    cursor: pointer;
+    margin-left: auto;
+    padding: 0 4px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+.spaced-rep-pill .dismiss-btn:hover { opacity: 1; }
+.lesson-card.review-highlight {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 2px rgba(245,158,11,0.3), 0 4px 12px rgba(245,158,11,0.15) !important;
+}
+
+/* Legacy S4 compat — keep old cert-banner */
 .cert-banner {
     display: flex;
     align-items: center;
@@ -2179,7 +2489,7 @@ kbd {
 }
 .cert-btn:hover { opacity: 0.85; }
 
-/* S4.3 — 7-day streak calendar */
+/* Legacy streak dots */
 .streak-calendar {
     display: flex;
     gap: 4px;
@@ -2198,7 +2508,7 @@ kbd {
 .streak-dot.today { outline: 2px solid var(--accent); outline-offset: 1px; }
 .streak-dot.active.today { background: #10b981; outline-color: #10b981; }
 
-/* S4.4 — Spaced repetition nudge */
+/* Legacy spaced rep nudge */
 .spaced-rep-nudge {
     display: block;
     width: calc(100% - 24px);
