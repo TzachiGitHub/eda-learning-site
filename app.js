@@ -4764,3 +4764,75 @@ document.addEventListener('DOMContentLoaded', () => {
         registerServiceWorker();
     }, 600);
 });
+
+// ============================================================
+// REAL IMPLEMENTATION EXAMPLES
+// Inject TypeScript project code into lesson modals
+// ============================================================
+
+function injectRealImplementation(lessonId) {
+    const contentEl = document.getElementById('lesson-content');
+    if (!contentEl) return;
+
+    // Remove existing
+    contentEl.querySelector('.real-impl-section')?.remove();
+
+    if (typeof PROJECT_EXAMPLES === 'undefined' || typeof SUBJECT_EXAMPLE_MAP === 'undefined') return;
+
+    const exampleKey = SUBJECT_EXAMPLE_MAP[currentSubject];
+    const example = PROJECT_EXAMPLES[exampleKey];
+    if (!example) return;
+
+    // Only inject into lessons that aren't quizzes
+    const config = SUBJECT_CONFIG[currentSubject];
+    const lesson = config?.lessons()[lessonId];
+    if (!lesson) return;
+    const title = (lesson.title || '').toLowerCase();
+    if (title.includes('quiz') || title.includes('test')) return;
+
+    const section = document.createElement('div');
+    section.className = 'real-impl-section';
+
+    section.innerHTML = `
+        <div class="real-impl-header">
+            <span class="real-impl-icon">🏗</span>
+            <div>
+                <div class="real-impl-title">${example.title}</div>
+                <div class="real-impl-desc">${example.description}</div>
+            </div>
+        </div>
+        <div class="code-wrapper">
+            <pre><code class="language-${example.lang}">${escapeHtml(example.code)}</code></pre>
+        </div>
+        <div class="real-impl-footer">
+            <span>Full project: <code>devlearn-ts-projects/${exampleKey}/</code></span>
+            <span class="real-impl-run">Run: <code>npx ts-node src/index.ts</code></span>
+        </div>
+    `;
+
+    contentEl.appendChild(section);
+
+    // Apply copy button from Sprint 1
+    addCopyButtons();
+    addLanguageLabels();
+}
+
+function escapeHtml(str) {
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+// Patch startLesson to inject real implementation
+(function() {
+    const _prev = startLesson;
+    startLesson = function(lessonId) {
+        _prev(lessonId);
+        const modal = document.getElementById('lesson-modal');
+        if (!modal?.classList.contains('active')) return;
+        // Inject after a brief delay so other injections finish first
+        setTimeout(() => injectRealImplementation(lessonId), 50);
+    };
+})();

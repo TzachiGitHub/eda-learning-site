@@ -2690,3 +2690,66 @@ kbd {
     border: none;
     min-height: 200px;
 }
+
+/* === REAL IMPLEMENTATION EXAMPLES === */
+.real-impl-section {
+    margin: 32px 0 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+.real-impl-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, rgba(67,97,238,0.08), rgba(139,92,246,0.06));
+    border-bottom: 1px solid var(--border);
+}
+.real-impl-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.real-impl-title {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+.real-impl-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+.real-impl-section .code-wrapper {
+    border-radius: 0;
+    border: none;
+}
+.real-impl-section pre {
+    margin: 0;
+    max-height: 480px;
+    overflow-y: auto;
+    border-radius: 0;
+}
+.real-impl-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 18px;
+    background: var(--surface-2);
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.real-impl-footer code {
+    background: var(--surface);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-size: 11px;
+}
+.real-impl-run { color: var(--success); }
