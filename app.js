@@ -4445,6 +4445,302 @@ function checkSpacedRepetitionNudge(subject) {
     };
 })();
 
+// ============================================================
+// SPRINT 5: CODE RUNNER, SQL REPL, GISCUS COMMENTS, PWA
+// ============================================================
+
+// --- S5.1: Live JS Code Runner ---
+function addRunButtons() {
+    const contentEl = document.getElementById('lesson-content');
+    if (!contentEl) return;
+
+    contentEl.querySelectorAll('.code-wrapper').forEach(wrapper => {
+        if (wrapper.querySelector('.code-run-btn')) return;
+        const pre = wrapper.querySelector('pre');
+        if (!pre) return;
+        const code = pre.querySelector('code') || pre;
+        const text = code.textContent.trim();
+
+        // Only add Run button to JS/TS-looking code blocks
+        const langBadge = wrapper.querySelector('.code-lang-badge');
+        const lang = langBadge ? langBadge.textContent : '';
+        const isJS = lang === 'js' || lang === 'ts' ||
+            (!lang && (text.includes('function') || text.includes('const ') || text.includes('console.log') || text.includes('=>')));
+        // Skip non-runnable: bash, yaml, json, sql, short snippets
+        const isSkip = lang === 'bash' || lang === 'yaml' || lang === 'json' || lang === 'sql' ||
+            text.startsWith('$') || text.startsWith('#') || text.length < 30;
+        if (!isJS || isSkip) return;
+
+        const btn = document.createElement('button');
+        btn.className = 'code-run-btn';
+        btn.textContent = '▶ Run';
+        btn.addEventListener('click', () => runCodeInSandbox(wrapper, text));
+        wrapper.appendChild(btn);
+    });
+}
+
+function runCodeInSandbox(wrapper, code) {
+    // Remove previous output
+    const existingOutput = wrapper.parentElement.querySelector('.code-output');
+    if (existingOutput) existingOutput.remove();
+
+    const outputDiv = document.createElement('div');
+    outputDiv.className = 'code-output';
+    outputDiv.innerHTML = '<div class="code-output-label">Output</div>';
+    wrapper.insertAdjacentElement('afterend', outputDiv);
+
+    // Build sandboxed iframe
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.sandbox = 'allow-scripts';
+    document.body.appendChild(iframe);
+
+    const logs = [];
+
+    // Listen for messages from iframe
+    const handler = (e) => {
+        if (e.source !== iframe.contentWindow) return;
+        const data = e.data;
+        if (data && data.type === 'console') {
+            const cls = data.level === 'error' ? 'output-error' : data.level === 'warn' ? 'output-warn' : 'output-log';
+            logs.push('<div class="output-line ' + cls + '">' + escapeHtml(data.args.join(' ')) + '</div>');
+        } else if (data && data.type === 'done') {
+            if (logs.length === 0) {
+                outputDiv.innerHTML += '<div class="output-line output-log" style="opacity:0.5">(no output)</div>';
+            } else {
+                outputDiv.innerHTML += logs.join('');
+            }
+            window.removeEventListener('message', handler);
+            setTimeout(() => { iframe.remove(); }, 100);
+        } else if (data && data.type === 'error') {
+            outputDiv.innerHTML += '<div class="output-line output-error">' + escapeHtml(data.message) + '</div>';
+            window.removeEventListener('message', handler);
+            setTimeout(() => { iframe.remove(); }, 100);
+        }
+    };
+    window.addEventListener('message', handler);
+
+    // Timeout safety
+    setTimeout(() => {
+        window.removeEventListener('message', handler);
+        if (iframe.parentNode) iframe.remove();
+    }, 5000);
+
+    const script = `
+        <script>
+        (function(){
+            var _logs = [];
+            ['log','warn','error','info'].forEach(function(m){
+                console[m] = function(){
+                    var args = Array.prototype.slice.call(arguments).map(function(a){
+                        try { return typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a); }
+                        catch(e){ return String(a); }
+                    });
+                    parent.postMessage({type:'console', level:m, args:args}, '*');
+                };
+            });
+            try {
+                ${code}
+                parent.postMessage({type:'done'}, '*');
+            } catch(e) {
+                parent.postMessage({type:'error', message: e.toString()}, '*');
+            }
+        })();
+        <\/script>
+    `;
+    iframe.srcdoc = '<!DOCTYPE html><html><body>' + script + '</body></html>';
+}
+
+function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// --- S5.2: SQL mini-REPL ---
+let sqlDB = null;
+let sqlJsLoaded = false;
+
+function loadSqlJs() {
+    if (sqlJsLoaded) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+        if (window.initSqlJs) { sqlJsLoaded = true; resolve(); return; }
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js';
+        script.onload = () => { sqlJsLoaded = true; resolve(); };
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+async function initSqlDB() {
+    if (sqlDB) return sqlDB;
+    await loadSqlJs();
+    const SQL = await window.initSqlJs({
+        locateFile: file => 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/' + file
+    });
+    sqlDB = new SQL.Database();
+    // Seed with sample data matching the schema panel
+    sqlDB.run(`
+        CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT UNIQUE, created TEXT DEFAULT (datetime('now')));
+        CREATE TABLE orders (id INTEGER PRIMARY KEY, user_id INTEGER REFERENCES users(id), total REAL, status TEXT);
+        INSERT INTO users VALUES (1, 'Alice', 'alice@dev.io', '2024-01-15');
+        INSERT INTO users VALUES (2, 'Bob', 'bob@dev.io', '2024-02-20');
+        INSERT INTO users VALUES (3, 'Charlie', 'charlie@dev.io', '2024-03-10');
+        INSERT INTO orders VALUES (1, 1, 99.99, 'completed');
+        INSERT INTO orders VALUES (2, 1, 49.50, 'pending');
+        INSERT INTO orders VALUES (3, 2, 199.00, 'completed');
+        INSERT INTO orders VALUES (4, 3, 75.25, 'shipped');
+    `);
+    return sqlDB;
+}
+
+function injectSqlRepl() {
+    if (currentSubject !== 'postgres') return;
+
+    const contentEl = document.getElementById('lesson-content');
+    if (!contentEl) return;
+    if (contentEl.querySelector('.sql-repl')) return;
+
+    const defaultQuery = 'SELECT users.name, orders.total, orders.status\nFROM users\nJOIN orders ON users.id = orders.user_id\nORDER BY orders.total DESC;';
+
+    const repl = document.createElement('div');
+    repl.className = 'sql-repl';
+    repl.innerHTML = `
+        <div class="sql-repl-header">
+            <span>🐘 SQL Sandbox</span>
+            <span style="font-size:11px;opacity:0.6">SQLite (sql.js)</span>
+        </div>
+        <textarea class="sql-repl-editor" spellcheck="false">${defaultQuery}</textarea>
+        <div class="sql-repl-actions">
+            <button class="sql-run-btn" onclick="executeSqlRepl(this)">▶ Run Query</button>
+            <button class="sql-reset-btn" onclick="resetSqlRepl(this, '${encodeURIComponent(defaultQuery)}')">↺ Reset</button>
+        </div>
+        <div class="sql-repl-output">
+            <div class="sql-repl-message">Press "Run Query" to execute SQL</div>
+        </div>
+    `;
+
+    // Insert before the nav-cards or at end of lesson panel
+    const lessonPanel = contentEl.querySelector('[data-panel="lesson"]');
+    const target = lessonPanel || contentEl;
+    const navCards = target.querySelector('.nav-cards-container');
+    if (navCards) {
+        target.insertBefore(repl, navCards);
+    } else {
+        target.appendChild(repl);
+    }
+}
+
+async function executeSqlRepl(btn) {
+    const repl = btn.closest('.sql-repl');
+    const textarea = repl.querySelector('.sql-repl-editor');
+    const outputEl = repl.querySelector('.sql-repl-output');
+    const query = textarea.value.trim();
+
+    if (!query) {
+        outputEl.innerHTML = '<div class="sql-repl-message">Enter a SQL query</div>';
+        return;
+    }
+
+    outputEl.innerHTML = '<div class="sql-repl-message">Running...</div>';
+
+    try {
+        const db = await initSqlDB();
+        const results = db.exec(query);
+
+        if (results.length === 0) {
+            outputEl.innerHTML = '<div class="sql-repl-message">Query executed successfully (no results returned)</div>';
+            return;
+        }
+
+        let html = '';
+        results.forEach(result => {
+            html += '<table><thead><tr>';
+            result.columns.forEach(col => { html += '<th>' + escapeHtml(col) + '</th>'; });
+            html += '</tr></thead><tbody>';
+            result.values.forEach(row => {
+                html += '<tr>';
+                row.forEach(val => { html += '<td>' + escapeHtml(val === null ? 'NULL' : String(val)) + '</td>'; });
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+        });
+        outputEl.innerHTML = html;
+    } catch (e) {
+        outputEl.innerHTML = '<div class="sql-repl-error">Error: ' + escapeHtml(e.message) + '</div>';
+    }
+}
+
+function resetSqlRepl(btn, encodedDefault) {
+    const repl = btn.closest('.sql-repl');
+    repl.querySelector('.sql-repl-editor').value = decodeURIComponent(encodedDefault);
+    repl.querySelector('.sql-repl-output').innerHTML = '<div class="sql-repl-message">Press "Run Query" to execute SQL</div>';
+    // Reset DB
+    sqlDB = null;
+}
+
+// --- S5.3: Giscus comments ---
+function injectGiscusComments(lessonId) {
+    const contentEl = document.getElementById('lesson-content');
+    if (!contentEl) return;
+    contentEl.querySelector('.giscus-container')?.remove();
+
+    const container = document.createElement('div');
+    container.className = 'giscus-container';
+    container.innerHTML = '<div class="giscus-title">💬 Discussion</div><div class="giscus"></div>';
+
+    // Insert into the lesson panel if tabs exist, otherwise into content
+    const lessonPanel = contentEl.querySelector('[data-panel="lesson"]');
+    const target = lessonPanel || contentEl;
+    target.appendChild(container);
+
+    // Build Giscus script
+    const giscusDiv = container.querySelector('.giscus');
+    const script = document.createElement('script');
+    script.src = 'https://giscus.app/client.js';
+    script.setAttribute('data-repo', 'tzachigithub/eda-learning-site');
+    script.setAttribute('data-repo-id', '');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', '');
+    script.setAttribute('data-mapping', 'specific');
+    script.setAttribute('data-term', lessonId);
+    script.setAttribute('data-strict', '0');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-emit-metadata', '0');
+    script.setAttribute('data-input-position', 'top');
+    script.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+    script.setAttribute('data-lang', 'en');
+    script.setAttribute('data-loading', 'lazy');
+    script.crossOrigin = 'anonymous';
+    script.async = true;
+    giscusDiv.appendChild(script);
+}
+
+// --- S5.4: PWA Service Worker registration ---
+function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+}
+
+// --- Patch startLesson to inject Sprint 5 features ---
+(function() {
+    const _prevS5 = startLesson;
+    startLesson = function(lessonId) {
+        _prevS5(lessonId);
+        const modal = document.getElementById('lesson-modal');
+        if (!modal || !modal.classList.contains('active')) return;
+
+        // S5.1: Run buttons on JS code blocks
+        addRunButtons();
+
+        // S5.2: SQL REPL for Postgres lessons
+        injectSqlRepl();
+
+        // S5.3: Giscus comments
+        injectGiscusComments(lessonId);
+    };
+})();
+
 // --- Initialize all Sprint 4 features on load ---
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
@@ -4463,5 +4759,8 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.keys(SUBJECT_STORAGE).forEach(s => {
             checkSpacedRepetitionNudge(s);
         });
+
+        // S5.4: Register PWA service worker
+        registerServiceWorker();
     }, 600);
 });

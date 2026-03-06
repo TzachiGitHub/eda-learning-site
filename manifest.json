@@ -1,15 +1,15 @@
 {
-  "name": "Learn Event-Driven Architecture",
-  "short_name": "Learn EDA",
-  "description": "Interactive course to master Event-Driven Architecture with ADHD-optimized bite-sized lessons",
+  "name": "DevLearn",
+  "short_name": "DevLearn",
+  "description": "Interactive developer learning hub with ADHD-optimized bite-sized lessons",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#667eea",
-  "theme_color": "#667eea",
+  "background_color": "#0f1117",
+  "theme_color": "#6366f1",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23667eea' width='100' height='100'/><text y='75' font-size='80' fill='white' text-anchor='middle' x='50'>🎯</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%236366f1' width='100' height='100' rx='16'/><text y='72' font-size='60' fill='white' text-anchor='middle' x='50'>⚡</text></svg>",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
