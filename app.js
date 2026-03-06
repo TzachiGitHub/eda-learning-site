@@ -2694,3 +2694,470 @@ updateSidebarProgress = function() {
         closeLesson();
     };
 })();
+
+// ============================================================
+// FEATURE 1: ACHIEVEMENT / BADGE SYSTEM
+// ============================================================
+
+const BADGE_DEFS = [
+    { id: 'first_step',       emoji: '🌱', name: 'First Step',      desc: 'Complete your first lesson' },
+    { id: 'on_fire',          emoji: '🔥', name: 'On Fire',         desc: '3-day streak' },
+    { id: 'speed_learner',    emoji: '⚡', name: 'Speed Learner',   desc: 'Complete 5 lessons in one day' },
+    { id: 'module_master',    emoji: '🎯', name: 'Module Master',   desc: 'Complete all lessons in any module' },
+    { id: 'century',          emoji: '💯', name: 'Century',         desc: 'Earn 100 XP total' },
+    { id: 'xp_rocket',        emoji: '🚀', name: 'XP Rocket',       desc: 'Earn 500 XP total' },
+    { id: 'quiz_ace',         emoji: '🧠', name: 'Quiz Ace',        desc: 'Score 100% on any quiz' },
+    { id: 'course_complete',  emoji: '🏆', name: 'Course Complete', desc: 'Finish all lessons in a subject' },
+    { id: 'night_owl',        emoji: '🌙', name: 'Night Owl',       desc: 'Complete a lesson after 10pm' },
+    { id: 'scholar',          emoji: '📚', name: 'Scholar',         desc: 'Complete 20 lessons total' },
+];
+
+function getEarnedBadges() {
+    return JSON.parse(localStorage.getItem('eda_badges') || '[]');
+}
+
+function awardBadge(id) {
+    const earned = getEarnedBadges();
+    if (earned.find(b => b.id === id)) return; // Already earned
+    const def = BADGE_DEFS.find(b => b.id === id);
+    if (!def) return;
+    const newBadge = { id, earnedAt: new Date().toISOString() };
+    earned.push(newBadge);
+    localStorage.setItem('eda_badges', JSON.stringify(earned));
+    showAchievementToast(def.emoji + ' Achievement unlocked: ' + def.name);
+    launchConfetti();
+}
+
+function showAchievementToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'achievement-toast';
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3600);
+}
+
+function checkBadgesAfterLesson() {
+    // Gather cross-subject data
+    const allSubjects = ['eda','redis','docker','graphql','rq','kubernetes','postgres','typescript'];
+    let totalCompleted = 0;
+    let totalXpAll = 0;
+    allSubjects.forEach(s => {
+        const store = SUBJECT_STORAGE[s];
+        if (!store) return;
+        const comp = JSON.parse(localStorage.getItem(store.completedLessons) || '[]');
+        totalCompleted += comp.length;
+        totalXpAll += parseInt(localStorage.getItem(store.totalXP) || '0');
+    });
+
+    // First Step
+    if (totalCompleted >= 1) awardBadge('first_step');
+
+    // Scholar: 20 lessons total
+    if (totalCompleted >= 20) awardBadge('scholar');
+
+    // Century: 100 XP total
+    if (totalXpAll >= 100) awardBadge('century');
+
+    // XP Rocket: 500 XP total
+    if (totalXpAll >= 500) awardBadge('xp_rocket');
+
+    // On Fire: streak >= 3
+    const streak = parseInt(localStorage.getItem('eda_streak') || '0');
+    if (streak >= 3) awardBadge('on_fire');
+
+    // Night Owl: current hour >= 22
+    if (new Date().getHours() >= 22) awardBadge('night_owl');
+
+    // Speed Learner: 5 lessons today
+    const todayKey = 'eda_lessons_today_' + new Date().toDateString();
+    const todayCount = parseInt(localStorage.getItem(todayKey) || '0') + 1;
+    localStorage.setItem(todayKey, todayCount);
+    if (todayCount >= 5) awardBadge('speed_learner');
+
+    // Module Master: check if all lessons in any module are done
+    checkModuleMasterBadge();
+
+    // Course Complete: check if all lessons in any subject are done
+    checkCourseCompleteBadge();
+}
+
+function checkModuleMasterBadge() {
+    // EDA modules
+    const edaStore = SUBJECT_STORAGE.eda;
+    if (edaStore) {
+        const comp = JSON.parse(localStorage.getItem(edaStore.completedLessons) || '[]');
+        const m1 = ['1-1','1-2','1-3','1-4','1-5'].every(id => comp.includes(id));
+        const m2 = ['2-1','2-2','2-3','2-4','2-5','2-6'].every(id => comp.includes(id));
+        const m3 = ['3-1','3-2','3-3','3-4','3-5'].every(id => comp.includes(id));
+        const m4 = ['4-1','4-2','4-3','4-4'].every(id => comp.includes(id));
+        if (m1 || m2 || m3 || m4) awardBadge('module_master');
+    }
+}
+
+function checkCourseCompleteBadge() {
+    const allSubjects = ['eda','redis','docker','graphql','rq','kubernetes','postgres','typescript'];
+    allSubjects.forEach(s => {
+        const store = SUBJECT_STORAGE[s];
+        const config = SUBJECT_CONFIG[s];
+        if (!store || !config) return;
+        const comp = JSON.parse(localStorage.getItem(store.completedLessons) || '[]');
+        if (comp.length >= config.totalLessons) awardBadge('course_complete');
+    });
+}
+
+function openAchievementsModal() {
+    const modal = document.getElementById('achievements-modal');
+    const content = document.getElementById('achievements-content');
+    const earned = getEarnedBadges();
+    const earnedMap = {};
+    earned.forEach(b => earnedMap[b.id] = b);
+
+    content.innerHTML = '<div class="badges-grid">' +
+        BADGE_DEFS.map(def => {
+            const earnedBadge = earnedMap[def.id];
+            const isUnlocked = !!earnedBadge;
+            const dateStr = isUnlocked ? new Date(earnedBadge.earnedAt).toLocaleDateString() : '';
+            return `<div class="badge-card ${isUnlocked ? 'unlocked' : 'locked'}">
+                <span class="badge-emoji">${def.emoji}</span>
+                <div class="badge-name">${def.name}</div>
+                <div class="badge-desc">${def.desc}</div>
+                ${isUnlocked ? `<div class="badge-date">Earned ${dateStr}</div>` : ''}
+            </div>`;
+        }).join('') + '</div>';
+
+    modal.classList.add('active');
+}
+
+function closeAchievementsModal() {
+    document.getElementById('achievements-modal').classList.remove('active');
+}
+
+document.getElementById('achievements-modal').addEventListener('click', e => {
+    if (e.target.id === 'achievements-modal') closeAchievementsModal();
+});
+
+// Patch _completeSubjectLesson to check badges
+(function() {
+    const _prev = window._completeSubjectLesson;
+    window._completeSubjectLesson = function() {
+        if (_prev) _prev();
+        setTimeout(() => checkBadgesAfterLesson(), 200);
+    };
+})();
+
+// Also patch the eda completeLesson (original)
+(function() {
+    const _prev = completeLesson;
+    completeLesson = function() {
+        _prev();
+        setTimeout(() => checkBadgesAfterLesson(), 200);
+    };
+})();
+
+
+// ============================================================
+// FEATURE 2: GLOBAL LESSON SEARCH
+// ============================================================
+
+let lessonIndex = null; // built lazily
+
+function buildLessonIndex() {
+    if (lessonIndex) return lessonIndex;
+    lessonIndex = [];
+    const subjectMeta = {
+        eda:        { icon: '🎯', name: 'EDA' },
+        redis:      { icon: '🔴', name: 'Redis' },
+        docker:     { icon: '🐳', name: 'Docker' },
+        graphql:    { icon: '🔮', name: 'GraphQL' },
+        rq:         { icon: '⚡', name: 'React Query' },
+        kubernetes: { icon: '☸️', name: 'Kubernetes' },
+        postgres:   { icon: '🐘', name: 'PostgreSQL' },
+        typescript: { icon: '🔷', name: 'TypeScript' },
+    };
+
+    // Build from DOM lesson cards (captures all content)
+    document.querySelectorAll('.subject-content').forEach(container => {
+        const subjectId = container.id.replace('-content', '');
+        const meta = subjectMeta[subjectId] || { icon: '📚', name: subjectId };
+        container.querySelectorAll('.lesson-card[data-lesson]').forEach(card => {
+            const lessonId = card.dataset.lesson;
+            const title = card.querySelector('h3')?.textContent?.trim() || '';
+            const desc = card.querySelector('p')?.textContent?.trim() || '';
+            lessonIndex.push({ lessonId, subjectId, title, desc, icon: meta.icon, subjectName: meta.name });
+        });
+    });
+
+    return lessonIndex;
+}
+
+function openSearch() {
+    const overlay = document.getElementById('search-overlay');
+    overlay.style.display = 'block';
+    const input = document.getElementById('search-input');
+    input.value = '';
+    document.getElementById('search-results').innerHTML = '';
+    input.focus();
+    buildLessonIndex();
+}
+
+function closeSearch() {
+    document.getElementById('search-overlay').style.display = 'none';
+}
+
+function handleSearchInput(query) {
+    const resultsEl = document.getElementById('search-results');
+    if (!query.trim()) { resultsEl.innerHTML = ''; return; }
+    const q = query.toLowerCase();
+    const index = buildLessonIndex();
+    const matches = index.filter(item =>
+        item.title.toLowerCase().includes(q) || item.desc.toLowerCase().includes(q)
+    ).slice(0, 12);
+
+    if (matches.length === 0) {
+        resultsEl.innerHTML = '<div class="search-no-results">No lessons found for "' + query + '"</div>';
+        return;
+    }
+
+    resultsEl.innerHTML = matches.map((item, i) =>
+        `<div class="search-result-item" data-idx="${i}" onclick="jumpToLesson('${item.subjectId}','${item.lessonId}')">
+            <span class="search-result-icon">${item.icon}</span>
+            <span class="search-result-title">${item.title}</span>
+            <span class="search-result-subject">${item.subjectName}</span>
+        </div>`
+    ).join('');
+}
+
+function jumpToLesson(subjectId, lessonId) {
+    closeSearch();
+    if (currentSubject !== subjectId) switchSubject(subjectId);
+    setTimeout(() => startLesson(lessonId), 100);
+}
+
+document.getElementById('search-input').addEventListener('input', function() {
+    handleSearchInput(this.value);
+});
+
+// Close search on outside click
+document.getElementById('search-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeSearch();
+});
+
+
+// ============================================================
+// FEATURE 3: DASHBOARD HOME TAB
+// ============================================================
+
+const ACTIVITY_LOG_KEY = 'eda_activity_log';
+
+function logActivity(subjectId, lessonId, lessonTitle) {
+    const log = JSON.parse(localStorage.getItem(ACTIVITY_LOG_KEY) || '[]');
+    log.unshift({ subjectId, lessonId, lessonTitle, timestamp: Date.now() });
+    if (log.length > 50) log.length = 50;
+    localStorage.setItem(ACTIVITY_LOG_KEY, JSON.stringify(log));
+}
+
+// Patch _completeSubjectLesson to log activity
+(function() {
+    const _prev = window._completeSubjectLesson;
+    window._completeSubjectLesson = function() {
+        const subjectId = currentSubject;
+        const lessonId = currentLesson;
+        const config = SUBJECT_CONFIG[subjectId];
+        const lessonTitle = config ? (config.lessons()[lessonId]?.title || lessonId) : lessonId;
+        if (_prev) _prev();
+        logActivity(subjectId, lessonId, lessonTitle);
+    };
+})();
+
+function showHomeDashboard() {
+    // Mark Home tab active
+    document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-home')?.classList.add('active');
+
+    // Hide all subject content
+    const allSubjects = ['eda','redis','docker','graphql','rq','kubernetes','postgres','typescript'];
+    allSubjects.forEach(s => {
+        const el = document.getElementById(s + '-content');
+        if (el) el.style.display = 'none';
+    });
+
+    // Show or create home-content
+    let homeEl = document.getElementById('home-content');
+    if (!homeEl) {
+        homeEl = document.createElement('div');
+        homeEl.id = 'home-content';
+        homeEl.className = 'container';
+        document.getElementById('main-content').appendChild(homeEl);
+    }
+    homeEl.style.display = 'block';
+    renderHomeDashboard(homeEl);
+    window.scrollTo(0, 0);
+}
+
+function renderHomeDashboard(container) {
+    const allSubjects = ['eda','redis','docker','graphql','rq','kubernetes','postgres','typescript'];
+    const subjectMeta = [
+        { id: 'eda',        icon: '🎯', name: 'EDA',          total: 20 },
+        { id: 'redis',      icon: '🔴', name: 'Redis',        total: 20 },
+        { id: 'docker',     icon: '🐳', name: 'Docker',       total: 13 },
+        { id: 'graphql',    icon: '🔮', name: 'GraphQL',      total: 11 },
+        { id: 'rq',         icon: '⚡', name: 'React Query',  total: 10 },
+        { id: 'kubernetes', icon: '☸️', name: 'Kubernetes',   total: 13 },
+        { id: 'postgres',   icon: '🐘', name: 'PostgreSQL',   total: 13 },
+        { id: 'typescript', icon: '🔷', name: 'TypeScript',   total: 13 },
+    ];
+
+    // Compute stats
+    let totalLessons = 0;
+    let totalXP = 0;
+    allSubjects.forEach(s => {
+        const store = SUBJECT_STORAGE[s];
+        if (!store) return;
+        totalLessons += JSON.parse(localStorage.getItem(store.completedLessons) || '[]').length;
+        totalXP += parseInt(localStorage.getItem(store.totalXP) || '0');
+    });
+    const streak = parseInt(localStorage.getItem('eda_streak') || '0');
+    const badgesEarned = getEarnedBadges().length;
+
+    // Recent activity
+    const activityLog = JSON.parse(localStorage.getItem(ACTIVITY_LOG_KEY) || '[]').slice(0, 3);
+
+    // Render
+    container.innerHTML = `
+        <h2 style="font-size:22px;font-weight:900;margin-bottom:20px;color:var(--text)">🏠 Dashboard</h2>
+
+        <!-- Hero stats -->
+        <div class="home-hero">
+            <div class="home-stat-card">
+                <span class="home-stat-num">${totalXP}</span>
+                <div class="home-stat-label">Total XP</div>
+            </div>
+            <div class="home-stat-card">
+                <span class="home-stat-num">${totalLessons}</span>
+                <div class="home-stat-label">Lessons Done</div>
+            </div>
+            <div class="home-stat-card">
+                <span class="home-stat-num">${streak}</span>
+                <div class="home-stat-label">🔥 Day Streak</div>
+            </div>
+            <div class="home-stat-card">
+                <span class="home-stat-num">${badgesEarned}</span>
+                <div class="home-stat-label">🏆 Badges</div>
+            </div>
+        </div>
+
+        <!-- Course progress -->
+        <div class="home-section-title">📚 Course Progress</div>
+        <div class="courses-grid">
+            ${subjectMeta.map(s => {
+                const store = SUBJECT_STORAGE[s.id];
+                const done = store ? JSON.parse(localStorage.getItem(store.completedLessons) || '[]').length : 0;
+                const pct = Math.round((done / s.total) * 100);
+                return `<div class="course-progress-card" onclick="switchSubject('${s.id}')">
+                    <div class="course-card-header">
+                        <span class="course-card-icon">${s.icon}</span>
+                        <span class="course-card-name">${s.name}</span>
+                    </div>
+                    <div class="course-card-bar-track">
+                        <div class="course-card-bar-fill" style="width:${pct}%"></div>
+                    </div>
+                    <div class="course-card-stats">
+                        <span>${done}/${s.total} lessons</span>
+                        <span style="color:var(--accent);font-weight:700">${pct}%</span>
+                    </div>
+                </div>`;
+            }).join('')}
+        </div>
+
+        <!-- Recent activity -->
+        <div class="home-section-title">⏱️ Recent Activity</div>
+        <div class="activity-list">
+            ${activityLog.length === 0
+                ? '<div class="no-activity">No activity yet — start a lesson!</div>'
+                : activityLog.map(item => {
+                    const subjectMeIcon = subjectMeta.find(s => s.id === item.subjectId)?.icon || '📚';
+                    const ago = timeAgo(item.timestamp);
+                    return `<div class="activity-item">
+                        <span class="activity-item-icon">${subjectMeIcon}</span>
+                        <span class="activity-item-title">${item.lessonTitle || item.lessonId}</span>
+                        <span class="activity-item-time">${ago}</span>
+                    </div>`;
+                }).join('')
+            }
+        </div>
+    `;
+}
+
+function timeAgo(ts) {
+    const diff = Date.now() - ts;
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return 'just now';
+    if (m < 60) return m + 'm ago';
+    const h = Math.floor(m / 60);
+    if (h < 24) return h + 'h ago';
+    const d = Math.floor(h / 24);
+    return d + 'd ago';
+}
+
+// Patch switchSubject to hide home-content
+(function() {
+    const _prev = switchSubject;
+    switchSubject = function(subject) {
+        const homeEl = document.getElementById('home-content');
+        if (homeEl) homeEl.style.display = 'none';
+        document.getElementById('tab-home')?.classList.remove('active');
+        _prev(subject);
+    };
+})();
+
+
+// ============================================================
+// FEATURE 4: KEYBOARD SHORTCUTS
+// ============================================================
+
+document.addEventListener('keydown', function(e) {
+    // Don't fire when typing in inputs/textareas (except Escape)
+    const inInput = e.target.matches('input, textarea, [contenteditable]');
+
+    // / — open search
+    if (e.key === '/' && !inInput) {
+        e.preventDefault();
+        openSearch();
+        return;
+    }
+
+    // Escape — close any open modal or search
+    if (e.key === 'Escape') {
+        if (document.getElementById('search-overlay').style.display !== 'none') {
+            closeSearch(); return;
+        }
+        if (document.getElementById('achievements-modal')?.classList.contains('active')) {
+            closeAchievementsModal(); return;
+        }
+        if (document.getElementById('lesson-modal')?.classList.contains('active')) {
+            closeLesson(); return;
+        }
+        if (document.getElementById('flashcard-modal')?.classList.contains('active')) {
+            closeFlashcards(); return;
+        }
+        if (document.getElementById('challenge-modal')?.classList.contains('active')) {
+            closeDailyChallenge(); return;
+        }
+    }
+
+    // Flashcard shortcuts (only when flashcard modal is open)
+    if (document.getElementById('flashcard-modal')?.classList.contains('active')) {
+        if (e.key === 'ArrowRight') { nextCard(); return; }
+        if (e.key === 'ArrowLeft') { prevCard(); return; }
+        if (e.key === ' ') { e.preventDefault(); flipCard(); return; }
+    }
+
+    // n — next lesson (when lesson modal is open)
+    if (e.key === 'n' && !inInput) {
+        if (document.getElementById('lesson-modal')?.classList.contains('active')) {
+            const nextBtn = document.getElementById('btn-next-lesson');
+            if (nextBtn && nextBtn.style.display !== 'none') goToNextLesson();
+            return;
+        }
+    }
+});

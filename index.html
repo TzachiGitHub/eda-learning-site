@@ -24,6 +24,10 @@
                 <span class="sidebar-brand-text">DevLearn</span>
             </div>
             <nav class="sidebar-nav">
+                <button class="sidebar-item home-tab-btn" id="tab-home" onclick="showHomeDashboard()">
+                    <span class="sidebar-item-icon">🏠</span>
+                    <span class="sidebar-item-text">Home</span>
+                </button>
                 <div class="sidebar-nav-label">COURSES</div>
                 <button class="sidebar-item active" id="tab-eda" onclick="switchSubject('eda')">
                     <span class="sidebar-item-icon">🎯</span>
@@ -72,6 +76,20 @@
                 <button class="sidebar-setting-btn" onclick="changeFontSize(1)">A+ Font</button>
                 <button class="sidebar-setting-btn" id="focus-mode-btn" onclick="toggleFocusMode()">🎯 Focus</button>
                 <button class="sidebar-setting-btn" onclick="shareProgress()">📤 Share</button>
+                <button class="sidebar-setting-btn" onclick="openAchievementsModal()">🏆 Achievements</button>
+                <button class="sidebar-setting-btn" onclick="openSearch()">🔍 Search</button>
+                <div class="shortcuts-btn-wrapper">
+                    <button class="sidebar-setting-btn" id="shortcuts-btn">⌨️ Shortcuts</button>
+                    <div class="shortcuts-tooltip" id="shortcuts-tooltip">
+                        <div class="shortcuts-tooltip-title">Keyboard Shortcuts</div>
+                        <div class="shortcut-row"><kbd>/</kbd> Open search</div>
+                        <div class="shortcut-row"><kbd>Esc</kbd> Close modal</div>
+                        <div class="shortcut-row"><kbd>→</kbd> Next flashcard</div>
+                        <div class="shortcut-row"><kbd>←</kbd> Prev flashcard</div>
+                        <div class="shortcut-row"><kbd>Space</kbd> Flip flashcard</div>
+                        <div class="shortcut-row"><kbd>n</kbd> Next lesson</div>
+                    </div>
+                </div>
             </div>
         </aside>
 
@@ -584,6 +602,28 @@
 
     <!-- Confetti Container (Phase 4.3) -->
     <div id="confetti-container"></div>
+
+    <!-- Achievements Modal -->
+    <div class="modal" id="achievements-modal">
+        <div class="modal-content modal-achievements">
+            <div class="modal-header">
+                <h2>🏆 Achievements</h2>
+                <button class="btn-close" onclick="closeAchievementsModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="achievements-content">
+                <!-- Badges rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Search Overlay -->
+    <div id="search-overlay" class="search-overlay" style="display:none">
+        <div class="search-bar-wrapper">
+            <span class="search-icon-inline">🔍</span>
+            <input type="text" id="search-input" class="search-input" placeholder="Search lessons… (Esc to close)" autocomplete="off" />
+        </div>
+        <div class="search-results" id="search-results"></div>
+    </div>
 
     <script src="redis-lessons.js"></script>
     <script src="docker-lessons.js"></script>
