@@ -3545,3 +3545,797 @@ document.addEventListener('keydown', function(e) {
         if (idx > 0) navigateToLesson(order[idx - 1]);
     }
 });
+
+// ============================================================
+// SPRINT 2: UI/UX ENHANCEMENTS
+// ============================================================
+
+// --- S2.1: Build connected-node sidebar TOC ---
+function buildSidebarTOC(subject) {
+    const config = SUBJECT_CONFIG[subject];
+    if (!config) return;
+    const allLessons = config.lessons();
+    const completed = JSON.parse(localStorage.getItem(
+        (SUBJECT_STORAGE[subject]?.completedLessons) || '[]') || '[]');
+
+    // Find the subject content pane - look for module sections
+    const contentEl = document.getElementById(subject + '-content');
+    if (!contentEl) return;
+
+    // Find existing sidebar nav for this subject — build inside the sidebar
+    // We insert a TOC list below the active sidebar item
+    let tocEl = document.getElementById('sidebar-toc-' + subject);
+    if (!tocEl) {
+        tocEl = document.createElement('div');
+        tocEl.id = 'sidebar-toc-' + subject;
+        tocEl.className = 'sidebar-toc';
+        const tabBtn = document.getElementById('tab-' + subject);
+        if (tabBtn && tabBtn.parentNode) {
+            tabBtn.parentNode.insertBefore(tocEl, tabBtn.nextSibling);
+        }
+    }
+    tocEl.innerHTML = '';
+
+    // Group lessons by module
+    const modules = {};
+    contentEl.querySelectorAll('.module').forEach(mod => {
+        const h2 = mod.querySelector('.module-header h2');
+        const modName = h2 ? h2.textContent.trim() : 'Module';
+        const lessonCards = mod.querySelectorAll('.lesson-card[data-lesson]');
+        const lessonIds = [...lessonCards].map(c => c.dataset.lesson);
+        modules[modName] = lessonIds;
+    });
+
+    Object.entries(modules).forEach(([modName, lessonIds]) => {
+        const modWrap = document.createElement('div');
+        modWrap.className = 'toc-module';
+
+        const modNode = document.createElement('span');
+        modNode.className = 'toc-module-node';
+        const modLabel = document.createElement('span');
+        modLabel.className = 'toc-module-label';
+        modLabel.textContent = modName.replace(/^[^\s]+\s*/, '').trim();
+
+        modWrap.appendChild(modNode);
+        modWrap.appendChild(modLabel);
+
+        lessonIds.forEach(lid => {
+            const lesson = allLessons[lid];
+            if (!lesson) return;
+            const lessonWrap = document.createElement('div');
+            lessonWrap.className = 'toc-lesson';
+            lessonWrap.dataset.lessonId = lid;
+            if (completed.includes(lid)) lessonWrap.classList.add('completed');
+            if (lid === currentLesson) lessonWrap.classList.add('current');
+
+            const node = document.createElement('span');
+            node.className = 'toc-lesson-node';
+            const btn = document.createElement('button');
+            btn.className = 'toc-lesson-btn';
+            btn.textContent = lesson.title.replace(/^\d+\.\d+\s*/, '');
+            btn.title = lesson.title;
+            btn.addEventListener('click', () => startLesson(lid));
+
+            lessonWrap.appendChild(node);
+            lessonWrap.appendChild(btn);
+            modWrap.appendChild(lessonWrap);
+        });
+
+        tocEl.appendChild(modWrap);
+    });
+}
+
+function updateSidebarTOCState(subject, currentLessonId) {
+    const tocEl = document.getElementById('sidebar-toc-' + subject);
+    if (!tocEl) return;
+    const completed = JSON.parse(localStorage.getItem(
+        (SUBJECT_STORAGE[subject]?.completedLessons) || '[]') || '[]');
+    tocEl.querySelectorAll('.toc-lesson').forEach(el => {
+        const lid = el.dataset.lessonId;
+        el.classList.toggle('current', lid === currentLessonId);
+        el.classList.toggle('completed', completed.includes(lid));
+    });
+}
+
+// --- S2.2: 'What you'll learn' callout ---
+function injectWhatYoullLearn(lessonContent, lessonId) {
+    const contentEl = document.getElementById('lesson-content');
+    if (!contentEl) return;
+
+    // Remove existing
+    const existing = contentEl.querySelector('.callout-learn');
+    if (existing) existing.remove();
+
+    // Extract bullets from h3 headings or first sentences of paragraphs
+    const tmp = document.createElement('div');
+    tmp.innerHTML = lessonContent;
+    const headings = [...tmp.querySelectorAll('h3')].slice(0, 5);
+    let bullets = headings.map(h => h.textContent.replace(/^[^\w]+/, '').trim()).filter(Boolean);
+
+    // If few headings, fall back to first sentence of paragraphs
+    if (bullets.length < 3) {
+        const paras = [...tmp.querySelectorAll('p')].slice(0, 5);
+        bullets = paras.map(p => {
+            const txt = p.textContent.trim();
+            const sent = txt.split(/[.!?]/)[0].trim();
+            return sent.length > 20 && sent.length < 90 ? sent : null;
+        }).filter(Boolean).slice(0, 5);
+    }
+
+    if (!bullets.length) return;
+
+    const callout = document.createElement('div');
+    callout.className = 'callout-learn';
+    callout.innerHTML = '<strong>In this lesson:</strong><ul>' +
+        bullets.map(b => '<li>' + b + '</li>').join('') + '</ul>';
+
+    contentEl.insertBefore(callout, contentEl.firstChild);
+}
+
+// --- S2.4: Language label on code blocks ---
+function addLanguageLabels() {
+    const contentEl = document.getElementById('lesson-content');
+    if (!contentEl) return;
+
+    contentEl.querySelectorAll('.code-wrapper').forEach(wrapper => {
+        if (wrapper.querySelector('.code-lang-badge')) return;
+        const pre = wrapper.querySelector('pre');
+        if (!pre) return;
+
+        // Detect language from class or content
+        let lang = 'code';
+        const code = pre.querySelector('code');
+        const cls = (code?.className || pre.className || '');
+        const match = cls.match(/language-(\w+)/);
+        if (match) {
+            lang = match[1];
+        } else {
+            const text = (code || pre).textContent.trim();
+            if (text.startsWith('{') || text.startsWith('[')) lang = 'json';
+            else if (text.includes('kubectl') || text.includes('docker ') || text.includes('$ ')) lang = 'bash';
+            else if (text.includes('SELECT ') || text.includes('INSERT ') || text.includes('CREATE TABLE')) lang = 'sql';
+            else if (text.includes('apiVersion:') || text.includes('kind:')) lang = 'yaml';
+            else if (text.includes('interface ') || text.includes(': string') || text.includes(': number')) lang = 'ts';
+            else if (text.includes('function') || text.includes('const ') || text.includes('=>')) lang = 'js';
+        }
+
+        const badge = document.createElement('span');
+        badge.className = 'code-lang-badge';
+        badge.textContent = lang;
+        wrapper.appendChild(badge);
+    });
+}
+
+// --- S2.5: Author credit below modal header ---
+function injectAuthorCredit(lessonId) {
+    const modalContent = document.getElementById('lesson-modal')?.querySelector('.modal-content');
+    if (!modalContent) return;
+    const existing = modalContent.querySelector('.lesson-author-credit');
+    if (existing) existing.remove();
+
+    const config = SUBJECT_CONFIG[currentSubject];
+    const lesson = config?.lessons()[lessonId];
+    const mins = lesson ? estimateReadingTime(lesson.content) : 5;
+
+    const credit = document.createElement('div');
+    credit.className = 'lesson-author-credit';
+    credit.innerHTML = '<span>by <strong>DevLearn</strong></span><span class="sep">·</span><span>' + mins + ' min read</span>';
+
+    const posEl = modalContent.querySelector('.lesson-position');
+    const navBar = modalContent.querySelector('.lesson-nav-bar');
+    const insertAfter = navBar || posEl || modalContent.querySelector('.modal-header');
+    if (insertAfter?.nextSibling) {
+        modalContent.insertBefore(credit, insertAfter.nextSibling);
+    }
+}
+
+// --- S2.6: Upgrade modal bottom nav to cards ---
+function upgradeNavToCards(lessonId) {
+    const modalContent = document.getElementById('lesson-modal')?.querySelector('.modal-content');
+    if (!modalContent) return;
+
+    // Remove old bottom nav
+    const oldNav = modalContent.querySelector('.modal-bottom-nav');
+    if (oldNav) oldNav.remove();
+
+    const order = getSubjectLessonOrder();
+    const idx = order.indexOf(lessonId);
+    if (idx < 0) return;
+
+    const config = SUBJECT_CONFIG[currentSubject];
+    const subjectLessons = config ? config.lessons() : {};
+    const prevId = idx > 0 ? order[idx - 1] : null;
+    const nextId = idx < order.length - 1 ? order[idx + 1] : null;
+    const prevLesson = prevId ? subjectLessons[prevId] : null;
+    const nextLesson = nextId ? subjectLessons[nextId] : null;
+
+    const container = document.createElement('div');
+    container.className = 'nav-cards-container';
+
+    const prevCard = document.createElement('button');
+    prevCard.className = 'nav-card';
+    if (prevLesson) {
+        prevCard.innerHTML = '<span class="nav-card-direction">← Previous</span>' +
+            '<span class="nav-card-title">' + prevLesson.title.replace(/^\d+\.\d+\s*/, '') + '</span>';
+        prevCard.addEventListener('click', () => navigateToLesson(prevId));
+    } else {
+        prevCard.innerHTML = '<span class="nav-card-direction">← Previous</span><span class="nav-card-title">—</span>';
+        prevCard.disabled = true;
+    }
+
+    const nextCard = document.createElement('button');
+    nextCard.className = 'nav-card nav-card-next';
+    if (nextLesson) {
+        nextCard.innerHTML = '<span class="nav-card-direction">Next →</span>' +
+            '<span class="nav-card-title">' + nextLesson.title.replace(/^\d+\.\d+\s*/, '') + '</span>';
+        nextCard.addEventListener('click', () => navigateToLesson(nextId));
+    } else {
+        nextCard.innerHTML = '<span class="nav-card-direction">Next →</span><span class="nav-card-title">—</span>';
+        nextCard.disabled = true;
+    }
+
+    container.appendChild(prevCard);
+    container.appendChild(nextCard);
+    modalContent.appendChild(container);
+}
+
+// --- S2.7: Schema collapsible panel ---
+const SUBJECT_SCHEMAS = {
+    postgres: `-- Example tables used in this lesson
+CREATE TABLE users (
+  id       SERIAL PRIMARY KEY,
+  name     VARCHAR(100) NOT NULL,
+  email    VARCHAR(255) UNIQUE,
+  created  TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE orders (
+  id         SERIAL PRIMARY KEY,
+  user_id    INTEGER REFERENCES users(id),
+  total      NUMERIC(10,2),
+  status     VARCHAR(50)
+);`,
+    redis: `# Key/Value
+SET user:1001:name "Alice"
+GET user:1001:name   → "Alice"
+
+# Hash
+HSET user:1001 name "Alice" age 30 city "Tel Aviv"
+HGETALL user:1001
+
+# List
+RPUSH messages "msg1" "msg2"
+LRANGE messages 0 -1
+
+# Set / Sorted Set
+SADD tags "nodejs" "redis"
+ZADD leaderboard 100 "alice" 85 "bob"`
+};
+
+function injectSchemaPanel(subject, lessonId) {
+    const schema = SUBJECT_SCHEMAS[subject];
+    if (!schema) return;
+
+    const contentEl = document.getElementById('lesson-content');
+    if (!contentEl) return;
+    if (contentEl.querySelector('.schema-panel')) return;
+
+    const details = document.createElement('details');
+    details.className = 'schema-panel';
+    details.innerHTML = '<summary>📋 Data Schema</summary>' +
+        '<div class="schema-content">' + schema + '</div>';
+
+    // Insert at top, after the callout-learn if it exists
+    const learnCallout = contentEl.querySelector('.callout-learn');
+    if (learnCallout) {
+        learnCallout.insertAdjacentElement('afterend', details);
+    } else {
+        contentEl.insertBefore(details, contentEl.firstChild);
+    }
+}
+
+// --- S2.9: 'On this page' anchor nav ---
+function injectOnThisPage() {
+    const contentEl = document.getElementById('lesson-content');
+    if (!contentEl) return;
+    contentEl.querySelector('.on-this-page')?.remove();
+
+    const headings = [...contentEl.querySelectorAll('h2, h3')];
+    if (headings.length < 3) return; // Only for long lessons
+
+    // Add IDs to headings
+    headings.forEach((h, i) => {
+        if (!h.id) h.id = 'section-' + i;
+    });
+
+    const nav = document.createElement('div');
+    nav.className = 'on-this-page';
+    nav.innerHTML = '<div class="on-this-page-title">On this page</div>' +
+        headings.map(h => '<a href="#' + h.id + '">' + h.textContent.replace(/^[^\w]+/, '').trim() + '</a>').join('');
+
+    nav.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', e => {
+            e.preventDefault();
+            const target = contentEl.querySelector(a.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    contentEl.insertBefore(nav, contentEl.firstChild);
+}
+
+// --- Patch startLesson to inject all Sprint 2 features ---
+(function() {
+    const _prevS1 = startLesson;
+    startLesson = function(lessonId) {
+        _prevS1(lessonId);
+
+        const modal = document.getElementById('lesson-modal');
+        if (!modal || !modal.classList.contains('active')) return;
+
+        // Get lesson content
+        const config = SUBJECT_CONFIG[currentSubject];
+        const lesson = config?.lessons()[lessonId];
+
+        // S2.2: What you'll learn callout
+        if (lesson) injectWhatYoullLearn(lesson.content, lessonId);
+
+        // S2.4: Language labels (after copy buttons from Sprint 1)
+        addLanguageLabels();
+
+        // S2.5: Author credit
+        injectAuthorCredit(lessonId);
+
+        // S2.6: Upgrade bottom nav to cards
+        upgradeNavToCards(lessonId);
+
+        // S2.7: Schema panel for relevant subjects
+        injectSchemaPanel(currentSubject, lessonId);
+
+        // S2.9: On this page nav
+        injectOnThisPage();
+
+        // S2.1: Update TOC state
+        updateSidebarTOCState(currentSubject, lessonId);
+    };
+})();
+
+// --- Patch switchSubject to build TOC ---
+(function() {
+    const _prevSwitch = switchSubject;
+    switchSubject = function(subject) {
+        _prevSwitch(subject);
+        // Hide all TOCs
+        document.querySelectorAll('[id^="sidebar-toc-"]').forEach(el => el.style.display = 'none');
+        // Show/build for current subject
+        setTimeout(() => {
+            buildSidebarTOC(subject);
+            const tocEl = document.getElementById('sidebar-toc-' + subject);
+            if (tocEl) tocEl.style.display = '';
+        }, 100);
+    };
+})();
+
+// Build TOC for default subject on load
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        if (currentSubject) buildSidebarTOC(currentSubject);
+    }, 300);
+});
+
+// ============================================================
+// SPRINT 2: UI/UX ENHANCEMENTS
+// ============================================================
+
+// --- S2.1: Build vertical connected-node sidebar TOC ---
+function buildSidebarTOC(subjectId) {
+    const config = SUBJECT_CONFIG[subjectId];
+    if (!config) return;
+    const container = document.querySelector('.lessons-container, #lessons-container, .subject-content');
+    if (!container) return;
+
+    // Find the sidebar nav area to inject TOC (below subject buttons area)
+    // We inject a floating TOC inside the sidebar when a subject is active
+    let toc = document.getElementById('sidebar-toc-' + subjectId);
+    if (toc) { toc.remove(); }
+
+    const subjectLessons = config.lessons();
+    const lessonIds = Object.keys(subjectLessons);
+    const completed = JSON.parse(localStorage.getItem(
+        SUBJECT_STORAGE[subjectId]?.completedLessons || STORAGE_KEYS.completedLessons
+    ) || '[]');
+
+    // Group lessons by module number
+    const modules = {};
+    lessonIds.forEach(id => {
+        const mod = id.split('-')[0];
+        if (!modules[mod]) modules[mod] = [];
+        modules[mod].push(id);
+    });
+
+    // Build the TOC HTML
+    toc = document.createElement('div');
+    toc.className = 'sidebar-toc';
+    toc.id = 'sidebar-toc-' + subjectId;
+
+    Object.entries(modules).forEach(([modNum, ids]) => {
+        // Find module name from the DOM
+        const modEl = document.getElementById('module-' + modNum);
+        const modName = modEl
+            ? (modEl.querySelector('.module-header h2')?.textContent.replace(/^[^\s]+\s*/, '').trim() || 'Module ' + modNum)
+            : 'Module ' + modNum;
+
+        const modDiv = document.createElement('div');
+        modDiv.className = 'toc-module';
+        modDiv.innerHTML = '<span class="toc-module-node"></span><span class="toc-module-label">' + modName + '</span>';
+
+        ids.forEach(lessonId => {
+            const lesson = subjectLessons[lessonId];
+            const isDone = completed.includes(lessonId);
+            const isCurrent = lessonId === currentLesson;
+
+            const lessonDiv = document.createElement('div');
+            lessonDiv.className = 'toc-lesson' + (isDone ? ' completed' : '') + (isCurrent ? ' current' : '');
+            lessonDiv.id = 'toc-node-' + lessonId;
+
+            const node = document.createElement('span');
+            node.className = 'toc-lesson-node';
+
+            const btn = document.createElement('button');
+            btn.className = 'toc-lesson-btn';
+            btn.textContent = lesson.title.replace(/^\d+\.\d+\s*/, '');
+            btn.title = lesson.title;
+            btn.addEventListener('click', () => startLesson(lessonId));
+
+            lessonDiv.appendChild(node);
+            lessonDiv.appendChild(btn);
+            modDiv.appendChild(lessonDiv);
+        });
+
+        toc.appendChild(modDiv);
+    });
+
+    // Inject into sidebar below the active subject button
+    const activeBtn = document.getElementById('tab-' + subjectId);
+    if (activeBtn && activeBtn.parentNode) {
+        // Remove any existing TOC first
+        document.querySelectorAll('.sidebar-toc').forEach(el => el.remove());
+        activeBtn.parentNode.insertBefore(toc, activeBtn.nextSibling);
+    }
+}
+
+// Update TOC node state when a lesson changes
+function updateSidebarTOCState(lessonId) {
+    document.querySelectorAll('.toc-lesson').forEach(el => {
+        el.classList.remove('current');
+    });
+    const node = document.getElementById('toc-node-' + lessonId);
+    if (node) {
+        node.classList.add('current');
+        node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+// --- S2.2: 'What you'll learn' callout at top of lesson ---
+function injectWhatYoullLearn(lessonId) {
+    const contentEl = document.getElementById('lesson-content');
+    if (!contentEl) return;
+
+    // Remove existing
+    contentEl.querySelector('.callout-learn')?.remove();
+
+    const config = SUBJECT_CONFIG[currentSubject];
+    const lesson = config?.lessons()[lessonId];
+    if (!lesson) return;
+
+    // Extract headings or first sentences of paragraphs as bullets
+    const tmp = document.createElement('div');
+    tmp.innerHTML = lesson.content;
+
+    const bullets = [];
+
+    // Prefer h3 headings
+    tmp.querySelectorAll('h3').forEach(h => {
+        const txt = h.textContent.replace(/^[^\w]+/, '').replace(/🎯|📖|🔑|💡|✅|🌟|🔧|⚡|🚀|🔥|💻|🏗/g, '').trim();
+        if (txt && bullets.length < 5 && !txt.toLowerCase().includes('key takeaway') && !txt.toLowerCase().includes('quick check')) {
+            bullets.push(txt);
+        }
+    });
+
+    // Fallback: first sentence of first paragraphs
+    if (bullets.length < 3) {
+        tmp.querySelectorAll('p').forEach(p => {
+            if (bullets.length >= 5) return;
+            const txt = p.textContent.split('.')[0].trim();
+            if (txt && txt.length > 20 && txt.length < 100) bullets.push(txt);
+        });
+    }
+
+    if (bullets.length === 0) return;
+
+    const callout = document.createElement('div');
+    callout.className = 'callout-learn';
+    callout.innerHTML = '<strong>In this lesson:</strong><ul>' +
+        bullets.slice(0, 5).map(b => '<li>' + b + '</li>').join('') +
+        '</ul>';
+
+    contentEl.insertBefore(callout, contentEl.firstChild);
+}
+
+// --- S2.3: Language labels on code blocks ---
+function addLanguageLabels() {
+    const contentEl = document.getElementById('lesson-content');
+    if (!contentEl) return;
+
+    contentEl.querySelectorAll('.code-wrapper, pre').forEach(el => {
+        const pre = el.tagName === 'PRE' ? el : el.querySelector('pre');
+        if (!pre) return;
+        const wrapper = pre.parentElement.classList.contains('code-wrapper') ? pre.parentElement : null;
+        if (!wrapper) return;
+
+        // Skip if already has label
+        if (wrapper.querySelector('.code-lang-badge')) return;
+
+        // Detect language
+        let lang = '';
+        const cls = (pre.className + ' ' + (pre.querySelector('code')?.className || '')).toLowerCase();
+        if (/language-ts|typescript|\.tsx?/.test(cls)) lang = 'ts';
+        else if (/language-js|javascript/.test(cls)) lang = 'js';
+        else if (/language-bash|language-sh|shell/.test(cls)) lang = 'bash';
+        else if (/language-yaml|language-yml/.test(cls)) lang = 'yaml';
+        else if (/language-json/.test(cls)) lang = 'json';
+        else if (/language-sql|postgres|postgresql/.test(cls)) lang = 'sql';
+        else if (/language-py|python/.test(cls)) lang = 'py';
+        else if (/language-go/.test(cls)) lang = 'go';
+        else {
+            // Infer from content
+            const txt = pre.textContent.slice(0, 200);
+            if (/SELECT|INSERT|UPDATE|FROM\s+\w/i.test(txt)) lang = 'sql';
+            else if (/^FROM\s+\w|^RUN\s|^CMD\s|^ENTRYPOINT/m.test(txt)) lang = 'docker';
+            else if (/apiVersion:|kind:\s*(Pod|Deployment)/m.test(txt)) lang = 'yaml';
+            else if (/^\s*{[\s\S]*"[\w]+"\s*:/m.test(txt)) lang = 'json';
+            else if (/function|const |let |var |=>|import |export /.test(txt)) lang = 'js';
+            else if (/SET\s+\w+|GET\s+\w+|HSET\s+|ZADD\s+/i.test(txt)) lang = 'redis';
+        }
+
+        if (!lang) return;
+        const badge = document.createElement('span');
+        badge.className = 'code-lang-badge';
+        badge.textContent = lang;
+        wrapper.appendChild(badge);
+    });
+}
+
+// --- S2.4: Author credit line ---
+function injectAuthorCredit(lessonId) {
+    const modalContent = document.getElementById('lesson-modal')?.querySelector('.modal-content');
+    if (!modalContent) return;
+    modalContent.querySelector('.lesson-author-credit')?.remove();
+
+    const config = SUBJECT_CONFIG[currentSubject];
+    const lesson = config?.lessons()[lessonId];
+    const mins = lesson ? estimateReadingTime(lesson.content) : 5;
+
+    const credit = document.createElement('div');
+    credit.className = 'lesson-author-credit';
+    credit.innerHTML = 'by DevLearn <span class="sep">·</span> ' + mins + ' min read';
+
+    const posEl = modalContent.querySelector('.lesson-position');
+    const navBar = modalContent.querySelector('.lesson-nav-bar');
+    const insertAfter = navBar || posEl || modalContent.querySelector('.modal-header');
+    if (insertAfter?.nextSibling) {
+        modalContent.insertBefore(credit, insertAfter.nextSibling);
+    }
+}
+
+// --- S2.5: Schema collapsible panel for Redis & PostgreSQL ---
+const SUBJECT_SCHEMAS = {
+    redis: `# Redis Data Structures Example
+# Strings
+SET user:1:name "Alice"
+GET user:1:name  # → "Alice"
+
+# Hashes
+HSET user:1 name "Alice" age 30 role "admin"
+HGET user:1 name  # → "Alice"
+
+# Lists
+RPUSH queue:jobs "job1" "job2" "job3"
+LPOP queue:jobs  # → "job1"
+
+# Sets
+SADD tags:post:1 "nodejs" "redis" "backend"
+SMEMBERS tags:post:1
+
+# Sorted Sets
+ZADD leaderboard 1500 "alice" 1200 "bob"
+ZRANGE leaderboard 0 -1 WITHSCORES`,
+
+    postgres: `-- Sample Schema
+CREATE TABLE users (
+  id         SERIAL PRIMARY KEY,
+  name       VARCHAR(100) NOT NULL,
+  email      VARCHAR(255) UNIQUE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE posts (
+  id         SERIAL PRIMARY KEY,
+  user_id    INT REFERENCES users(id),
+  title      TEXT NOT NULL,
+  body       TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE tags (
+  id   SERIAL PRIMARY KEY,
+  name VARCHAR(50) UNIQUE NOT NULL
+);
+
+CREATE TABLE post_tags (
+  post_id INT REFERENCES posts(id),
+  tag_id  INT REFERENCES tags(id),
+  PRIMARY KEY (post_id, tag_id)
+);`
+};
+
+function injectSchemaPanel() {
+    const contentEl = document.getElementById('lesson-content');
+    if (!contentEl) return;
+
+    contentEl.querySelector('.schema-panel')?.remove();
+
+    const schema = SUBJECT_SCHEMAS[currentSubject];
+    if (!schema) return;
+
+    const label = currentSubject === 'redis' ? '🔴 Redis Data Schema' : '🐘 PostgreSQL Schema';
+    const panel = document.createElement('details');
+    panel.className = 'schema-panel';
+    panel.innerHTML = '<summary>' + label + '</summary><div class="schema-content">' + schema + '</div>';
+
+    // Insert before first h3 or at top of content
+    const firstH3 = contentEl.querySelector('h3');
+    if (firstH3) {
+        contentEl.insertBefore(panel, firstH3);
+    } else {
+        contentEl.insertBefore(panel, contentEl.firstChild);
+    }
+}
+
+// --- S2.6: Upgrade bottom nav to styled cards ---
+function upgradeNavToCards(lessonId) {
+    const modalContent = document.getElementById('lesson-modal')?.querySelector('.modal-content');
+    if (!modalContent) return;
+
+    // Remove old modal-bottom-nav (from Sprint 1)
+    modalContent.querySelector('.modal-bottom-nav')?.remove();
+    modalContent.querySelector('.nav-cards-container')?.remove();
+
+    const order = getSubjectLessonOrder();
+    const idx = order.indexOf(lessonId);
+    if (idx < 0) return;
+
+    const config = SUBJECT_CONFIG[currentSubject];
+    const subjectLessons = config ? config.lessons() : {};
+
+    const prevId = idx > 0 ? order[idx - 1] : null;
+    const nextId = idx < order.length - 1 ? order[idx + 1] : null;
+    const prevLesson = prevId ? subjectLessons[prevId] : null;
+    const nextLesson = nextId ? subjectLessons[nextId] : null;
+
+    const container = document.createElement('div');
+    container.className = 'nav-cards-container';
+
+    // Prev card
+    const prevCard = document.createElement('button');
+    prevCard.className = 'nav-card nav-card-prev';
+    if (prevLesson) {
+        prevCard.innerHTML = '<span class="nav-card-direction">← Previous</span>' +
+            '<span class="nav-card-title">' + prevLesson.title.replace(/^\d+\.\d+\s*/, '') + '</span>';
+        prevCard.addEventListener('click', () => navigateToLesson(prevId));
+    } else {
+        prevCard.innerHTML = '<span class="nav-card-direction">← Previous</span><span class="nav-card-title">First lesson</span>';
+        prevCard.disabled = true;
+    }
+
+    // Next card
+    const nextCard = document.createElement('button');
+    nextCard.className = 'nav-card nav-card-next';
+    if (nextLesson) {
+        nextCard.innerHTML = '<span class="nav-card-direction">Next →</span>' +
+            '<span class="nav-card-title">' + nextLesson.title.replace(/^\d+\.\d+\s*/, '') + '</span>';
+        nextCard.addEventListener('click', () => navigateToLesson(nextId));
+    } else {
+        nextCard.innerHTML = '<span class="nav-card-direction">Next →</span><span class="nav-card-title">Last lesson</span>';
+        nextCard.disabled = true;
+    }
+
+    container.appendChild(prevCard);
+    container.appendChild(nextCard);
+    modalContent.appendChild(container);
+}
+
+// --- S2.7: 'On this page' anchor nav for long lessons ---
+function injectOnThisPage() {
+    const contentEl = document.getElementById('lesson-content');
+    if (!contentEl) return;
+
+    contentEl.querySelector('.on-this-page')?.remove();
+
+    // Count words
+    const wordCount = contentEl.textContent.replace(/\s+/g, ' ').split(' ').length;
+    if (wordCount < 400) return;
+
+    // Extract h3s, add ids
+    const headings = [];
+    contentEl.querySelectorAll('h3').forEach((h, i) => {
+        const id = 'section-' + i + '-' + h.textContent.replace(/[^a-z0-9]/gi, '-').toLowerCase().slice(0, 30);
+        h.id = id;
+        const txt = h.textContent.replace(/^[^\w]+/, '').replace(/[🎯📖🔑💡✅🌟🔧⚡🚀🔥💻🏗]/g, '').trim();
+        if (txt) headings.push({ id, txt });
+    });
+
+    if (headings.length < 2) return;
+
+    const nav = document.createElement('div');
+    nav.className = 'on-this-page';
+    nav.innerHTML = '<div class="on-this-page-title">On this page</div>' +
+        headings.map(h =>
+            '<a href="#' + h.id + '" onclick="event.preventDefault();document.getElementById(\'' + h.id + '\')?.scrollIntoView({behavior:\'smooth\'})">' + h.txt + '</a>'
+        ).join('');
+
+    contentEl.insertBefore(nav, contentEl.firstChild);
+}
+
+// --- S2: Patch startLesson to inject Sprint 2 features ---
+(function() {
+    const _prevStart = startLesson;
+    startLesson = function(lessonId) {
+        _prevStart(lessonId);
+
+        const modal = document.getElementById('lesson-modal');
+        if (!modal || !modal.classList.contains('active')) return;
+
+        // S2.2: What you'll learn
+        injectWhatYoullLearn(lessonId);
+
+        // S2.3: Language labels (after copy buttons from S1)
+        addLanguageLabels();
+
+        // S2.4: Author credit
+        injectAuthorCredit(lessonId);
+
+        // S2.5: Schema panel (Redis/PostgreSQL only)
+        if (currentSubject === 'redis' || currentSubject === 'postgres') {
+            injectSchemaPanel();
+        }
+
+        // S2.6: Nav cards (replaces Sprint 1 bottom buttons)
+        upgradeNavToCards(lessonId);
+
+        // S2.7: On this page
+        injectOnThisPage();
+
+        // S2.1: Update sidebar TOC state
+        updateSidebarTOCState(lessonId);
+    };
+})();
+
+// --- S2: Patch switchSubject to build sidebar TOC ---
+(function() {
+    const _prevSwitch = switchSubject;
+    switchSubject = function(subjectId) {
+        _prevSwitch(subjectId);
+        // Build TOC after content renders (slight delay for DOM)
+        setTimeout(() => buildSidebarTOC(subjectId), 150);
+    };
+})();
+
+// Build TOC on initial load
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        if (typeof currentSubject !== 'undefined' && currentSubject) {
+            buildSidebarTOC(currentSubject);
+        }
+    }, 300);
+});
