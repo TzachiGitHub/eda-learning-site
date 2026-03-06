@@ -671,6 +671,7 @@ Publisher 3 ──┘                            ├──> Subscriber 2
             </ul>
 
             <h3>⚠️ Challenges</h3>
+            <div class="callout-warning"><strong>Warning:</strong> Event Sourcing adds significant complexity. Don't use it for simple CRUD apps — the overhead of maintaining an event store, handling schema evolution, and managing snapshots is only worth it when you genuinely need a full audit trail or time-travel debugging.</div>
             <ul>
                 <li><strong>Storage:</strong> Events grow over time (use snapshots)</li>
                 <li><strong>Complexity:</strong> More complex than CRUD</li>
@@ -3159,5 +3160,388 @@ document.addEventListener('keydown', function(e) {
             if (nextBtn && nextBtn.style.display !== 'none') goToNextLesson();
             return;
         }
+    }
+});
+
+// ============================================================
+// SPRINT 1: UI/UX ENHANCEMENTS
+// ============================================================
+
+// --- S1: Ordered lesson list per subject ---
+function getSubjectLessonOrder() {
+    const config = SUBJECT_CONFIG[currentSubject];
+    if (!config) return [];
+    const allLessons = config.lessons();
+    return Object.keys(allLessons);
+}
+
+// --- S1: Module name lookup ---
+function getModuleNameForLesson(lessonId) {
+    // Try to find the module section that contains this lesson card
+    const card = document.querySelector('[data-lesson="' + lessonId + '"]');
+    if (card) {
+        const module = card.closest('.module');
+        if (module) {
+            const h2 = module.querySelector('.module-header h2');
+            if (h2) return h2.textContent.replace(/^[^\s]+\s*/, '').trim();
+        }
+    }
+    // Fallback: derive from lesson ID
+    const modNum = lessonId.replace(/[a-z]/gi, '').split('-')[0];
+    return 'Module ' + modNum;
+}
+
+// --- S1.1: Copy buttons on code blocks ---
+function addCopyButtons() {
+    const modal = document.getElementById('lesson-content');
+    if (!modal) return;
+    modal.querySelectorAll('pre').forEach(pre => {
+        if (pre.parentElement.classList.contains('code-wrapper')) return;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'code-wrapper';
+        pre.parentNode.insertBefore(wrapper, pre);
+        wrapper.appendChild(pre);
+
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn';
+        btn.textContent = 'Copy';
+        btn.addEventListener('click', () => {
+            const code = pre.querySelector('code');
+            const text = (code || pre).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                btn.textContent = '\u2713 Copied';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        });
+        wrapper.appendChild(btn);
+    });
+}
+
+// --- S1.5: Estimate reading time from content ---
+function estimateReadingTime(content) {
+    if (!content) return 3;
+    const text = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const words = text.split(' ').length;
+    return Math.max(3, Math.round(words / 200));
+}
+
+// --- S1.2/S1.3: Task checkboxes + counter + gate ---
+function injectTaskChecklist(lessonId) {
+    const modalContent = document.getElementById('lesson-modal')?.querySelector('.modal-content');
+    if (!modalContent) return;
+
+    // Remove existing checklist
+    const existing = modalContent.querySelector('.task-checklist');
+    if (existing) existing.remove();
+
+    const completed = JSON.parse(localStorage.getItem(
+        (SUBJECT_STORAGE[currentSubject]?.completedLessons || STORAGE_KEYS.completedLessons)
+    ) || '[]');
+    if (completed.includes(lessonId)) return; // Already completed, no gate needed
+
+    const tasks = [
+        'I understand the core concept',
+        'I can explain this to someone else',
+        'I know when to apply this pattern'
+    ];
+
+    const saved = JSON.parse(localStorage.getItem(lessonId + '_tasks') || '[]');
+
+    const checklist = document.createElement('div');
+    checklist.className = 'task-checklist';
+    checklist.innerHTML = '<div class="task-checklist-title">Self-Check</div>';
+
+    tasks.forEach((task, i) => {
+        const item = document.createElement('label');
+        item.className = 'task-check-item' + (saved[i] ? ' checked' : '');
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = !!saved[i];
+        cb.addEventListener('change', () => {
+            const state = [];
+            checklist.querySelectorAll('input[type="checkbox"]').forEach(c => state.push(c.checked));
+            localStorage.setItem(lessonId + '_tasks', JSON.stringify(state));
+            item.classList.toggle('checked', cb.checked);
+            updateTaskCounter(checklist);
+            updateCompleteButtonGate();
+        });
+        const lbl = document.createElement('label');
+        lbl.textContent = task;
+        item.appendChild(cb);
+        item.appendChild(lbl);
+        checklist.appendChild(item);
+    });
+
+    // Counter
+    const counter = document.createElement('div');
+    counter.className = 'task-counter';
+    checklist.appendChild(counter);
+
+    // Insert before the footer
+    const footer = modalContent.querySelector('.modal-footer');
+    if (footer) {
+        modalContent.insertBefore(checklist, footer);
+    } else {
+        modalContent.appendChild(checklist);
+    }
+
+    updateTaskCounter(checklist);
+    updateCompleteButtonGate();
+}
+
+function updateTaskCounter(checklist) {
+    const cbs = checklist.querySelectorAll('input[type="checkbox"]');
+    const checked = [...cbs].filter(c => c.checked).length;
+    const total = cbs.length;
+    const counter = checklist.querySelector('.task-counter');
+    if (!counter) return;
+    if (checked === total) {
+        counter.textContent = '\u2713 All tasks done \u2014 ready to complete!';
+        counter.classList.add('all-done');
+    } else {
+        counter.textContent = checked + ' of ' + total + ' tasks done';
+        counter.classList.remove('all-done');
+    }
+}
+
+function updateCompleteButtonGate() {
+    const btn = document.getElementById('btn-complete');
+    if (!btn || btn.disabled) return; // Already completed state
+    const checklist = document.querySelector('.task-checklist');
+    if (!checklist) { return; }
+    const cbs = checklist.querySelectorAll('input[type="checkbox"]');
+    const allChecked = [...cbs].every(c => c.checked);
+    btn.disabled = !allChecked;
+    if (!allChecked) {
+        btn.title = 'Complete all self-check tasks first';
+    } else {
+        btn.title = '';
+    }
+}
+
+// --- S1.4: Lesson position indicator ---
+function injectLessonPosition(lessonId) {
+    const modalContent = document.getElementById('lesson-modal')?.querySelector('.modal-content');
+    if (!modalContent) return;
+
+    // Remove existing
+    const existing = modalContent.querySelector('.lesson-position');
+    if (existing) existing.remove();
+
+    const order = getSubjectLessonOrder();
+    const idx = order.indexOf(lessonId);
+    if (idx < 0) return;
+
+    const moduleName = getModuleNameForLesson(lessonId);
+
+    const pos = document.createElement('div');
+    pos.className = 'lesson-position';
+    pos.innerHTML = 'Lesson ' + (idx + 1) + ' of ' + order.length +
+        ' <span class="sep">\u00b7</span> ' + moduleName;
+
+    // Insert after the header
+    const header = modalContent.querySelector('.modal-header');
+    if (header && header.nextSibling) {
+        modalContent.insertBefore(pos, header.nextSibling);
+    }
+}
+
+// --- S1.5: Time estimate in modal ---
+function injectModalTimeEstimate(lessonId) {
+    const modalContent = document.getElementById('lesson-modal')?.querySelector('.modal-content');
+    if (!modalContent) return;
+
+    // Remove existing
+    const existing = modalContent.querySelector('.modal-time-badge');
+    if (existing) existing.remove();
+
+    const config = SUBJECT_CONFIG[currentSubject];
+    const subjectLessons = config ? config.lessons() : {};
+    const lesson = subjectLessons[lessonId];
+    if (!lesson) return;
+
+    const mins = estimateReadingTime(lesson.content);
+    const badge = document.createElement('span');
+    badge.className = 'modal-time-badge';
+    badge.textContent = '\u23f1 ' + mins + 'min';
+
+    // Add to header
+    const header = modalContent.querySelector('.modal-header');
+    if (header) {
+        const closeBtn = header.querySelector('.btn-close');
+        if (closeBtn) {
+            header.insertBefore(badge, closeBtn);
+        } else {
+            header.appendChild(badge);
+        }
+    }
+}
+
+// --- S1.6: Confetti (canvas-confetti library) ---
+(function() {
+    const _prevLaunch = launchConfetti;
+    launchConfetti = function() {
+        if (typeof confetti === 'function') {
+            confetti({
+                particleCount: 120,
+                spread: 80,
+                origin: { y: 0.6 },
+                colors: ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c77dff']
+            });
+        } else {
+            _prevLaunch();
+        }
+    };
+})();
+
+// --- S1.8: Prev/Next navigation in modal ---
+function injectPrevNextNav(lessonId) {
+    const modalContent = document.getElementById('lesson-modal')?.querySelector('.modal-content');
+    if (!modalContent) return;
+
+    // Remove existing navs
+    modalContent.querySelectorAll('.lesson-nav-bar, .modal-bottom-nav').forEach(el => el.remove());
+
+    const order = getSubjectLessonOrder();
+    const idx = order.indexOf(lessonId);
+    if (idx < 0) return;
+
+    const config = SUBJECT_CONFIG[currentSubject];
+    const subjectLessons = config ? config.lessons() : {};
+
+    const prevId = idx > 0 ? order[idx - 1] : null;
+    const nextId = idx < order.length - 1 ? order[idx + 1] : null;
+    const prevLesson = prevId ? subjectLessons[prevId] : null;
+    const nextLesson = nextId ? subjectLessons[nextId] : null;
+
+    // Top nav bar
+    const topNav = document.createElement('div');
+    topNav.className = 'lesson-nav-bar';
+
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'lesson-nav-link';
+    if (prevLesson) {
+        prevBtn.textContent = '\u2190 ' + prevLesson.title.replace(/^\d+\.\d+\s*/, '');
+        prevBtn.addEventListener('click', () => navigateToLesson(prevId));
+    } else {
+        prevBtn.textContent = '\u2190';
+        prevBtn.disabled = true;
+    }
+
+    const center = document.createElement('span');
+    center.className = 'lesson-nav-center';
+    center.textContent = 'Lesson ' + (idx + 1) + ' of ' + order.length;
+
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'lesson-nav-link';
+    if (nextLesson) {
+        nextBtn.textContent = nextLesson.title.replace(/^\d+\.\d+\s*/, '') + ' \u2192';
+        nextBtn.addEventListener('click', () => navigateToLesson(nextId));
+    } else {
+        nextBtn.textContent = '\u2192';
+        nextBtn.disabled = true;
+    }
+
+    topNav.appendChild(prevBtn);
+    topNav.appendChild(center);
+    topNav.appendChild(nextBtn);
+
+    // Insert after position indicator or after header
+    const posEl = modalContent.querySelector('.lesson-position');
+    const insertAfter = posEl || modalContent.querySelector('.modal-header');
+    if (insertAfter && insertAfter.nextSibling) {
+        modalContent.insertBefore(topNav, insertAfter.nextSibling);
+    }
+
+    // Bottom nav
+    const bottomNav = document.createElement('div');
+    bottomNav.className = 'modal-bottom-nav';
+
+    const botPrev = document.createElement('button');
+    botPrev.textContent = '\u2190 Previous';
+    if (prevLesson) {
+        botPrev.addEventListener('click', () => navigateToLesson(prevId));
+    } else {
+        botPrev.disabled = true;
+    }
+
+    const botNext = document.createElement('button');
+    botNext.textContent = 'Next \u2192';
+    if (nextLesson) {
+        botNext.addEventListener('click', () => navigateToLesson(nextId));
+    } else {
+        botNext.disabled = true;
+    }
+
+    bottomNav.appendChild(botPrev);
+    bottomNav.appendChild(botNext);
+    modalContent.appendChild(bottomNav);
+}
+
+function navigateToLesson(lessonId) {
+    // Navigate without closing — reload modal content in place
+    startLesson(lessonId);
+}
+
+// --- S1.9: XP floating animation ---
+function showXPFloat(xpAmount) {
+    const el = document.createElement('div');
+    el.className = 'xp-float';
+    el.textContent = '+' + xpAmount + ' XP \u26a1';
+    el.style.left = (window.innerWidth / 2 - 40) + 'px';
+    el.style.top = (window.innerHeight / 2 - 20) + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1500);
+}
+
+// --- Patch showXPPopup to also show floating XP ---
+(function() {
+    const _prev = showXPPopup;
+    showXPPopup = function(earned, total) {
+        _prev(earned, total);
+        showXPFloat(earned);
+    };
+})();
+
+// --- Patch startLesson to inject Sprint 1 features ---
+(function() {
+    const _prevStart = startLesson;
+    startLesson = function(lessonId) {
+        _prevStart(lessonId);
+
+        // Only inject if modal is now active
+        const modal = document.getElementById('lesson-modal');
+        if (!modal || !modal.classList.contains('active')) return;
+
+        // S1.1: Copy buttons
+        addCopyButtons();
+
+        // S1.4: Lesson position indicator
+        injectLessonPosition(lessonId);
+
+        // S1.5: Time estimate
+        injectModalTimeEstimate(lessonId);
+
+        // S1.8: Prev/Next nav
+        injectPrevNextNav(lessonId);
+
+        // S1.2/S1.3: Task checkboxes (after nav so it appears before footer)
+        injectTaskChecklist(lessonId);
+    };
+})();
+
+// --- S1: Arrow key prev/next in modal ---
+document.addEventListener('keydown', function(e) {
+    const modal = document.getElementById('lesson-modal');
+    if (!modal?.classList.contains('active')) return;
+    if (e.target.matches('input, textarea, [contenteditable]')) return;
+    if (e.key === 'ArrowLeft') {
+        const order = getSubjectLessonOrder();
+        const idx = order.indexOf(currentLesson);
+        if (idx > 0) navigateToLesson(order[idx - 1]);
     }
 });
