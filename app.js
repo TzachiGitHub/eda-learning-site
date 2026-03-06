@@ -3924,3 +3924,201 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================================
+
+// ============================================================
+// SPRINT 4: GAMIFICATION
+// ============================================================
+
+// --- S4.1: Certificate shown on subject overview ---
+function injectCertificateBanner(subject) {
+    const contentEl = document.getElementById(subject + '-content');
+    if (!contentEl) return;
+    if (contentEl.querySelector('.cert-banner')) return;
+
+    const config = SUBJECT_CONFIG[subject];
+    if (!config) return;
+    const completed = JSON.parse(localStorage.getItem(
+        SUBJECT_STORAGE[subject]?.completedLessons || '') || '[]');
+    const total = config.totalLessons || Object.keys(config.lessons()).length;
+    const done = completed.length;
+    const allDone = done >= total;
+
+    const banner = document.createElement('div');
+    banner.className = 'cert-banner' + (allDone ? ' cert-earned' : '');
+    banner.innerHTML = allDone
+        ? `<span class="cert-icon">🏆</span>
+           <div><strong>Certificate Earned!</strong>
+           <p>You've completed ${config.title || subject}. <button onclick="generateCertificate('${subject}')" class="cert-btn">Download Certificate</button></p></div>`
+        : `<span class="cert-icon">🎓</span>
+           <div><strong>Earn the ${config.title || subject} Certificate</strong>
+           <p>Complete all ${total} lessons — ${total - done} remaining — to earn your certificate.</p></div>`;
+
+    // Insert at top of content area
+    contentEl.insertBefore(banner, contentEl.firstChild);
+}
+
+// --- S4.2: Certificate generator (canvas) ---
+function generateCertificate(subject) {
+    const config = SUBJECT_CONFIG[subject];
+    const title = config?.title || subject;
+    const canvas = document.createElement('canvas');
+    canvas.width = 900; canvas.height = 600;
+    const ctx = canvas.getContext('2d');
+
+    // Background gradient
+    const grd = ctx.createLinearGradient(0, 0, 900, 600);
+    grd.addColorStop(0, '#0d1117'); grd.addColorStop(1, '#1a1d2e');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, 900, 600);
+
+    // Border
+    ctx.strokeStyle = '#4361ee';
+    ctx.lineWidth = 6;
+    ctx.strokeRect(18, 18, 864, 564);
+    ctx.strokeStyle = 'rgba(67,97,238,0.3)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(26, 26, 848, 548);
+
+    // Title
+    ctx.fillStyle = '#4361ee';
+    ctx.font = 'bold 22px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('DEVLEARN', 450, 80);
+
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = 'bold 44px system-ui, sans-serif';
+    ctx.fillText('Certificate of Completion', 450, 170);
+
+    ctx.fillStyle = 'rgba(226,232,240,0.6)';
+    ctx.font = '20px system-ui, sans-serif';
+    ctx.fillText('This certifies successful completion of', 450, 240);
+
+    ctx.fillStyle = '#4361ee';
+    ctx.font = 'bold 36px system-ui, sans-serif';
+    ctx.fillText(title, 450, 310);
+
+    ctx.fillStyle = 'rgba(226,232,240,0.5)';
+    ctx.font = '16px system-ui, sans-serif';
+    ctx.fillText(new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'}), 450, 380);
+
+    ctx.fillStyle = '#10b981';
+    ctx.font = 'bold 28px system-ui, sans-serif';
+    ctx.fillText('⚡ DevLearn', 450, 500);
+
+    // Download
+    const a = document.createElement('a');
+    a.download = 'devlearn-' + subject + '-certificate.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+}
+
+// --- S4.3: 7-day streak calendar dots ---
+function renderStreakCalendar() {
+    const el = document.getElementById('streak-calendar');
+    if (!el) return;
+
+    const activityLog = JSON.parse(localStorage.getItem('eda_activity_log') || '[]');
+    const today = new Date();
+
+    const dots = [];
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toDateString();
+        const hasActivity = activityLog.some(a => new Date(a.timestamp).toDateString() === dateStr);
+        const isToday = i === 0;
+        dots.push(`<span class="streak-dot ${hasActivity ? 'active' : ''} ${isToday ? 'today' : ''}" title="${dateStr}"></span>`);
+    }
+    el.innerHTML = dots.join('');
+}
+
+// --- S4.4: Spaced repetition nudge ---
+function checkSpacedRepetition() {
+    const nudgeEl = document.getElementById('spaced-rep-nudge');
+    if (!nudgeEl) return;
+
+    const now = Date.now();
+    const intervals = [3, 7, 14].map(d => d * 24 * 60 * 60 * 1000);
+    const due = [];
+
+    Object.keys(SUBJECT_STORAGE).forEach(subj => {
+        const completed = JSON.parse(localStorage.getItem(SUBJECT_STORAGE[subj].completedLessons) || '[]');
+        completed.forEach(lid => {
+            const ts = parseInt(localStorage.getItem(lid + '_completed_ts') || '0');
+            if (!ts) return;
+            const age = now - ts;
+            const isDue = intervals.some(iv => age >= iv && age < iv + 24 * 60 * 60 * 1000);
+            if (isDue) {
+                const lesson = SUBJECT_CONFIG[subj]?.lessons()[lid];
+                if (lesson) due.push({ lid, subj, title: lesson.title });
+            }
+        });
+    });
+
+    if (due.length > 0) {
+        nudgeEl.style.display = '';
+        nudgeEl.textContent = '🔁 ' + due.length + ' review' + (due.length > 1 ? 's' : '') + ' due';
+        nudgeEl.title = due.map(d => d.title).join('\n');
+        nudgeEl.onclick = () => {
+            if (due[0]) {
+                if (currentSubject !== due[0].subj) switchSubject(due[0].subj);
+                startLesson(due[0].lid);
+            }
+        };
+    } else {
+        nudgeEl.style.display = 'none';
+    }
+}
+
+// Track completion timestamp
+(function() {
+    const _origComplete = markLessonComplete || null;
+    if (typeof markLessonComplete === 'function') {
+        const _prev = markLessonComplete;
+        markLessonComplete = function(lessonId) {
+            _prev(lessonId);
+            localStorage.setItem((lessonId || currentLesson) + '_completed_ts', Date.now());
+        };
+    }
+})();
+
+// --- Inject streak calendar HTML into stats bar ---
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        // Find the streak display element and add calendar next to it
+        const streakEl = document.querySelector('.stat-streak, [id*="streak"], .streak-count');
+        if (streakEl && !document.getElementById('streak-calendar')) {
+            const cal = document.createElement('div');
+            cal.id = 'streak-calendar';
+            cal.className = 'streak-calendar';
+            streakEl.parentNode?.insertBefore(cal, streakEl.nextSibling);
+        }
+
+        // Add spaced rep nudge to sidebar
+        if (!document.getElementById('spaced-rep-nudge')) {
+            const nudge = document.createElement('button');
+            nudge.id = 'spaced-rep-nudge';
+            nudge.className = 'spaced-rep-nudge';
+            nudge.style.display = 'none';
+            const nav = document.querySelector('.sidebar-nav');
+            if (nav) nav.insertBefore(nudge, nav.firstChild);
+        }
+
+        renderStreakCalendar();
+        checkSpacedRepetition();
+
+        // Inject cert banners for all subjects
+        Object.keys(SUBJECT_CONFIG).forEach(s => {
+            if (document.getElementById(s + '-content')) {
+                injectCertificateBanner(s);
+            }
+        });
+
+        // Patch switchSubject for cert banner
+        const _prevCert = switchSubject;
+        switchSubject = function(subject) {
+            _prevCert(subject);
+            setTimeout(() => injectCertificateBanner(subject), 200);
+        };
+    }, 500);
+});
