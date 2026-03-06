@@ -1,200 +1,260 @@
 # DevLearn — UI/UX Enhancement Plan
-
-> Deep research across the 5 best learning sites per subject.  
-> Every todo item is lifted from a real pattern used by a top-tier platform.
+> Live browser research conducted 2026-03-06.  
+> Sites visited and screenshotted directly. Every pattern is real and verified.
 
 ---
 
 ## 🔬 Research: Best Learning Sites per Subject
 
 ### 📡 EDA (Event-Driven Architecture)
-| # | Site | Standout UI/UX Pattern |
-|---|------|------------------------|
-| 1 | **Confluent Developer** (developer.confluent.io) | Interactive scenario walkthroughs; dark terminal aesthetic; architecture diagrams inline with lessons |
-| 2 | **Solace PubSub+ Tutorials** (solace.com/learn) | "Mission" framing — each tutorial is a mission with a badge reward |
-| 3 | **AWS Event-Driven Workshop** (catalog.workshops.aws) | Step-by-step lab format with numbered checkpoints; inline AWS console screenshots |
-| 4 | **Microsoft Learn** (learn.microsoft.com) | Module → Unit drill-down; XP + trophy system; knowledge checks after every unit; clean two-column layout |
-| 5 | **Estuary Flow Docs** (docs.estuary.dev) | Concept-first → Hands-on progression; "What you'll learn" callout boxes; copy-able code blocks with filename labels |
+| # | Site | URL | What Makes It Great |
+|---|------|-----|---------------------|
+| 1 | **EDA Visuals** ⭐ | eda-visuals.boyney.io | Hand-drawn visual cards, one concept per card, bite-sized (5 min each), sketchbook aesthetic with colored diagrams — perfect ADHD format |
+| 2 | **EventCatalog** | eventcatalog.dev | Interactive architecture documentation — visual event map, service relationships graph |
+| 3 | **Confluent Developer** | developer.confluent.io | Deep Kafka-centric hands-on; architecture diagrams inline; dark terminal aesthetic |
+| 4 | **AWS EDA Workshop** | catalog.workshops.aws | Step-by-step numbered labs; inline AWS console screenshots; checkpoint completion gates |
+| 5 | **Three Dots Labs** | threedots.tech/episode/event-driven-architecture | "Hard Parts" format — real lessons from production; podcast + written parity |
 
-### 🔴 Redis
-| # | Site | Standout UI/UX Pattern |
-|---|------|------------------------|
-| 1 | **try.redis.io** (redis.io/try-free) | In-browser Redis REPL; command-by-command tutorial; dark terminal UI; immediate output |
-| 2 | **Redis University** (university.redis.io) | Video + quiz hybrid; certificate on completion; course track visualization |
-| 3 | **Upstash Docs** (upstash.com/docs) | "Quick Start in 60 seconds" hero; copy-paste code snippets with tabs per language |
-| 4 | **Cloudflare Workers KV Docs** | Clear "When to use" vs "When NOT to use" tables — brutal honesty UI |
-| 5 | **Redis Launchpad** (launchpad.redis.com) | Community showcase + starter templates gallery; one-click sandbox launch |
-
-### 🐳 Docker
-| # | Site | Standout UI/UX Pattern |
-|---|------|------------------------|
-| 1 | **training.play-with-docker.com** | In-browser Alpine VM terminal; time-limited sandbox creates urgency; step progress tracker |
-| 2 | **Docker Docs** (docs.docker.com) | Tabbed multi-OS instructions (Mac/Win/Linux) inline; "Try it out" collapsible steps |
-| 3 | **KodeKloud** (kodekloud.com) | Embedded hands-on lab terminal next to content; scenario-based labs; auto-validation |
-| 4 | **Bret Fisher's Docker Mastery** (Udemy) | Activity checklist per section; Q&A surfaced per lesson; resource downloads per module |
-| 5 | **Ivan Velichko's iximiuz.com** | Interactive playgrounds with real containers; "Challenges" with auto-graded scenarios |
-
-### 🔮 GraphQL
-| # | Site | Standout UI/UX Pattern |
-|---|------|------------------------|
-| 1 | **Apollo Odyssey** (apollographql.com/tutorials) | 🏆 BEST IN CLASS: video + written parity; inline code challenges; confetti on pass; rocket-ship metaphor; path/track visualizer |
-| 2 | **HowToGraphQL** (howtographql.com) | Language/framework selector at the start; split tutorial + schema viewer; GitHub-linked code at each step |
-| 3 | **GraphQL.org/learn** | Minimal clean design; interactive query runner on the page; progressive disclosure |
-| 4 | **The Guild Docs** (the-guild.dev) | Dark mode first; component-level code examples; "Why we built this" context before features |
-| 5 | **Hasura Learn** (hasura.io/learn) | Hands-on from step 1 (no preamble); embedded GraphiQL explorer; numbered progress bar |
-
-### ⚡ React Query (TanStack Query)
-| # | Site | Standout UI/UX Pattern |
-|---|------|------------------------|
-| 1 | **TanStack Docs** (tanstack.com/query) | Framework tabs (React/Vue/Angular/etc.) per code block; collapsible detail sections; anchor-linked headers |
-| 2 | **ui.dev React Query course** | Visualized query lifecycle diagrams; "Before/After" code comparisons; narrated video + transcript |
-| 3 | **ByteGrad YouTube → Blog** | Short-form concept posts; one concept per page; SEO-optimized "What does X mean" format |
-| 4 | **Smashing Magazine articles** | Long-form + deep dives with illustrated diagrams; code sandbox embeds (CodeSandbox/StackBlitz) |
-| 5 | **Kent C. Dodds / EpicReact** | Workshop format: problems → solutions; `git checkout` per exercise; failing test → pass flow |
-
-### ☸️ Kubernetes
-| # | Site | Standout UI/UX Pattern |
-|---|------|------------------------|
-| 1 | **Killercoda** (killercoda.com) | In-browser terminal scenarios with auto step-checker; "Did you complete this step?" validation |
-| 2 | **KodeKloud** (kodekloud.com) | Full lab environments; gamified path with XP, badges, leaderboard |
-| 3 | **killer.sh** | Exam simulator UI; timed pressure; realistic kubectl terminal; score breakdown |
-| 4 | **kubernetes.io/docs** interactive tutorial | Guided terminal in the browser; copy-button on every command; checkpoint questions |
-| 5 | **Nana's TechWorld Nano** | Concept → Diagram → CLI demo flow per topic; cheat sheet cards per module |
-
-### 🐘 PostgreSQL
-| # | Site | Standout UI/UX Pattern |
-|---|------|------------------------|
-| 1 | **pgexercises.com** | 🏆 BEST SQL UX: two-panel (problem + editor); auto-grade; "show answer" toggle; category filter sidebar |
-| 2 | **SQLZoo** (sqlzoo.net) | Interactive SQL REPL on every single page; table preview before writing query; progressive difficulty gating |
-| 3 | **Neon.tech Tutorials** (neon.tech/docs) | "Run in Neon" embedded sandbox; modern dark design; step-by-step with copy buttons |
-| 4 | **Supabase Docs** (supabase.com/docs) | Clean step-by-step with screenshots; SQL editor embed; "What you'll build" preview at top |
-| 5 | **PostgreSQL Exercises** (mode.com analytics) | Guided analytics track; visualize query results as charts inline |
-
-### 🔷 TypeScript
-| # | Site | Standout UI/UX Pattern |
-|---|------|------------------------|
-| 1 | **Total TypeScript** (totaltypescript.com) | 🏆 BEST TS UX: in-browser exercises with VSCode-like editor; hover types shown inline; wizard-level progression |
-| 2 | **Execute Program** (executeprogram.com) | Spaced repetition system (reminds you when to review); inline REPL per concept; minimal distraction-free design |
-| 3 | **TypeScript Playground** (typescriptlang.org/play) | Split editor/output; shareable URLs; error squiggles in real-time; "Examples" dropdown with curated snippets |
-| 4 | **TypeHero** (typehero.dev) | Community type challenges; difficulty rating; solutions ranked by upvotes; profile/streak system |
-| 5 | **Matt Pocock's TS Reset / TS Errors** | "Error explainer" flow: paste error → get human explanation; beginner-facing error messages |
+**Key EDA UI patterns to steal:**
+- EDA Visuals: **card grid of visual concepts** with sketch-style diagrams — each card is one pattern
+- EventCatalog: **interactive graph/map** of how events flow between services
+- AWS Workshop: **numbered step gates** — you can't skip ahead without completing current step
 
 ---
 
-## 🎯 Extracted UI/UX Patterns (Top Cross-Cutting)
+### 🔴 Redis
+| # | Site | URL | What Makes It Great |
+|---|------|-----|---------------------|
+| 1 | **Redis.io Docs** | redis.io/docs | Command reference with inline "Try it" REPL; copy buttons everywhere |
+| 2 | **Upstash Docs** | upstash.com/docs | "Quick Start in 60 seconds" hero; language tabs on every code block |
+| 3 | **Redis University** | university.redis.io | Video + quiz hybrid; certificate on completion; course track visualization |
+| 4 | **Launchpad** | launchpad.redis.com | Community template gallery; one-click sandbox launch per template |
+| 5 | **Cloudflare KV Docs** | developers.cloudflare.com/kv | Brutal honesty "When to use / When NOT to use" tables; extremely clear prose |
 
-These patterns appear in the best sites across all subjects:
+**Key Redis UI patterns to steal:**
+- **"Quick Start in 60 seconds"** hero section before lesson content
+- **"When to use / When NOT to use"** comparison table
+- **Command reference cards** — each Redis command as a card with syntax, example, output
 
-### Navigation & Layout
-- **Split-screen layout** — instructions left, editor/terminal right (Apollo, KodeKloud, pgexercises)
-- **Sticky step sidebar** — current lesson position always visible (Microsoft Learn, Apollo)
-- **"What you'll learn" callout** — explicit learning objectives before every lesson (Estuary, Supabase)
-- **Framework/language tabs** — code examples switch per stack (TanStack, HowToGraphQL)
+---
 
-### Engagement & Gamification
-- **Confetti on completion** — Apollo Odyssey does this perfectly; huge emotional payoff
-- **Progress path visualization** — not just a bar; a visual journey (Apollo's launch path, KodeKloud skill tree)
-- **Spaced repetition nudges** — Execute Program: "You have 3 items to review today"
-- **Streak + daily review reminders** — with visual flame/streak counter
-- **Leaderboard** — optional but KodeKloud shows it drives engagement
+### 🐳 Docker
+| # | Site | URL | What Makes It Great |
+|---|------|-----|---------------------|
+| 1 | **Play with Docker** | training.play-with-docker.com | In-browser Alpine Linux VM; time-limited sandbox creates urgency; lab step tracker |
+| 2 | **Docker Docs** | docs.docker.com | Multi-OS tabs (Mac/Win/Linux) inline; "Try it out" collapsible steps |
+| 3 | **KodeKloud** | kodekloud.com | Embedded hands-on terminal next to content; scenario-based auto-validation |
+| 4 | **iximiuz Labs** | labs.iximiuz.com | Real container playgrounds; "Challenges" with auto-graded scenarios; beautiful dark UI |
+| 5 | **Bret Fisher's Docker Mastery** | udemy.com (Docker Mastery) | Activity checklist per section; resource downloads per module |
 
-### Interactivity
-- **Inline code REPL** — runnable code on the page (Execute Program, SQLZoo, TS Playground)
-- **Auto-graded steps** — Killercoda validates terminal output automatically
-- **"Try it out" expandable sections** — Docker docs uses this pattern
-- **Shareable progress URLs** — link to your exact lesson progress
-- **Before/After code toggle** — ui.dev React Query shows state before and after a concept
+**Key Docker UI patterns to steal:**
+- **OS/platform tabs** on code blocks (Mac / Linux / Windows)
+- **"Try it out"** expandable hands-on sections within lesson text
+- **Time-limited lab badge** — urgency creates focus (great for ADHD)
 
-### Content Design
-- **Filename labels on code blocks** — `// src/app.ts` header on code snippets (Estuary, Supabase)
-- **"Why this matters" context** — before showing code (The Guild docs pattern)
-- **Brutal honesty tables** — "When to use / When NOT to use" (Cloudflare KV, many Redis docs)
-- **Concept → Diagram → Code flow** — Nana TechWorld pattern, universal best practice
-- **One concept per page** — ByteGrad, Execute Program; prevents cognitive overload
+---
 
-### Feedback & Motivation
-- **XP + badge system** — Microsoft Learn, KodeKloud; visible reward loop
-- **Certificate on completion** — Redis University; shareable social proof
-- **Failed test → hint → correct flow** — Apollo Odyssey code challenges
-- **Time estimates per lesson** — sets expectation; reduces anxiety for ADHD learners
+### 🔮 GraphQL
+| # | Site | URL | What Makes It Great |
+|---|------|-----|---------------------|
+| 1 | **Apollo Odyssey** ⭐ | apollographql.com/tutorials | **Best learning UX seen.** Dark space theme (rocket ship metaphor), video + written parity, inline code challenges with test runner, confetti on pass, path/track visualizer |
+| 2 | **HowToGraphQL** | howtographql.com | Language/framework selector at start; GitHub-linked code at each step |
+| 3 | **GraphQL.org/learn** | graphql.org/learn | Interactive query runner embedded on the page; minimal clean design |
+| 4 | **The Guild Docs** | the-guild.dev | Dark-first design; "Why we built this" context before every feature |
+| 5 | **Hasura Learn** | hasura.io/learn | Hands-on from step 1; embedded GraphiQL explorer; numbered progress bar |
+
+**Key GraphQL UI patterns to steal:**
+- Apollo Odyssey: **rocket/journey metaphor** for progress (you're launching a mission)
+- Apollo: **inline code challenge** — write code, run tests, see pass/fail, confetti on success
+- Hasura: **embedded live playground** within the lesson (not a separate tab)
+
+---
+
+### ⚡ React Query (TanStack)
+| # | Site | URL | What Makes It Great |
+|---|------|-----|---------------------|
+| 1 | **Scrimba** ⭐ | scrimba.com | **IDE + video merged into one** — you pause the video and edit the code directly in the screencap; unique format |
+| 2 | **TanStack Docs** | tanstack.com/query | Framework tabs (React/Vue/Angular) per code block; anchor-linked headers |
+| 3 | **ui.dev** | ui.dev | Visual diagrams of query lifecycle; "Before/After" code toggle |
+| 4 | **ByteGrad** | bytegrad.com | One concept per page; SEO-first format; clean minimal reading experience |
+| 5 | **Epic React** | epicreact.dev (Kent C. Dodds) | Workshop format: failing test → pass; git checkout per exercise; progressive unlocking |
+
+**Key React Query UI patterns to steal:**
+- Scrimba: **interactive video** — watch + edit in the same view (unique)
+- ui.dev: **"Before/After" code slider** showing code transformation
+- Framework **tab switcher** on every code block
+
+---
+
+### ☸️ Kubernetes
+| # | Site | URL | What Makes It Great |
+|---|------|-----|---------------------|
+| 1 | **Killercoda** ⭐ | killercoda.com | In-browser terminal (real containers!); scenario auto-checker validates your work; certification paths; clean card grid layout |
+| 2 | **KodeKloud** | kodekloud.com | Full lab environments; gamified path with XP, badges, leaderboard; mock exams |
+| 3 | **killer.sh** | killer.sh | Exam simulator; timed pressure; real kubectl terminal; score breakdown |
+| 4 | **kubernetes.io tutorial** | kubernetes.io/docs/tutorials | Official guided terminal in browser; copy button on every command |
+| 5 | **TechWorld with Nana** | youtube.com/c/TechWorldwithNana | Concept → Diagram → CLI flow per topic; cheat sheet cards per module |
+
+**Key Kubernetes UI patterns to steal:**
+- Killercoda: **certification track cards** (visual grid with badges) as entry point
+- Killercoda: **step validator** — "✅ Step 1 complete, move to Step 2" shown in terminal pane
+- KodeKloud: **skill tree** progression map
+
+---
+
+### 🐘 PostgreSQL
+| # | Site | URL | What Makes It Great |
+|---|------|-----|---------------------|
+| 1 | **pgexercises.com** ⭐ | pgexercises.com | **Best SQL learning UX.** Left: problem + schema diagram. Right: your SQL editor. Expected results shown. Hint / Help / Run Query buttons. Breadcrumb nav. "Next Exercise →" always visible |
+| 2 | **SQLZoo** | sqlzoo.net | Interactive REPL on every page; left sidebar with per-topic progress bars; language selector (MySQL/PostgreSQL); step-by-step progression |
+| 3 | **Neon.tech Tutorials** | neon.tech/docs/tutorials | Modern dark docs; "Run in Neon" embedded sandbox; clean step-by-step |
+| 4 | **Supabase Docs** | supabase.com/docs | "What you'll build" preview at top of every guide; screenshot-heavy; embedded SQL editor |
+| 5 | **Mode Analytics SQL** | mode.com/sql-tutorial | Query results visualized as charts inline; business-context framing for every exercise |
+
+**Key PostgreSQL UI patterns to steal:**
+- pgexercises: **schema diagram always visible** while writing query (collapsible reminder)
+- pgexercises: **Hint → Help → Answer** progressive reveal (reduces frustration)
+- SQLZoo: **progress bar per topic** in left sidebar
+- pgexercises: **"Next Exercise →"** always in top-right corner (zero friction to continue)
+
+---
+
+### 🔷 TypeScript
+| # | Site | URL | What Makes It Great |
+|---|------|-----|---------------------|
+| 1 | **Total TypeScript** ⭐ | totaltypescript.com | **Dark hero with magical/wizard theme**, exercise count badges, in-browser VSCode-like editor, hover type inspection, "Beginner → Wizard" progression framing |
+| 2 | **TypeHero** | typehero.dev | Community type challenges; EASY/HARD difficulty badges; card layout with challenge previews; author tags |
+| 3 | **Execute Program** | executeprogram.com | Spaced repetition system (review reminders); inline REPL per concept; distraction-free |
+| 4 | **TS Playground** | typescriptlang.org/play | Split editor/output; shareable URLs; live error squiggles; curated "Examples" dropdown |
+| 5 | **Matt Pocock's TS Errors** | ts-error-translator.vercel.app | Paste TypeScript error → get human explanation — "error explainer" UX format |
+
+**Key TypeScript UI patterns to steal:**
+- Total TypeScript: **magical/wizard theme** — progression framing ("you're becoming a wizard")
+- TypeHero: **challenge cards** with code preview, difficulty pill, author attribution
+- Execute Program: **spaced repetition** — "3 items due for review today" nudge
+- TS Errors: **"paste error, get explanation"** — utility-first interaction pattern
+
+---
+
+## 🎯 Cross-Cutting UI/UX Patterns (confirmed via live research)
+
+### Layout Patterns
+| Pattern | Seen At | How to Apply |
+|---------|---------|--------------|
+| **Card grid entry point** | Killercoda, TypeHero | Subject home = grid of concept cards, not a flat list |
+| **Split panel (instructions + editor)** | pgexercises, Scrimba | Lesson modal → split view option |
+| **Left sidebar progress per topic** | SQLZoo | Per-module progress bars in sidebar |
+| **Schema/context always visible** | pgexercises | Collapsible "Schema Reminder" panel in lesson |
+| **"Next →" always reachable** | pgexercises | Persistent next lesson link in header |
+
+### Engagement Patterns
+| Pattern | Seen At | How to Apply |
+|---------|---------|--------------|
+| **Themed visual identity** | Total TypeScript (wizard 🧙), Apollo (rocket 🚀) | Give DevLearn a strong visual theme |
+| **Confetti on success** | Apollo Odyssey | Fire canvas-confetti on lesson complete |
+| **Step auto-validator** | Killercoda | 1 MCQ to unlock "Mark Complete" |
+| **Hint → Help → Answer** progressive reveal | pgexercises | Replace raw quiz answer with 3-step reveal |
+| **Spaced repetition nudge** | Execute Program | "3 concepts due for review" badge |
+| **Exercise count badges** | Total TypeScript ("10 EXERCISES") | Add count badge to module headers |
+
+### Content Patterns
+| Pattern | Seen At | How to Apply |
+|---------|---------|--------------|
+| **Visual concept cards** (sketched diagrams) | EDA Visuals | Add architecture diagrams to EDA/Redis/k8s lessons |
+| **"When to use / When NOT to use"** | Cloudflare KV | Add comparison table to Redis, Docker, GraphQL lessons |
+| **OS/language tabs on code** | Docker Docs, TanStack | Code blocks with tab switcher |
+| **"Quick Start in 60 seconds"** | Upstash | Lesson opener summary card |
+| **Author attribution** | TypeHero | Credit on lesson cards |
+| **Certification track cards** | Killercoda | "Earn the EDA certificate" track card |
 
 ---
 
 ## ✅ Full Todo List
 
-### 🔴 P0 — Core Interactivity (Most Impactful)
+### 🔴 P0 — Visual Identity & Theme
 
-- [ ] **Inline code runner** — Add a "Run" button to code blocks; execute JS snippets in a sandboxed `<iframe>` or `new Function()` context; show output below the block *(inspired by Execute Program, SQLZoo)*
-- [ ] **Step auto-validation** — After "Mark Complete", show a quick knowledge check (1 MCQ); only mark done if answered correctly *(Killercoda, Apollo Odyssey)*
-- [ ] **Confetti on lesson complete** — canvas-confetti or CSS keyframes burst when user finishes a lesson *(Apollo Odyssey)*
-- [ ] **Spaced repetition system** — Track when lessons were completed; surface "Review Due" badge on sidebar items after 3, 7, 14 days *(Execute Program)*
+- [ ] **Pick a strong visual theme** — DevLearn needs a personality. Options: 🧙 Wizard (like Total TypeScript), 🚀 Rocket/Mission (like Apollo), ⚡ Power-up (current vibe). Recommend: **"Level Up"** theme with consistent energy metaphor across all subjects
+- [ ] **Hero illustration per subject** — Each subject gets a unique hero image/icon in the header (like Apollo's rocket, Total TS's potion). Could be emoji-based or simple SVG
+- [ ] **Sketch-style concept diagrams** — Add hand-drawn style SVG architecture diagrams to key EDA/Redis/k8s lessons (inspired by EDA Visuals)
+- [ ] **"Exercise count" badges on modules** — `10 EXERCISES` pill badge on module cards (Total TypeScript pattern)
 
-### 🟠 P1 — Layout & Navigation
+### 🔴 P1 — Lesson Card & Navigation Polish
 
-- [ ] **"What you'll learn" callout box** — Add a styled callout at the top of every lesson modal listing 3-5 bullet learning objectives *(Estuary, Supabase)*
-- [ ] **Filename labels on code blocks** — Show `// filename.js` header styled like a tab on every code snippet *(universal best practice)*
-- [ ] **Split-screen lesson view** — Option to open lesson in a split view: instructions left, code editor right (use CodeMirror or Monaco lite) *(Apollo, pgexercises)*
-- [ ] **Language/framework tabs on code** — For Redis, Docker, TypeScript lessons that have multi-language examples, add tab switcher *(TanStack docs)*
-- [ ] **"Why this matters" context section** — Before each lesson's code, add a short "Why you need this" paragraph styled differently *(The Guild docs)*
-- [ ] **Sticky lesson progress steps** — Inside modal, show a mini stepper (Step 1 of 4) that stays visible while scrolling *(Microsoft Learn)*
+- [ ] **Completed card state** — Green left border (4px, `--success`), ✅ icon top-right, slightly faded CTA button replaced with "Review" in muted style
+- [ ] **In-progress card state** — Accent blue border, subtle pulsing indicator dot
+- [ ] **Locked card state** — Gray tone, 🔒 icon, button disabled (for future gated progression)
+- [ ] **"Next →" persistent button** — After completing a lesson, add "Next Lesson →" in top-right of modal header (pgexercises pattern)
+- [ ] **Module progress rings** — Animated SVG circular rings next to "X/Y Complete" in module headers
+- [ ] **Exercise count badge** on each module card header — "5 LESSONS · 1 QUIZ"
+- [ ] **"Today's Path" horizontal scroll pills** — Colored by difficulty, icon + name, horizontal swipe on mobile
 
-### 🟡 P2 — Gamification & Motivation
+### 🟠 P2 — Interactivity
 
-- [ ] **Spaced repetition reminder badge** — `🔁 3 reviews due` pill in sidebar; clicking shows cards due for review *(Execute Program)*
-- [ ] **Progress path visual** — Replace or augment module list with a visual journey path (connected nodes, ○—●—○—●) *(Apollo Odyssey launch path)*
-- [ ] **Certificate generator** — On course completion (all lessons done), generate a shareable completion card (canvas-generated PNG) *(Redis University)*
-- [ ] **Daily streak system enhancement** — Current streak counter exists; add a 7-day calendar dot visualization showing which days were active *(Duolingo, Execute Program)*
-- [ ] **Leaderboard (optional/off by default)** — Anonymous XP leaderboard using localStorage + a shared key or a tiny backend *(KodeKloud)*
-- [ ] **"Before/After" code toggle** — For concept lessons, show the messy code BEFORE the pattern, then the clean version AFTER *(ui.dev React Query)*
+- [ ] **Hint → Help → Answer** 3-step reveal on quiz questions — replaces showing correct answer immediately; reduces frustration; pgexercises pattern
+- [ ] **Confetti on lesson complete** — `canvas-confetti` burst when marking lesson done (Apollo Odyssey pattern)
+- [ ] **XP floating animation** — `+125 XP ⚡` floats up and fades on lesson complete
+- [ ] **Step auto-validator** — Before "Mark Complete", show 1 MCQ knowledge check; only unlocks on correct answer (Killercoda pattern)
+- [ ] **"Schema Reminder" collapsible** — For code-heavy lessons, add a collapsible panel showing the relevant data structure/schema (pgexercises pattern)
+- [ ] **"Quick Start" opener card** — First lesson in each subject gets a "What you'll build in 60 seconds" summary card at the top (Upstash pattern)
+- [ ] **OS/language tabs on code blocks** — Where relevant (Docker, TypeScript), add Mac/Linux/Windows or JS/TS tab switcher
 
-### 🟢 P3 — Content & Design Polish
+### 🟠 P3 — Content Upgrades
 
-- [ ] **Lesson card visual states** — Completed (green left border + ✅), In Progress (accent border, pulsing), Locked (gray, lock icon) *(universal)*
-- [ ] **Module progress rings** — Replace "X/Y Complete" text with animated SVG circular progress rings *(KodeKloud, Microsoft Learn)*
-- [ ] **XP floating animation** — `+125 XP ⚡` floats up and fades on lesson complete *(Apollo Odyssey, KodeKloud)*
-- [ ] **Difficulty badges polish** — EASY=green, MEDIUM=amber, HARD=red; consistent across all subjects *(universal)*
-- [ ] **"When to use / When NOT to use" table** — Add a structured pros/cons table in relevant lessons (Redis, Docker, EDA patterns) *(Cloudflare KV docs)*
-- [ ] **Concept diagram section** — Add ASCII-art or SVG diagrams to key architecture lessons (Pub/Sub, CQRS, Event Sourcing) *(Confluent Developer)*
-- [ ] **Resource cards at lesson end** — After each lesson modal, show 2-3 curated external links styled as cards *(Solace, Confluent)*
-- [ ] **Sidebar glow on active item** — box-shadow glow behind active nav item *(polished SaaS apps)*
-- [ ] **Subject switch fade animation** — Fade content in/out on subject switch *(standard UX)*
-- [ ] **Stat counter animation** — Numbers count up on page load *(common on dashboards)*
+- [ ] **"When to use / When NOT to use" tables** — Add to Redis (vs in-memory), Docker (vs bare metal), EDA (vs REST API), GraphQL (vs REST) lessons
+- [ ] **Architecture diagrams** — SVG flow diagrams for: Pub/Sub, Event Sourcing, CQRS, Redis Pub/Sub, Docker networking, k8s pod-to-service (EDA Visuals style)
+- [ ] **"What you'll learn" callout** — Styled box at top of every lesson modal with 3–5 bullet points (Supabase/Estuary pattern)
+- [ ] **Filename labels on code blocks** — `// app.js` tab-style header on every code snippet
+- [ ] **"Before/After" code toggle** — For lessons introducing a pattern, show the messy old code vs clean new code (ui.dev pattern)
+- [ ] **Resource cards at lesson end** — 2–3 curated external links styled as cards after each lesson
 
-### 🔵 P4 — Advanced Features
+### 🟡 P4 — Gamification
 
-- [ ] **In-browser SQL REPL for PostgreSQL** — Embed sql.js (SQLite compiled to WASM) for interactive SQL exercises *(SQLZoo, pgexercises)*
-- [ ] **TypeScript Playground embed** — Open TypeScript lessons in an embedded Monaco editor showing type errors live *(Total TypeScript)*
-- [ ] **"Shareable progress" URL** — Encode current subject + completed lessons into a URL hash so progress can be shared *(standard)*
-- [ ] **Printable cheat sheet per subject** — "Download PDF cheat sheet" button; generates a print-friendly summary of all key concepts *(Nana TechWorld)*
-- [ ] **Dark mode default for code blocks** — Even in light mode, code blocks should use a dark theme (VSCode Dark+) *(Total TypeScript, every good docs site)*
-- [ ] **PWA: offline mode** — Service worker to cache all lesson content for offline access *(mobile-first principle)*
+- [ ] **Spaced repetition nudge** — Track lesson completion dates; surface "🔁 3 concepts due for review" pill in sidebar after 3/7/14 days (Execute Program)
+- [ ] **Visual progress path** — Replace flat module list with connected node path: ○—●—○—●—○ (Apollo Odyssey launch path)
+- [ ] **Certificate card** — On full subject completion, generate a shareable canvas PNG certificate (Redis University pattern)
+- [ ] **7-day streak calendar** — Row of 7 dots showing active days (more visual than just a number)
+- [ ] **"Certification track" entry card** — Subject home shows a "Earn the [Subject] Certificate" card as a goal (Killercoda pattern)
+- [ ] **Sidebar glow on active item** — box-shadow glow + animated left border
+
+### 🟡 P5 — Advanced Features
+
+- [ ] **Smooth subject switch fade** — Fade in/out on subject change
+- [ ] **Stat counter animation** — XP/Lessons/Streak count up from 0 on load
+- [ ] **Dark mode for code blocks** — VSCode Dark+ theme even in light mode
+- [ ] **Difficulty badge polish** — EASY=green, MEDIUM=amber, HARD=red (consistent everywhere)
+- [ ] **Inline code runner** — For JS/TS lessons, "Run" button executes snippet in sandboxed iframe; shows output below
+- [ ] **SQL mini-REPL for PostgreSQL** — Embed sql.js (SQLite WASM) for interactive SQL exercises (SQLZoo/pgexercises pattern)
+- [ ] **PWA offline mode** — Service worker caches all lesson content
 
 ---
 
-## 🏗️ Implementation Priority Order
+## 🏗️ Implementation Priority
 
 ```
-Week 1: P0 (confetti, knowledge check gates, inline code runner basics)
-Week 2: P1 layout (filename labels, "what you'll learn", sticky stepper)  
-Week 3: P2 gamification (progress path visual, spaced repetition)
-Week 4: P3 design polish (all visual states, animations, badges)
-Week 5+: P4 advanced (SQL REPL, TS editor embed, PWA)
+Sprint 1: P0 + P1 (identity, card states, navigation polish)
+Sprint 2: P2 (confetti, hints, XP animation, knowledge check)
+Sprint 3: P3 (content upgrades — diagrams, tables, callouts)
+Sprint 4: P4 (gamification — spaced rep, path visual, certs)
+Sprint 5: P5 (advanced — code runner, SQL REPL, PWA)
 ```
 
 ---
 
-## 📐 Design System Inspiration
+## 🎨 Design Inspiration Summary
 
-| Aspect | Steal from |
-|--------|-----------|
-| Color palette (dark) | Confluent Dev, Total TypeScript (near-black + vivid accent) |
-| Typography scale | Apollo Odyssey (generous line-height, large lesson titles) |
-| Code block style | VSCode Dark+ theme (universal recognition) |
-| Card design | KodeKloud (border-left accent by difficulty, subtle shadow) |
-| Progress visualization | Microsoft Learn (horizontal step tracker) |
-| Celebration moments | Apollo Odyssey (confetti, sound optional) |
-| Modal/overlay | Hasura Learn (full-page immersive lesson view) |
+| Element | Steal from | Why |
+|---------|-----------|-----|
+| Dark hero, magical theme | **Total TypeScript** | Strong identity, memorable |
+| Visual concept cards | **EDA Visuals** | Perfect for ADHD — one idea, one card |
+| Confetti + code challenges | **Apollo Odyssey** | Highest engagement pattern found |
+| Split panel + schema reminder | **pgexercises** | Best SQL UX on the internet |
+| Step auto-validator | **Killercoda** | Enforces actual learning |
+| Hint → Help → Answer reveal | **pgexercises** | Reduces frustration, builds confidence |
+| Spaced repetition nudge | **Execute Program** | Long-term retention |
+| IDE + video merged | **Scrimba** | Future stretch goal for rich lessons |
 
 ---
 
-*Generated: 2026-03-06 | Based on deep review of 40 learning platforms across 8 subjects*
+*Research method: Live browser sessions via Chrome relay — Google searches + site visits + screenshots*  
+*Sites visited: EDA Visuals, Killercoda, pgexercises, SQLZoo, Total TypeScript, Apollo Odyssey, TypeHero, Scrimba*  
+*Date: 2026-03-06*
