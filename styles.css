@@ -2753,3 +2753,224 @@ kbd {
     font-size: 11px;
 }
 .real-impl-run { color: var(--success); }
+
+/* ============================================================
+   MOBILE-FIRST OVERHAUL
+   Fixes: horizontal overflow, stats row, progress label clip,
+   button widths, streak calendar, lesson card orphan words,
+   XP badge clip, header layout, today's path, nav cards
+   ============================================================ */
+
+/* Global overflow containment */
+html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+* { box-sizing: border-box; }
+
+/* ── Top progress bar label ── */
+#top-progress-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+#top-progress-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex-shrink: 1;
+}
+
+/* ── Header stats row: no overflow ── */
+.header-stats {
+    flex-wrap: nowrap;
+    overflow: hidden;
+    min-width: 0;
+    flex-shrink: 1;
+}
+.stat-pill {
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+.stat-pill-num, .stat-pill-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── XP badge on lesson cards: never clip ── */
+.xp-badge {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.lesson-header {
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+}
+.lesson-header h3 {
+    min-width: 0;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    flex: 1 1 0;
+}
+
+/* ── Action buttons: consistent width ── */
+.home-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+.home-action-btn, .btn-resume, .btn-daily, .btn-flashcard {
+    width: 100% !important;
+    text-align: center;
+    justify-content: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Streak calendar: fit within screen ── */
+.streak-calendar {
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.cal-day {
+    flex: 1 0 calc(14% - 4px);
+    min-width: 32px;
+    max-width: 44px;
+}
+
+/* ── Today's path: horizontal scroll with padding ── */
+.todays-path-inner {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+}
+
+/* ── Nav cards: stack on small screens ── */
+@media (max-width: 540px) {
+    .nav-cards-container {
+        grid-template-columns: 1fr;
+    }
+    .nav-card.nav-card-next {
+        text-align: left;
+    }
+}
+
+/* ── Lesson modal on mobile ── */
+@media (max-width: 768px) {
+    .lesson-nav-bar {
+        font-size: 11px;
+        padding: 0 12px 6px;
+    }
+    .lesson-nav-link {
+        max-width: 120px;
+        font-size: 11px;
+    }
+    .real-impl-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    .on-this-page {
+        display: none; /* too cramped on mobile */
+    }
+    .callout-learn, .callout-warning {
+        font-size: 13px;
+    }
+    .task-checklist {
+        padding: 12px 14px;
+    }
+}
+
+/* ── Header: mobile layout ── */
+@media (max-width: 768px) {
+    .header {
+        padding: 10px 14px;
+        gap: 8px;
+    }
+    .header-inner {
+        flex-wrap: wrap;
+        gap: 8px;
+        min-width: 0;
+    }
+    .header-identity {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .header-stats {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .stat-pill {
+        flex: 1;
+        min-width: 0;
+        padding: 5px 8px;
+    }
+    .stat-pill-num { font-size: 15px; }
+    .stat-pill-label { font-size: 9px; }
+    .streak-calendar-wrap { padding: 10px 14px; }
+}
+
+/* ── Small phones (<480px): tighten further ── */
+@media (max-width: 480px) {
+    .container, .subject-main { padding: 12px; }
+    .module-header {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .lesson-card { padding: 14px; }
+    .lessons-grid { gap: 10px; }
+    .stat-pill-num { font-size: 13px; }
+    .header-title { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-brand-text { font-size: 14px; }
+
+    /* Hamburger + header tight layout */
+    .top-bar, .header-row {
+        gap: 6px;
+    }
+
+    /* Cert banner */
+    .cert-banner {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    /* Real implementation section */
+    .real-impl-header {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .real-impl-section pre {
+        max-height: 300px;
+        font-size: 11px;
+    }
+
+    /* Spaced rep nudge */
+    .review-due-badge {
+        font-size: 9px;
+        padding: 2px 6px;
+    }
+
+    /* Schema panel */
+    .schema-panel .schema-content {
+        font-size: 11px;
+    }
+}
+
+/* ── Safe area insets (iPhone notch/home bar) ── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .mobile-bottom-nav {
+        padding-bottom: calc(6px + env(safe-area-inset-bottom));
+    }
+    .main-content {
+        padding-bottom: calc(70px + env(safe-area-inset-bottom));
+    }
+}
