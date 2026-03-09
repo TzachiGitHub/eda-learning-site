@@ -5060,3 +5060,59 @@ function audioSetSpeed(v)     { AudioPlayer.setSpeed(v); }
         _close();
     };
 })();
+
+// ============================================================
+// SUPABASE CROSS-DEVICE SYNC (v1 compatibility layer)
+// ============================================================
+(function() {
+  const SUPABASE_URL  = 'https://mqnosenddinigyurvkwx.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xbm9zZW5kZGluaWd5dXJ2a3d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNTkxNDcsImV4cCI6MjA4ODYzNTE0N30.o78QfqJdXA2jTVENbCcP1vHbDx1jksf1LId7SFylIKA';
+  const DEVICE_KEY    = 'devlearn_device_id';
+  const V1_STORAGE    = 'devlearn_v1';
+
+  function getDeviceId() {
+    let id = localStorage.getItem(DEVICE_KEY);
+    if (!id) { id = 'dev_' + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem(DEVICE_KEY, id); }
+    return id;
+  }
+
+  function getV1Data() {
+    // Collect all relevant v1 localStorage keys
+    const data = {};
+    const keys = ['userXP','userStreak','lastActive','completedLessons','lessonProgress','currentSubject','certificates'];
+    keys.forEach(k => { const v = localStorage.getItem(k); if (v) data[k] = v; });
+    return data;
+  }
+
+  function applyV1Data(data) {
+    Object.entries(data).forEach(([k, v]) => {
+      if (!localStorage.getItem(k)) localStorage.setItem(k, v);
+    });
+  }
+
+  async function sfetch(path, opts = {}) {
+    try {
+      const res = await fetch(SUPABASE_URL + path, {
+        ...opts,
+        headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal', ...(opts.headers||{}) }
+      });
+      const t = await res.text(); return t ? JSON.parse(t) : null;
+    } catch { return null; }
+  }
+
+  async function syncV1() {
+    const deviceId = getDeviceId();
+    const data = getV1Data();
+    // Push
+    await sfetch('/rest/v1/progress', { method: 'POST', body: JSON.stringify({ device_id: deviceId + '_v1', data, updated_at: new Date().toISOString() }) });
+    // Pull latest from any v1 device
+    const rows = await sfetch('/rest/v1/progress?device_id=like.' + encodeURIComponent('*_v1') + '&order=updated_at.desc&limit=5');
+    if (rows && rows.length) {
+      const remote = rows.find(r => r.device_id !== deviceId + '_v1');
+      if (remote) applyV1Data(remote.data || {});
+    }
+  }
+
+  // Run after page load
+  window.addEventListener('load', () => { setTimeout(syncV1, 2000); setInterval(syncV1, 60000); });
+})();
