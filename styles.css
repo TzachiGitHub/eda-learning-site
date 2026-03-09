@@ -2974,3 +2974,193 @@ html, body {
         padding-bottom: calc(70px + env(safe-area-inset-bottom));
     }
 }
+
+/* ============================================================
+   MOBILE-FIRST FIXES
+   Issues identified from screenshots:
+   - Horizontal overflow on stats row, XP badges, progress label
+   - Inconsistent button widths on home dashboard
+   - Streak calendar overflow
+   - Lesson card title orphaned words
+   - Double progress bar confusion
+   - Dark gap between sections
+   ============================================================ */
+
+/* Global: prevent any horizontal scroll */
+html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+* {
+    box-sizing: border-box;
+    min-width: 0; /* allows flex children to shrink below content size */
+}
+
+/* ── Stats row: wrap + shrink on small screens ── */
+.header-stats {
+    flex-wrap: wrap;
+    overflow: hidden;
+    max-width: 100%;
+}
+.stat-pill {
+    flex-shrink: 1;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+/* ── Top progress bar label: don't overflow ── */
+#top-progress-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+    font-size: 11px;
+}
+
+/* ── XP badges on lesson cards: constrain ── */
+.xp-badge {
+    white-space: nowrap;
+    flex-shrink: 0;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Lesson card header: don't let title push badge off screen ── */
+.lesson-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    overflow: hidden;
+}
+.lesson-header h3 {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+    /* Prevent orphaned single letters */
+    text-wrap: balance;
+}
+
+/* ── Home dashboard CTA buttons: equal width grid ── */
+.home-ctas, .dashboard-actions, .quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    width: 100%;
+}
+.home-cta-btn, .quick-action-btn {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+/* ── Resume button text: truncate cleanly ── */
+#resume-btn, [id*="resume"], .resume-btn {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* ── Streak calendar: scroll horizontally if needed ── */
+.streak-calendar-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+}
+.streak-calendar {
+    min-width: max-content;
+}
+
+/* ── Dark gap between sections: remove excessive padding ── */
+.home-hero, .dashboard-hero {
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+/* ── Hamburger button: clear z-index, no overlap ── */
+.hamburger-btn {
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+/* ── Header inner: never overflow ── */
+.header-inner {
+    overflow: hidden;
+    max-width: 100%;
+    flex-wrap: wrap;
+}
+.header-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    flex: 1;
+}
+
+/* ── Module progress badge: wrap not clip ── */
+.module-progress {
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 12px;
+}
+.module-header {
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* ── Lesson meta row: wrap on small screens ── */
+.lesson-meta {
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* ── Real implementation code block: scroll, don't overflow ── */
+.real-impl-section pre {
+    overflow-x: auto;
+    max-width: 100%;
+}
+.real-impl-footer {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* ── Nav cards: single column on mobile ── */
+.nav-cards-container {
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 520px) {
+    .nav-cards-container {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* ── On-this-page: hide on small screens ── */
+@media (max-width: 640px) {
+    .on-this-page { display: none; }
+    .top-progress-bar-container { font-size: 10px; }
+    .streak-calendar .cal-day { width: 30px; height: 30px; font-size: 9px; }
+    .lesson-position { font-size: 11px; }
+    .lesson-nav-bar { font-size: 11px; }
+    .lesson-nav-link { max-width: 120px; }
+    .modal-time-badge { display: none; } /* redundant with author credit on mobile */
+    .real-impl-header { flex-direction: column; gap: 8px; }
+    .header-stats .stat-pill:nth-child(n+4) { display: none; } /* show max 3 stats */
+    .callout-learn, .callout-warning { font-size: 13px; padding: 10px 14px; }
+}
+
+@media (max-width: 400px) {
+    .header-stats .stat-pill { padding: 4px 8px; }
+    .stat-pill-num { font-size: 13px; }
+    .stat-pill-label { display: none; } /* icon only on tiny screens */
+    .lesson-card { padding: 14px; }
+    .btn-start { font-size: 13px; padding: 10px 16px; }
+    .xp-badge { font-size: 10px; padding: 3px 7px; }
+}
