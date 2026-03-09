@@ -3164,3 +3164,154 @@ html, body {
     .btn-start { font-size: 13px; padding: 10px 16px; }
     .xp-badge { font-size: 10px; padding: 3px 7px; }
 }
+
+/* ============================================================
+   AUDIO PLAYER
+   ============================================================ */
+
+/* 🎧 Listen button in modal header */
+.modal-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.btn-listen {
+    background: linear-gradient(135deg, rgba(67,97,238,0.15), rgba(139,92,246,0.15));
+    border: 1px solid rgba(67,97,238,0.35);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.btn-listen:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+.btn-listen.playing {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+    animation: listeningPulse 2s ease-in-out infinite;
+}
+@keyframes listeningPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(67,97,238,0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(67,97,238,0); }
+}
+
+/* Floating audio player bar — docked at bottom */
+.audio-player-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9000;
+    background: rgba(15, 17, 35, 0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(67,97,238,0.25);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+.audio-player-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+.audio-player-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+.audio-player-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+    flex: 1;
+}
+.audio-player-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+.audio-ctrl-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 18px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+.audio-ctrl-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.audio-ctrl-play {
+    background: var(--accent);
+    color: white;
+    font-size: 16px;
+    width: 44px;
+    height: 44px;
+}
+.audio-ctrl-play:hover { background: #3451e0; color: white; }
+.audio-ctrl-close {
+    font-size: 14px;
+    color: #64748b;
+    width: 32px;
+    height: 32px;
+}
+.audio-speed-select {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    outline: none;
+}
+.audio-speed-select:focus { border-color: var(--accent); }
+
+/* Thin progress bar at bottom of player */
+.audio-progress-bar {
+    height: 3px;
+    background: rgba(255,255,255,0.1);
+    position: relative;
+}
+.audio-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.5s linear;
+}
+
+/* Push modal/main content up when player is visible */
+body.audio-playing .modal-content {
+    padding-bottom: 70px;
+}
+body.audio-playing .main-content {
+    padding-bottom: calc(70px + env(safe-area-inset-bottom));
+}
+
+@media (max-width: 480px) {
+    .audio-player-title { max-width: 100px; }
+    .btn-listen { font-size: 12px; padding: 5px 10px; }
+    .audio-ctrl-btn { width: 36px; height: 36px; font-size: 16px; }
+    .audio-ctrl-play { width: 40px; height: 40px; }
+}

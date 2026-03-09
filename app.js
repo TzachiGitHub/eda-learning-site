@@ -4836,3 +4836,227 @@ function escapeHtml(str) {
         setTimeout(() => injectRealImplementation(lessonId), 50);
     };
 })();
+
+// ============================================================
+// AUDIO PLAYER — Web Speech API
+// ============================================================
+
+const AudioPlayer = (function() {
+    let utterances = [];
+    let currentIdx = 0;
+    let isPlaying = false;
+    let speed = 1;
+    let lessonTitle = '';
+    let synth = window.speechSynthesis;
+
+    // Extract clean readable text from lesson HTML
+    function extractText(html) {
+        const div = document.createElement('div');
+        div.innerHTML = html;
+
+        // Remove code blocks — read label instead
+        div.querySelectorAll('pre').forEach(pre => {
+            const lang = pre.querySelector('.code-lang-badge')?.textContent || 'code';
+            pre.replaceWith(document.createTextNode(' [' + lang + ' example] '));
+        });
+
+        // Remove callout-learn (already listed as bullets — skip)
+        div.querySelectorAll('.callout-learn, .on-this-page, .real-impl-section, .schema-panel').forEach(el => el.remove());
+
+        // Convert headings to natural spoken breaks
+        div.querySelectorAll('h2, h3').forEach(h => {
+            const text = h.textContent.replace(/^[\s\W]+/, '').trim();
+            h.replaceWith(document.createTextNode('. ' + text + '. '));
+        });
+
+        // Get text and clean it up
+        let text = div.textContent || '';
+        text = text
+            .replace(/\s+/g, ' ')
+            .replace(/\.\s*\./g, '.')
+            .replace(/[🎯📖🔑💡✅🌟🔧⚡🚀🔥💻🏗🔄⚠️☐]/g, '')
+            .replace(/\[object Object\]/g, '')
+            .trim();
+
+        return text;
+    }
+
+    // Split text into sentence-sized chunks for progress tracking
+    function buildChunks(text) {
+        return text
+            .split(/(?<=[.!?])\s+/)
+            .filter(s => s.trim().length > 0)
+            .reduce((acc, s) => {
+                // Merge very short sentences
+                if (acc.length && acc[acc.length - 1].length < 80) {
+                    acc[acc.length - 1] += ' ' + s;
+                } else {
+                    acc.push(s);
+                }
+                return acc;
+            }, []);
+    }
+
+    function updateProgress() {
+        const fill = document.getElementById('audio-progress-fill');
+        if (fill && utterances.length > 0) {
+            fill.style.width = Math.round((currentIdx / utterances.length) * 100) + '%';
+        }
+    }
+
+    function updatePlayButton() {
+        const btn = document.getElementById('audio-btn-play');
+        const listenBtn = document.getElementById('btn-listen');
+        if (btn) btn.textContent = isPlaying ? '⏸' : '▶';
+        if (listenBtn) {
+            listenBtn.textContent = isPlaying ? '⏸ Pause' : '🎧 Listen';
+            listenBtn.classList.toggle('playing', isPlaying);
+        }
+    }
+
+    function speakChunk(idx) {
+        if (idx >= utterances.length) {
+            // Done
+            isPlaying = false;
+            currentIdx = 0;
+            updatePlayButton();
+            updateProgress();
+            document.body.classList.remove('audio-playing');
+            document.getElementById('audio-player-bar').style.display = 'none';
+            return;
+        }
+        currentIdx = idx;
+        updateProgress();
+
+        const u = new SpeechSynthesisUtterance(utterances[idx]);
+        u.rate = speed;
+        u.pitch = 1;
+        u.volume = 1;
+
+        // Pick a good voice if available
+        const voices = synth.getVoices();
+        const preferred = voices.find(v =>
+            v.name.includes('Samantha') ||
+            v.name.includes('Google US English') ||
+            v.name.includes('Alex') ||
+            (v.lang === 'en-US' && !v.name.includes('Compact'))
+        );
+        if (preferred) u.voice = preferred;
+
+        u.onend = () => {
+            if (isPlaying) speakChunk(idx + 1);
+        };
+        u.onerror = () => {
+            if (isPlaying) speakChunk(idx + 1);
+        };
+
+        synth.speak(u);
+    }
+
+    return {
+        play(html, title) {
+            synth.cancel();
+            const text = extractText(html);
+            utterances = buildChunks(text);
+            currentIdx = 0;
+            lessonTitle = title || 'Lesson';
+            isPlaying = true;
+
+            const bar = document.getElementById('audio-player-bar');
+            const titleEl = document.getElementById('audio-player-title');
+            if (bar) bar.style.display = '';
+            if (titleEl) titleEl.textContent = lessonTitle;
+            document.body.classList.add('audio-playing');
+
+            speakChunk(0);
+            updatePlayButton();
+            updateProgress();
+        },
+
+        toggle() {
+            if (!utterances.length) return;
+            if (isPlaying) {
+                isPlaying = false;
+                synth.pause();
+            } else {
+                isPlaying = true;
+                if (synth.paused) {
+                    synth.resume();
+                } else {
+                    speakChunk(currentIdx);
+                }
+            }
+            updatePlayButton();
+        },
+
+        stop() {
+            isPlaying = false;
+            utterances = [];
+            currentIdx = 0;
+            synth.cancel();
+            document.body.classList.remove('audio-playing');
+            const bar = document.getElementById('audio-player-bar');
+            if (bar) bar.style.display = 'none';
+            const listenBtn = document.getElementById('btn-listen');
+            if (listenBtn) {
+                listenBtn.textContent = '🎧 Listen';
+                listenBtn.classList.remove('playing');
+            }
+        },
+
+        seekBack() {
+            const target = Math.max(0, currentIdx - 3);
+            synth.cancel();
+            if (isPlaying) speakChunk(target);
+            else currentIdx = target;
+            updateProgress();
+        },
+
+        seekForward() {
+            const target = Math.min(utterances.length - 1, currentIdx + 3);
+            synth.cancel();
+            if (isPlaying) speakChunk(target);
+            else currentIdx = target;
+            updateProgress();
+        },
+
+        setSpeed(s) {
+            speed = parseFloat(s);
+            if (isPlaying) {
+                const idx = currentIdx;
+                synth.cancel();
+                speakChunk(idx);
+            }
+        }
+    };
+})();
+
+// Global functions wired to HTML
+function audioPlayLesson() {
+    const contentEl = document.getElementById('lesson-content');
+    const titleEl = document.getElementById('lesson-title');
+    if (!contentEl) return;
+
+    const listenBtn = document.getElementById('btn-listen');
+    if (listenBtn?.classList.contains('playing')) {
+        AudioPlayer.toggle();
+        return;
+    }
+
+    AudioPlayer.play(contentEl.innerHTML, titleEl?.textContent || 'Lesson');
+}
+
+function audioToggle()        { AudioPlayer.toggle(); }
+function audioStop()          { AudioPlayer.stop(); }
+function audioSeekBack()      { AudioPlayer.seekBack(); }
+function audioSeekForward()   { AudioPlayer.seekForward(); }
+function audioSetSpeed(v)     { AudioPlayer.setSpeed(v); }
+
+// Stop audio when lesson closes
+(function() {
+    const _close = closeLesson;
+    closeLesson = function() {
+        AudioPlayer.stop();
+        _close();
+    };
+})();
